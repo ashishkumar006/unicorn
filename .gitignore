@@ -1,0 +1,54 @@
+# Environment variables (contains sensitive API keys)
+.env
+.env.local
+.env.*.local
+
+# Documentation and guides (archived)
+docs/
+tests/
+archive/
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Sensitive files
+*.pem
+*.key
+*.private
+credentials.json
+secrets.json
+
+# Build outputs
+dist/
+build/
+.next/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Temp files
+temp/
+tmp/
+.cache/
