@@ -16,10 +16,11 @@ import {
   MapPinIcon,
   Clock,
   Utensils,
-  BookOpen
+  BookOpen,
+  ExternalLink
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
-import AgentPanelV2 from '../components/agent/AgentPanelV2';
+import InternalToolsRail from '../components/internal/InternalToolsRail';
 import '../styles/designSystem.css';
 
 const BUDGET_SPLITS = [
@@ -36,6 +37,29 @@ const buildBudgetData = (budgetAmount) => BUDGET_SPLITS.map((item) => ({
 
 const formatBudget = (value) => `₹${Number(value || 0).toLocaleString()}`;
 
+const getBudgetSectionValue = (section, fallback = 0) => {
+  if (section == null) {
+    return fallback;
+  }
+
+  if (typeof section === 'number') {
+    return Number.isFinite(section) ? section : fallback;
+  }
+
+  if (typeof section === 'string') {
+    const parsed = Number(section);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  if (typeof section === 'object') {
+    const rawValue = section.value ?? section.amount ?? section.total ?? section.budget ?? section.allocated;
+    const parsed = Number(rawValue);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  return fallback;
+};
+
 export default function DashboardPage({
   tripData,
   onBackToHome,
@@ -50,11 +74,33 @@ export default function DashboardPage({
   const tabs = ['Itinerary', 'Travel', 'Hotels', 'Places', 'Food'];
 
   const plan = tripData?.plan || {};
+  const planMeta = tripData?.planMeta || plan.meta || null;
+  const budgetAllocation = planMeta?.budgetAllocation || null;
+  const routeInsights = planMeta?.routeInsights || null;
+  const googlePlacesMeta = planMeta?.googlePlaces || null;
+  const olaPlacesMeta = planMeta?.olaPlaces || null;
+  const hasGooglePlacesMeta = Boolean(googlePlacesMeta?.enabled);
+  const hasOlaPlacesMeta = Boolean(olaPlacesMeta?.enabled);
+  const referenceProviderLabel = planMeta?.referenceProvider === 'ola'
+    ? 'Ola Maps'
+    : planMeta?.referenceProvider === 'google'
+      ? 'Google Places'
+      : null;
+  const activeReferenceProviderLabel = hasOlaPlacesMeta
+    ? 'Ola Maps'
+    : hasGooglePlacesMeta
+      ? 'Google Places'
+      : referenceProviderLabel;
   const itinerary = plan.itinerary || [];
   const startDate = tripData?.startDate || '2026-03-31';
   const endDate = tripData?.endDate || '2026-04-04';
   const fromPlace = tripData?.fromPlace || 'Mumbai';
   const toPlace = tripData?.toPlace || 'Goa';
+  const openStreetMapMeta = planMeta?.openStreetMap || null;
+  const openStreetMapLabel = openStreetMapMeta?.displayName || toPlace;
+  const openStreetMapSearchUrl = openStreetMapMeta?.searchUrl || `https://www.openstreetmap.org/search?query=${encodeURIComponent(toPlace)}`;
+  const openStreetMapMapUrl = openStreetMapMeta?.mapUrl || openStreetMapSearchUrl;
+  const openStreetMapEmbedUrl = openStreetMapMeta?.embedUrl || '';
   const budget = tripData?.budget || '10000';
   const budgetAmount = Number.parseInt(budget, 10) || 10000;
   const travelersCount = parseInt(tripData?.travelers) || 2;
@@ -71,6 +117,7 @@ export default function DashboardPage({
     departure: 'Mumbai CST',
     arrival: 'Goa Madgaon',
     highlights: ['Scenic coastline', 'Budget-friendly', 'Relaxed journey'],
+    link: '',
   };
   const selectedHotel = tabData.Hotels?.options?.[0] || {
     name: 'Taj Holiday Village',
@@ -78,6 +125,7 @@ export default function DashboardPage({
     location: 'Calangute Beach',
     pricePerNight: 5000,
     highlights: ['Beachfront luxury', 'Resort amenities', 'Great for families'],
+    link: '',
   };
 
   const detailTabs = ['Travel', 'Hotels', 'Places', 'Food'];
@@ -284,6 +332,156 @@ export default function DashboardPage({
         </div>
           </div>
 
+          {planMeta && (
+            <div className="content-section plan-intelligence-section">
+              <h2 className="section-title">
+                <Sparkles size={16} /> Plan Intelligence
+              </h2>
+
+              <div className="plan-intelligence-grid">
+                <div className="plan-intelligence-card">
+                  <h3>Budget split</h3>
+                  {budgetAllocation ? (
+                    <div className="plan-intelligence-chip-row">
+                      <span className="plan-intelligence-chip">Travel ₹{getBudgetSectionValue(budgetAllocation.transportation, budgetData[0]?.value || 0).toLocaleString()}</span>
+                      <span className="plan-intelligence-chip">Stay ₹{getBudgetSectionValue(budgetAllocation.accommodation, budgetData[1]?.value || 0).toLocaleString()}</span>
+                      <span className="plan-intelligence-chip">Food ₹{getBudgetSectionValue(budgetAllocation.food, budgetData[2]?.value || 0).toLocaleString()}</span>
+                      <span className="plan-intelligence-chip">Local transport ₹{getBudgetSectionValue(budgetAllocation.localTransport, Math.round(budgetAmount * 0.08)).toLocaleString()}</span>
+                      <span className="plan-intelligence-chip">Activities ₹{getBudgetSectionValue(budgetAllocation.activities, budgetData[3]?.value || 0).toLocaleString()}</span>
+                      <span className="plan-intelligence-chip">Buffer ₹{getBudgetSectionValue(budgetAllocation.miscellaneous, Math.max(0, budgetAmount - (budgetData[0].value + budgetData[1].value + budgetData[2].value + budgetData[3].value))).toLocaleString()}</span>
+                    </div>
+                  ) : (
+                    <p className="plan-intelligence-muted">Budget allocation not available.</p>
+                  )}
+                </div>
+
+                <div className="plan-intelligence-card">
+                  <h3>Real-time Places</h3>
+                  {hasOlaPlacesMeta ? (
+                    <>
+                      <p className="plan-intelligence-summary">
+                        {olaPlacesMeta.enabled
+                          ? `Ola Maps returned ${olaPlacesMeta.restaurants || 0} restaurants and ${olaPlacesMeta.attractions || 0} attractions.`
+                          : 'Ola Maps was not used for this plan.'}
+                      </p>
+                      {activeReferenceProviderLabel && (
+                        <p className="plan-intelligence-muted">Primary source: {activeReferenceProviderLabel}</p>
+                      )}
+                      {googlePlacesMeta?.enabled && googlePlacesMeta.summary && (
+                        <p className="plan-intelligence-muted">
+                          Google enrichment: {googlePlacesMeta.restaurants || 0} restaurants and {googlePlacesMeta.attractions || 0} attractions.
+                        </p>
+                      )}
+                      {olaPlacesMeta.summary && (
+                        <p className="plan-intelligence-muted">{olaPlacesMeta.summary}</p>
+                      )}
+                    </>
+                  ) : hasGooglePlacesMeta ? (
+                    <>
+                      <p className="plan-intelligence-summary">
+                        {googlePlacesMeta.enabled
+                          ? `Google Places returned ${googlePlacesMeta.restaurants || 0} restaurants and ${googlePlacesMeta.attractions || 0} attractions.`
+                          : 'Google Places was not used for this plan.'}
+                      </p>
+                      {activeReferenceProviderLabel && (
+                        <p className="plan-intelligence-muted">Primary source: {activeReferenceProviderLabel}</p>
+                      )}
+                      {googlePlacesMeta.summary && (
+                        <p className="plan-intelligence-muted">{googlePlacesMeta.summary}</p>
+                      )}
+                    </>
+                  ) : (
+                    <p className="plan-intelligence-muted">No Places metadata available.</p>
+                  )}
+                </div>
+
+                <div className="plan-intelligence-card">
+                  <h3>Route & transport</h3>
+                  {routeInsights?.enabled ? (
+                    <>
+                      <p className="plan-intelligence-summary">{routeInsights.summary}</p>
+                      <div className="plan-intelligence-chip-row">
+                        <span className="plan-intelligence-chip">Stay base {routeInsights.hotel?.name || selectedHotel.name}</span>
+                        <span className="plan-intelligence-chip">Bus ₹{routeInsights.localTransport?.bus?.toLocaleString?.() || '0'}</span>
+                        <span className="plan-intelligence-chip">Auto ₹{routeInsights.localTransport?.auto?.toLocaleString?.() || '0'}</span>
+                        <span className="plan-intelligence-chip">Taxi ₹{routeInsights.localTransport?.taxi?.toLocaleString?.() || '0'}</span>
+                      </div>
+                      {routeInsights.nearbyRestaurants?.[0] && (
+                        <p className="plan-intelligence-muted">
+                          Nearest restaurant: {routeInsights.nearbyRestaurants[0].name} at {routeInsights.nearbyRestaurants[0].distanceLabel}
+                        </p>
+                      )}
+                      {routeInsights.nearbyAttractions?.[0] && (
+                        <p className="plan-intelligence-muted">
+                          Nearest attraction: {routeInsights.nearbyAttractions[0].name} at {routeInsights.nearbyAttractions[0].distanceLabel}
+                        </p>
+                      )}
+                      {routeInsights.hotel?.mapUrl && (
+                        <a
+                          className="openstreetmap-link"
+                          href={routeInsights.hotel.mapUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Open stay-area map <ExternalLink size={14} />
+                        </a>
+                      )}
+                    </>
+                  ) : (
+                    <p className="plan-intelligence-muted">Distance insights will appear once the stay and place coordinates are available.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="content-section openstreetmap-section">
+            <div className="openstreetmap-header">
+              <h2 className="section-title">
+                <MapPin size={16} /> OpenStreetMap Preview
+              </h2>
+              <a
+                className="openstreetmap-link"
+                href={openStreetMapMapUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Open in OpenStreetMap <ExternalLink size={14} />
+              </a>
+            </div>
+
+            <div className="openstreetmap-card">
+              {openStreetMapEmbedUrl ? (
+                <iframe
+                  className="openstreetmap-frame"
+                  title={`OpenStreetMap preview for ${openStreetMapLabel}`}
+                  src={openStreetMapEmbedUrl}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              ) : (
+                <div className="openstreetmap-fallback">
+                  <p>Map preview is loading for {openStreetMapLabel}.</p>
+                  <a href={openStreetMapMapUrl} target="_blank" rel="noreferrer">
+                    Open the map page
+                  </a>
+                </div>
+              )}
+
+              <div className="openstreetmap-meta">
+                <span className="openstreetmap-pill">{openStreetMapLabel}</span>
+                {openStreetMapMeta?.lat != null && openStreetMapMeta?.lon != null && (
+                  <span className="openstreetmap-coordinates">
+                    {Number(openStreetMapMeta.lat).toFixed(4)}, {Number(openStreetMapMeta.lon).toFixed(4)}
+                  </span>
+                )}
+                {openStreetMapMeta?.summary && (
+                  <span className="openstreetmap-summary">{openStreetMapMeta.summary}</span>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Trip Summary Block */}
           <div className="content-section summary-block">
         <h2 className="section-title-large">Trip Summary</h2>
@@ -382,7 +580,14 @@ export default function DashboardPage({
                 {tabData['Travel'].options.map((option, idx) => (
                   <div key={idx} className="option-card travel-card" style={{ animationDelay: `${idx * 100}ms` }}>
                     <div className="option-header">
-                      <h3>{option.name}</h3>
+                      <div className="card-title-group">
+                        <h3>{option.name}</h3>
+                        {option.link && (
+                          <a className="card-link-badge" href={option.link} target="_blank" rel="noreferrer">
+                            Open <ExternalLink size={12} />
+                          </a>
+                        )}
+                      </div>
                       <span className="option-price">₹{option.price}</span>
                     </div>
                     <div className="option-meta">
@@ -422,7 +627,14 @@ export default function DashboardPage({
                 {tabData['Hotels'].options.map((hotel, idx) => (
                   <div key={idx} className="option-card hotel-card" style={{ animationDelay: `${idx * 100}ms` }}>
                     <div className="option-header">
-                      <h3>{hotel.name}</h3>
+                      <div className="card-title-group">
+                        <h3>{hotel.name}</h3>
+                        {hotel.link && (
+                          <a className="card-link-badge" href={hotel.link} target="_blank" rel="noreferrer">
+                            Open <ExternalLink size={12} />
+                          </a>
+                        )}
+                      </div>
                       <span className="rating">
                         <Star size={14} className="star-filled" /> {hotel.rating}
                       </span>
@@ -464,7 +676,14 @@ export default function DashboardPage({
                       {category.places?.map((place, pidx) => (
                         <div key={pidx} className="place-card" style={{ animationDelay: `${pidx * 50}ms` }}>
                           <div className="place-header">
-                            <h4>{place.name}</h4>
+                            <div className="card-title-group">
+                              <h4>{place.name}</h4>
+                              {place.link && (
+                                <a className="card-link-badge" href={place.link} target="_blank" rel="noreferrer">
+                                  Open <ExternalLink size={12} />
+                                </a>
+                              )}
+                            </div>
                             <span className="place-type">{place.type}</span>
                           </div>
                           <p className="place-desc">{place.description}</p>
@@ -501,7 +720,14 @@ export default function DashboardPage({
                   {tabData['Food'].restaurants.map((restaurant, idx) => (
                     <div key={idx} className="restaurant-card" style={{ animationDelay: `${idx * 100}ms` }}>
                       <div className="restaurant-header">
-                        <h3>{restaurant.name}</h3>
+                        <div className="card-title-group">
+                          <h3>{restaurant.name}</h3>
+                          {restaurant.link && (
+                            <a className="card-link-badge" href={restaurant.link} target="_blank" rel="noreferrer">
+                              Open <ExternalLink size={12} />
+                            </a>
+                          )}
+                        </div>
                         <span className="rating">
                           <Star size={14} className="star-filled" /> {restaurant.rating}
                         </span>
@@ -529,7 +755,14 @@ export default function DashboardPage({
                         <div key={idx} className="specialty-item" style={{ animationDelay: `${idx * 100}ms` }}>
                           <div className="specialty-title">
                             {specialty.mustTry && <span className="must-try">Must Try</span>}
-                            <h4>{specialty.name}</h4>
+                            <div className="card-title-group">
+                              <h4>{specialty.name}</h4>
+                              {specialty.link && (
+                                <a className="card-link-badge" href={specialty.link} target="_blank" rel="noreferrer">
+                                  Open <ExternalLink size={12} />
+                                </a>
+                              )}
+                            </div>
                           </div>
                           <p>{specialty.description}</p>
                           <p className="where"><MapPinIcon size={12} /> {specialty.whereToFind}</p>
@@ -549,22 +782,12 @@ export default function DashboardPage({
         </div>
 
         <aside className="dashboard-side-rail">
-          {/* Travel Assistant */}
-          <div className="dashboard-agent-section">
-            <div className="dashboard-agent-intro">
-              <h2 className="section-title-large">Travel Assistant</h2>
-              <p className="footer-subtext">
-                Ask for changes, clarifications, or plan analysis based on the itinerary above.
-              </p>
-            </div>
-
-            <AgentPanelV2
-              userId={agentUserId}
-              currentPlan={plan}
-              onPlanUpdate={handleAgentPlanUpdate}
-              agentModel="gemma-cloud"
-            />
-          </div>
+          <InternalToolsRail
+            userId={agentUserId}
+            currentPlan={plan}
+            onPlanUpdate={handleAgentPlanUpdate}
+            agentModel="gemma-cloud"
+          />
         </aside>
       </div>
 

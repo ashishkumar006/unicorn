@@ -3,6 +3,8 @@ import { Sparkles, Loader2, AlertCircle } from 'lucide-react';
 import './styles/designSystem.css';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
+import InternalLabPage from './pages/InternalLabPage';
+import { isInternalToolsEnabled, getInternalView } from './config/runtimeFlags';
 
 const DESTINATION_FACTS = {
   goa: [
@@ -121,12 +123,40 @@ const buildLoadingFacts = (tripMeta = {}) => {
   return DEFAULT_LOADING_FACTS(tripMeta);
 };
 
+const formatBudget = (value) => `₹${Number(value || 0).toLocaleString()}`;
+
+const PLANNING_STAGES = [
+  {
+    title: 'Reading trip brief',
+    detail: 'Checking route, dates, travelers, and budget constraints.'
+  },
+  {
+    title: 'Checking live maps',
+    detail: 'Pulling place data, stay zones, and route clusters.'
+  },
+  {
+    title: 'Estimating real costs',
+    detail: 'Measuring stay, food, and local transport before locking spend.'
+  },
+  {
+    title: 'Writing the plan',
+    detail: 'Balancing the budget and polishing the final dashboard view.'
+  }
+];
+
+const PLANNING_PROGRESS = [18, 42, 68, 92];
+
 function LoadingScreen({ error, tripMeta = {} }) {
   const [factIndex, setFactIndex] = useState(0);
+  const [stageIndex, setStageIndex] = useState(0);
   const facts = buildLoadingFacts(tripMeta);
   const destinationName = tripMeta?.toPlace || 'your destination';
-  const destinationKey = String(tripMeta?.toPlace || '').trim().toLowerCase();
-  const hasCuratedFacts = Boolean(DESTINATION_FACTS[destinationKey]);
+  const routeLabel = `${tripMeta?.fromPlace || 'your origin'} → ${destinationName}`;
+  const travelersCount = Number.parseInt(tripMeta?.travelers, 10) || 1;
+  const travelersLabel = travelersCount === 1 ? '1 traveler' : `${travelersCount} travelers`;
+  const budgetLabel = formatBudget(tripMeta?.budget || 10000);
+  const currentStage = PLANNING_STAGES[stageIndex] || PLANNING_STAGES[0];
+  const progressValue = PLANNING_PROGRESS[stageIndex] || PLANNING_PROGRESS[PLANNING_PROGRESS.length - 1];
 
   useEffect(() => {
     if (error || facts.length <= 1) {
@@ -140,6 +170,19 @@ function LoadingScreen({ error, tripMeta = {} }) {
 
     return () => window.clearInterval(timer);
   }, [error, facts.length]);
+
+  useEffect(() => {
+    if (error || PLANNING_STAGES.length <= 1) {
+      return undefined;
+    }
+
+    setStageIndex(0);
+    const timer = window.setInterval(() => {
+      setStageIndex((previous) => Math.min(previous + 1, PLANNING_STAGES.length - 1));
+    }, 2800);
+
+    return () => window.clearInterval(timer);
+  }, [error, destinationName, tripMeta?.fromPlace, tripMeta?.budget, tripMeta?.startDate, tripMeta?.endDate, tripMeta?.travelers]);
 
   if (error) {
     return (
@@ -160,8 +203,59 @@ function LoadingScreen({ error, tripMeta = {} }) {
   return (
     <div className="loading-screen">
       <div className="loading-content loading-content-travel">
-        <div className="spinner-container">
-          <Loader2 className="spinner" size={64} />
+        <div className="loading-destination-card">
+          <div className="loading-destination-header">
+            <div>
+              <div className="loading-destination-kicker">Cost-first planning</div>
+              <div className="loading-destination-route">{routeLabel}</div>
+            </div>
+            <div className="loading-destination-pill">
+              <Loader2 className="spinner" size={14} />
+              Planning
+            </div>
+          </div>
+
+          <div className="loading-progress-title">Building a map-aware itinerary</div>
+          <div className="loading-progress-subtitle">
+            Checking live places, distances, hotel zones, food stops, and local fares before the budget is split.
+          </div>
+
+          <div className="loading-hero-metrics">
+            <span className="loading-fact-pill">{tripMeta?.startDate || 'Start date'} → {tripMeta?.endDate || 'End date'}</span>
+            <span className="loading-fact-pill">{travelersLabel}</span>
+            <span className="loading-fact-pill">{budgetLabel}</span>
+          </div>
+        </div>
+
+        <div className="loading-progress-panel">
+          <div className="loading-progress-header">
+            <div>
+              <div className="loading-fact-pill">Planning {destinationName}</div>
+              <div className="loading-progress-title">Building your trip</div>
+              <div className="loading-progress-subtitle">{currentStage?.detail}</div>
+            </div>
+            <div className="loading-progress-percent">{progressValue}%</div>
+          </div>
+
+          <div className="loading-progress-track" aria-hidden="true">
+            <div className="loading-progress-fill" style={{ width: `${progressValue}%` }} />
+          </div>
+
+          <div className="loading-progress-steps">
+            {PLANNING_STAGES.map((stage, index) => {
+              const stepState = index < stageIndex ? 'done' : index === stageIndex ? 'active' : 'pending';
+
+              return (
+                <div key={stage.title} className={`loading-progress-step ${stepState}`}>
+                  <div className="loading-progress-step-badge">{index + 1}</div>
+                  <div>
+                    <div className="loading-progress-step-name">{stage.title}</div>
+                    <div className="loading-progress-step-detail">{stage.detail}</div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
 
         <div className="loading-fact-card" key={`${tripMeta?.toPlace || 'destination'}-${factIndex}`}>
@@ -178,6 +272,8 @@ function App() {
   const [hasResults, setHasResults] = useState(false);
   const [tripData, setTripData] = useState(null);
   const [error, setError] = useState(null);
+  const showInternalTools = isInternalToolsEnabled();
+  const internalView = getInternalView();
 
   const handlePlanUpdate = (updatedPlan) => {
     if (!updatedPlan) {
@@ -190,9 +286,11 @@ function App() {
       }
 
       const summary = updatedPlan.summary || {};
+      const preservedPlanMeta = previousTripData.planMeta || previousTripData.plan?.meta || null;
       const nextTripData = {
         ...previousTripData,
         plan: updatedPlan,
+        planMeta: preservedPlanMeta,
       };
 
       if (summary.fromPlace) {
@@ -260,7 +358,7 @@ function App() {
       if (response.ok) {
         const result = await response.json();
         const sessionId = `trip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-        setTripData({ ...formData, sessionId, plan: result.data });
+        setTripData({ ...formData, sessionId, plan: result.data, planMeta: result.meta || null });
         setHasResults(true);
       } else {
         const errorData = await response.json();
@@ -281,6 +379,10 @@ function App() {
     setError(null);
   };
 
+  if (showInternalTools && internalView === 'lab') {
+    return <InternalLabPage />;
+  }
+
   return (
     <div className="app-container">
       {isPlanning && <LoadingScreen error={error} tripMeta={tripData} />}
@@ -295,6 +397,7 @@ function App() {
           onBackToHome={handleBackToHome}
           onPlanAnother={handleBackToHome}
           onPlanUpdate={handlePlanUpdate}
+          showInternalTools={showInternalTools}
         />
       )}
     </div>

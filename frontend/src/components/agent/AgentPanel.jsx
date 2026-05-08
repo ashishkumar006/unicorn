@@ -189,8 +189,12 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
                 lastMsg.content = prefix + data.content;
               } else if (data.type === 'tool_start') {
                 lastMsg.content += `\n\n⏳ *Calling tool: \`${data.tool}\`...*`;
+              } else if (data.type === 'tool_result_chunk') {
+                lastMsg.content += `\n\n${data.content}`;
               } else if (data.type === 'tool_result') {
                 lastMsg.content += `\n✓ *Completed \`${data.tool}\`*`;
+              } else if (data.type === 'tool_end') {
+                lastMsg.content += `\n\n✓ *Completed \`${data.tool}\`*`;
               } else if (data.type === 'final') {
                 finalMessageReceived = true;
                 if (data.response) {

@@ -1,10 +1,31 @@
 /**
- * Restaurants API - Uses OpenStreetMap + Mock Data
- * OpenStreetMap is completely FREE
- * Can integrate with Google Places API if key is provided
+ * Restaurants API - Uses Google Places first, then OpenStreetMap + Mock Data
  */
 
 const axios = require('axios');
+const {
+  getGooglePlacesConfig,
+  isGooglePlacesConfigured,
+  getGoogleRestaurants,
+} = require('../services/googlePlaces');
+
+async function getRestaurantsFromGooglePlaces(destination, limit = 8) {
+  try {
+    const config = getGooglePlacesConfig();
+
+    if (!isGooglePlacesConfigured(config)) {
+      return [];
+    }
+
+    console.log(`🔍 Fetching restaurants from Google Places for ${destination}`);
+    const restaurants = await getGoogleRestaurants(destination, limit, config);
+    console.log(`✅ Found ${restaurants.length} restaurants from Google Places`);
+    return restaurants;
+  } catch (error) {
+    console.error('❌ Google Places restaurants error:', error.message);
+    return [];
+  }
+}
 
 /**
  * Get restaurants from OpenStreetMap using Nominatim + Overpass
@@ -84,12 +105,22 @@ async function getRestaurantsFromOSM(destination) {
   }
 }
 
+async function getRestaurants(destination, limit = 8) {
+  const googleRestaurants = await getRestaurantsFromGooglePlaces(destination, limit);
+
+  if (googleRestaurants.length > 0) {
+    return googleRestaurants;
+  }
+
+  return getRestaurantsFromOSM(destination);
+}
+
 /**
  * Get restaurants by budget
  */
 async function getRestaurantsByBudget(destination, budget_per_meal) {
   try {
-    const allRestaurants = await getRestaurantsFromOSM(destination);
+    const allRestaurants = await getRestaurants(destination);
     
     const within_budget = allRestaurants.filter(r => r.avg_cost <= budget_per_meal);
     
@@ -108,7 +139,7 @@ async function getRestaurantsByBudget(destination, budget_per_meal) {
  */
 async function getVegetarianRestaurants(destination) {
   try {
-    const allRestaurants = await getRestaurantsFromOSM(destination);
+    const allRestaurants = await getRestaurants(destination);
     
     const vegetarian = allRestaurants.filter(r => r.vegetarian_friendly);
     
@@ -261,7 +292,9 @@ function getRestaurantsMockData(destination) {
 }
 
 module.exports = {
+  getRestaurantsFromGooglePlaces,
   getRestaurantsFromOSM,
+  getRestaurants,
   getRestaurantsByBudget,
   getVegetarianRestaurants,
   getRestaurantsMockData

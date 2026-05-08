@@ -188,6 +188,32 @@
   font-size: 0.92em;
 }
 
+.message-markdown a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  color: #0f766e;
+  text-decoration: none;
+  font-weight: 700;
+  line-height: 1.2;
+  word-break: break-word;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.message-markdown a:hover {
+  background: rgba(15, 118, 110, 0.14);
+  border-color: rgba(15, 118, 110, 0.28);
+  transform: translateY(-1px);
+}
+
+.message-markdown a:visited {
+  color: #0f766e;
+}
+
 .message-markdown pre {
   margin: 0;
   padding: 0.85rem 0.95rem;

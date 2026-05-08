@@ -14,6 +14,28 @@ const DEFAULT_TRIP = {
 export default function LandingPage({ onPlanTrip }) {
   const [formData, setFormData] = useState(DEFAULT_TRIP);
 
+  const normalizedFromPlace = formData.fromPlace.trim();
+  const normalizedToPlace = formData.toPlace.trim();
+  const parsedBudget = Number(formData.budget);
+  const hasBudgetError = !Number.isFinite(parsedBudget) || parsedBudget <= 0;
+  const hasSameRouteError = Boolean(
+    normalizedFromPlace
+    && normalizedToPlace
+    && normalizedFromPlace.toLowerCase() === normalizedToPlace.toLowerCase()
+  );
+  const hasDateRangeError = Boolean(
+    formData.startDate
+    && formData.endDate
+    && new Date(formData.endDate) < new Date(formData.startDate)
+  );
+  const formError = hasSameRouteError
+    ? 'From and destination cannot be the same place.'
+    : hasDateRangeError
+      ? 'End date should be the same as or later than start date.'
+      : hasBudgetError
+        ? 'Budget should be greater than 0.'
+        : '';
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -21,7 +43,17 @@ export default function LandingPage({ onPlanTrip }) {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onPlanTrip(formData);
+
+    if (formError) {
+      return;
+    }
+
+    onPlanTrip({
+      ...formData,
+      fromPlace: normalizedFromPlace,
+      toPlace: normalizedToPlace,
+      budget: String(Math.max(1, Math.round(parsedBudget))),
+    });
   };
 
   return (
@@ -61,6 +93,7 @@ export default function LandingPage({ onPlanTrip }) {
                     onChange={handleChange}
                     placeholder="Select origin"
                     className="input-field"
+                    maxLength={80}
                     required
                   />
                 </div>
@@ -80,9 +113,12 @@ export default function LandingPage({ onPlanTrip }) {
                     onChange={handleChange}
                     placeholder="Select destination"
                     className="input-field"
+                    maxLength={80}
+                    aria-invalid={hasSameRouteError}
                     required
                   />
                 </div>
+                {hasSameRouteError && <span className="error-text">{formError}</span>}
               </div>
 
               {/* START DATE */}
@@ -98,6 +134,7 @@ export default function LandingPage({ onPlanTrip }) {
                     value={formData.startDate}
                     onChange={handleChange}
                     className="input-field"
+                    max={formData.endDate || undefined}
                     required
                   />
                   <Calendar className="input-icon-right" size={16} />
@@ -117,10 +154,13 @@ export default function LandingPage({ onPlanTrip }) {
                     value={formData.endDate}
                     onChange={handleChange}
                     className="input-field"
+                    min={formData.startDate || undefined}
+                    aria-invalid={hasDateRangeError}
                     required
                   />
                   <Calendar className="input-icon-right" size={16} />
                 </div>
+                {hasDateRangeError && <span className="error-text">{formError}</span>}
               </div>
 
               {/* TOTAL BUDGET */}
@@ -137,9 +177,12 @@ export default function LandingPage({ onPlanTrip }) {
                     onChange={handleChange}
                     placeholder="Enter budget in ₹"
                     className="input-field"
+                    min="1"
+                    aria-invalid={hasBudgetError}
                     required
                   />
                 </div>
+                {hasBudgetError && <span className="error-text">{formError}</span>}
               </div>
 
               {/* TRAVELERS */}
@@ -167,7 +210,7 @@ export default function LandingPage({ onPlanTrip }) {
 
               {/* SUBMIT BUTTON */}
               <div className="submit-container">
-                <button type="submit" className="button-submit">
+                <button type="submit" className="button-submit" disabled={Boolean(formError)}>
                   <Sparkles size={18} />
                   Plan My Trip
                   <ArrowRight size={16} />

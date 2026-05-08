@@ -2,9 +2,12 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import ReactMarkdown from 'react-markdown';
 import useAgent from '../hooks/useAgent';
-import AgentService from '../services/agentService';
 import ConversationSidebar from '../components/ConversationSidebar';
 import '../styles/agentPage.css';
+
+const markdownComponents = {
+  a: ({ children, ...props }) => <a {...props} target="_blank" rel="noreferrer">{children}</a>,
+};
 
 /**
  * DEDICATED AGENT PAGE
@@ -34,6 +37,7 @@ const AgentPage = () => {
   const [plan, setPlan] = useState(currentPlan);
   const [currentConversationId, setCurrentConversationId] = useState(null);
   const [isSending, setIsSending] = useState(false);
+  const [latestSources, setLatestSources] = useState([]);
   const messagesEndRef = useRef(null);
   const inputRef = useRef(null);
   const historyLoadedRef = useRef(false);
@@ -69,6 +73,14 @@ const AgentPage = () => {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+
+  useEffect(() => {
+    setLatestSources(Array.isArray(currentPlan?.meta?.citations)
+      ? currentPlan.meta.citations
+      : Array.isArray(currentPlan?.meta?.sources)
+        ? currentPlan.meta.sources
+        : []);
+  }, [currentPlan]);
 
   const loadConversationHistory = async () => {
     try {
@@ -243,6 +255,11 @@ const AgentPage = () => {
               if (data.response?.updatedPlan) {
                 setPlan(data.response.updatedPlan);
               }
+              setLatestSources(Array.isArray(data.response?.citations)
+                ? data.response.citations
+                : Array.isArray(data.response?.sources)
+                  ? data.response.sources
+                  : []);
             }
             return updated;
           });
@@ -336,6 +353,7 @@ const AgentPage = () => {
         userId={userId} 
         onSelectConversation={handleSelectConversation}
         currentConversationId={currentConversationId}
+        sources={latestSources}
       />
       <div className="agent-page">
       {/* Header */}
@@ -391,7 +409,7 @@ const AgentPage = () => {
                   
                   {message.text ? (
                     <div className="agent-page-message-text markdown-content">
-                      <ReactMarkdown>{message.text}</ReactMarkdown>
+                      <ReactMarkdown components={markdownComponents}>{message.text}</ReactMarkdown>
                     </div>
                   ) : null}
 

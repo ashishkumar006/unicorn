@@ -11,6 +11,7 @@
  * 4. Agent uses tools to make changes
  * 5. Agent can analyze costs and suggest alternatives
  * 6. Agent can generate email to send to group
+ * 7. Agent can search Google Places, Ola Maps, or the live web and read source pages when the user needs current information
  */
 
 const BaseAgent = require('./baseAgent');
@@ -32,8 +33,13 @@ const {
 function isSummaryRequest(userMessage = '') {
   const text = String(userMessage).toLowerCase();
   const modificationWords = /\b(modif(y|ication)|change|adjust|update|edit|shorten|lengthen|extend|reduce|increase|remove|add|set)\b/i;
+  const researchWords = /\b(search|web|research|browse|read url|source-backed|latest|current|live|weather|price|pricing|schedule|availability)\b/i;
 
   if (modificationWords.test(text)) {
+    return false;
+  }
+
+  if (researchWords.test(text)) {
     return false;
   }
 
@@ -66,6 +72,20 @@ Tool rules:
 - Do not call modifyDates unless the user gives explicit dates.
 - Do not call modifyDuration unless the user asks to shorten, extend, or set the trip length.
 - Never guess missing values for a modify tool.
+- Use searchPlaces when the user asks for restaurants, attractions, things to do, or destination-specific recommendations. Prefer provider=ola first for India-first searches, and use google when you need richer price-level or rating signals.
+- Use olaMaps when the user asks for Ola Maps data, India-first place discovery, or route and distance lookups.
+- Use openStreetMap when the user asks to see a destination on the platform map, wants an embedded preview, or needs a shareable OpenStreetMap page.
+- Use searchWeb when the user asks for current travel information, live pricing, weather, schedules, or source-backed recommendations.
+- Use readUrl when the user shares a link or when search results need deeper verification.
+
+Research workflow:
+- For destination-specific place data, use searchPlaces first with provider=ola. Fall back to google when Ola coverage is thin or you need price-level details.
+- For Ola-specific or India-first place and route data, use olaMaps.
+- For broader current information, use searchWeb so the assistant can collect sources.
+- When the answer depends on specific facts, cite those facts inline with markdown links such as [Goa Tourism](https://...).
+- Keep a compact Sources section at the end with the most relevant links.
+- Prefer source-backed phrasing over vague summaries.
+- Do not expose raw tool traces or internal reasoning to the user.
 
 Response style:
 - Be concise but informative.
@@ -77,6 +97,11 @@ Response style:
 Available tools:
 - analyzeCosts: Break down trip cost components and per-person impact.
 - suggestAlternatives: Offer cheaper or better travel, hotel, or activity options.
+- searchPlaces: Look up Ola Maps or Google Places restaurants and attractions with map links.
+- olaMaps: Look up Ola Maps places, routes, and distance information for India-first coverage.
+- openStreetMap: Resolve a destination into an embedded OpenStreetMap preview and shareable map link.
+- searchWeb: Search the live web for current travel information and summarize sources.
+- readUrl: Read a specific page and extract the most useful facts.
 - generateEmail: Draft a shareable email summary for the group.
 
 If the user asks to shorten, extend, or set the trip to a specific number of days, use modifyDuration.
@@ -190,6 +215,7 @@ If the user asks for a specific change with values, use the matching modify tool
     return {
       canModifyPlan: ['destination', 'dates', 'duration', 'groupSize', 'budget', 'constraints', 'itinerary'],
       canAnalyze: ['costs', 'alternatives', 'savings'],
+      canResearch: ['google places', 'ola maps', 'web search', 'page reading'],
       canGenerate: ['email', 'summary', 'itinerary'],
       tools: this.tools.map(t => ({
         name: t.name,

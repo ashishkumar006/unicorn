@@ -361,8 +361,11 @@ select.input-field {
    ================================ */
 
 .loading-screen {
-  position: fixed;
+  position: relative;
   inset: 0;
+  min-height: 100vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
   background:
     radial-gradient(circle at 20% 18%, rgba(222, 107, 72, 0.12), transparent 28%),
     radial-gradient(circle at 78% 22%, rgba(69, 183, 160, 0.14), transparent 26%),
@@ -371,6 +374,7 @@ select.input-field {
   align-items: center;
   justify-content: center;
   z-index: 100;
+  padding: 2rem 0;
 }
 
 .loading-screen.error-screen {
@@ -382,8 +386,8 @@ select.input-field {
   flex-direction: column;
   align-items: center;
   gap: 1rem;
-  width: min(92vw, 720px);
-  padding: 2rem;
+  width: min(92vw, 860px);
+  padding: 1.85rem 1.5rem 2rem;
 }
 
 .spinner-container {
@@ -408,10 +412,10 @@ select.input-field {
 }
 
 .loading-subtext {
+  max-width: 58ch;
   color: var(--text-secondary);
   font-size: 0.95rem;
   text-align: center;
-  max-width: 58ch;
 }
 
 .error-icon {
@@ -439,18 +443,25 @@ select.input-field {
 }
 
 .loading-content-travel {
-  gap: 1.35rem;
+  gap: 1rem;
 }
 
 .loading-destination-card {
   width: 100%;
-  max-width: 640px;
+  max-width: 860px;
   padding: 1.25rem;
   border-radius: 28px;
   border: 1px solid rgba(226, 232, 240, 0.92);
   background: rgba(255, 255, 255, 0.88);
   box-shadow: 0 22px 60px rgba(15, 23, 42, 0.09);
   backdrop-filter: blur(12px);
+}
+
+.loading-hero-metrics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.95rem;
 }
 
 .loading-destination-header {
@@ -491,6 +502,8 @@ select.input-field {
 }
 
 .loading-fact-card {
+  width: 100%;
+  max-width: 860px;
   padding: 1rem 1.05rem;
   border-radius: 22px;
   background: linear-gradient(135deg, rgba(255, 251, 247, 0.98), rgba(241, 248, 250, 0.96));
@@ -509,6 +522,147 @@ select.input-field {
   color: var(--text-secondary);
   font-size: 0.95rem;
   line-height: 1.6;
+}
+
+.loading-progress-panel {
+  width: 100%;
+  max-width: 720px;
+  padding: 1.15rem 1.15rem 1rem;
+  border-radius: 26px;
+  background: rgba(255, 255, 255, 0.88);
+  border: 1px solid rgba(226, 232, 240, 0.94);
+  box-shadow: 0 20px 60px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(12px);
+}
+
+.loading-progress-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: flex-start;
+  margin-bottom: 0.95rem;
+}
+
+.loading-progress-title {
+  margin-top: 0.55rem;
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+}
+
+.loading-progress-subtitle {
+  margin-top: 0.35rem;
+  color: var(--text-secondary);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.loading-progress-percent {
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.1);
+  color: #0f766e;
+  font-size: 0.85rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.loading-progress-track {
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(226, 232, 240, 0.95);
+  margin-bottom: 1rem;
+}
+
+.loading-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #0f766e 0%, #2dd4bf 48%, #de6b48 100%);
+  background-size: 180% 100%;
+  animation: loading-progress-shimmer 2.4s linear infinite;
+  transition: width 0.45s ease;
+  box-shadow: 0 0 12px rgba(15, 118, 110, 0.18);
+}
+
+.loading-progress-steps {
+  display: grid;
+  gap: 0.7rem;
+}
+
+.loading-progress-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.8rem;
+  padding: 0.8rem 0.85rem;
+  border-radius: 18px;
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  transition: transform 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+}
+
+.loading-progress-step.active {
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.08), rgba(222, 107, 72, 0.08));
+  border-color: rgba(15, 118, 110, 0.22);
+  transform: translateY(-1px);
+}
+
+.loading-progress-step.done {
+  opacity: 0.8;
+}
+
+.loading-progress-step-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+  font-size: 0.78rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.loading-progress-step.active .loading-progress-step-badge {
+  background: #0f766e;
+  color: #fff;
+}
+
+.loading-progress-step.done .loading-progress-step-badge {
+  background: rgba(222, 107, 72, 0.12);
+  color: #c2410c;
+}
+
+.loading-progress-step-name {
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.loading-progress-step-detail {
+  margin-top: 0.2rem;
+  color: var(--text-secondary);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+@keyframes loading-progress-shimmer {
+  0% { background-position: 0% 50%; }
+  100% { background-position: 180% 50%; }
+}
+
+@media (max-width: 768px) {
+  .loading-progress-header {
+    flex-direction: column;
+  }
+
+  .loading-progress-percent {
+    align-self: flex-start;
+  }
 }
 
 
@@ -917,6 +1071,35 @@ select.input-field {
   margin-bottom: 0.75rem;
 }
 
+.card-title-group {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.card-link-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.28rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  border: 1px solid rgba(15, 118, 110, 0.18);
+  color: #0f766e;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1;
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+}
+
+.card-link-badge:hover {
+  background: rgba(15, 118, 110, 0.14);
+  border-color: rgba(15, 118, 110, 0.28);
+  transform: translateY(-1px);
+}
+
 .option-header h3, .place-header h4, .restaurant-header h3 {
   font-size: 1.1rem;
   font-weight: 600;
@@ -1027,8 +1210,9 @@ select.input-field {
 
 .specialty-title {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.45rem;
   margin-bottom: 0.5rem;
 }
 
@@ -1148,6 +1332,10 @@ select.input-field {
   margin-top: 2rem;
 }
 
+.page-wrapper.dashboard .dashboard-layout.dashboard-layout--public {
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .page-wrapper.dashboard .dashboard-main-column {
   display: flex;
   flex-direction: column;
@@ -1209,8 +1397,178 @@ select.input-field {
   min-height: 0;
 }
 
+.page-wrapper.dashboard .plan-intelligence-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.page-wrapper.dashboard .plan-intelligence-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+
+.page-wrapper.dashboard .plan-intelligence-card {
+  align-self: start;
+  height: fit-content;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.05rem 1.05rem 1rem;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.page-wrapper.dashboard .plan-intelligence-card h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.page-wrapper.dashboard .plan-intelligence-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: flex-start;
+}
+
+.page-wrapper.dashboard .plan-intelligence-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.34rem 0.72rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.page-wrapper.dashboard .plan-intelligence-summary {
+  margin: 0;
+  color: #0f172a;
+  line-height: 1.6;
+  font-size: 0.98rem;
+}
+
+.page-wrapper.dashboard .plan-intelligence-muted {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.55;
+  font-size: 0.93rem;
+}
+
+.page-wrapper.dashboard .openstreetmap-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.page-wrapper.dashboard .openstreetmap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.page-wrapper.dashboard .openstreetmap-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(15, 118, 110, 0.16);
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.page-wrapper.dashboard .openstreetmap-link:hover {
+  background: rgba(15, 118, 110, 0.14);
+  border-color: rgba(15, 118, 110, 0.24);
+}
+
+.page-wrapper.dashboard .openstreetmap-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  padding: 1rem;
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(226, 232, 240, 0.92);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.page-wrapper.dashboard .openstreetmap-frame {
+  width: 100%;
+  height: 360px;
+  border: 0;
+  border-radius: 18px;
+  background: #eef2f7;
+}
+
+.page-wrapper.dashboard .openstreetmap-fallback {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: flex-start;
+  justify-content: center;
+  min-height: 240px;
+  padding: 1rem;
+  border-radius: 18px;
+  background: linear-gradient(135deg, rgba(15, 118, 110, 0.06), rgba(222, 107, 72, 0.06));
+  border: 1px dashed rgba(148, 163, 184, 0.36);
+  color: #334155;
+}
+
+.page-wrapper.dashboard .openstreetmap-fallback a {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.5rem 0.8rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.page-wrapper.dashboard .openstreetmap-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.page-wrapper.dashboard .openstreetmap-pill,
+.page-wrapper.dashboard .openstreetmap-coordinates,
+.page-wrapper.dashboard .openstreetmap-summary {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.38rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(15, 118, 110, 0.08);
+  color: #0f766e;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+.page-wrapper.dashboard .openstreetmap-summary {
+  background: rgba(245, 158, 11, 0.08);
+  color: #9a3412;
+}
+
 @media (max-width: 768px) {
   .page-wrapper.dashboard .dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .page-wrapper.dashboard .plan-intelligence-grid {
     grid-template-columns: 1fr;
   }
 
@@ -1222,6 +1580,10 @@ select.input-field {
   .page-wrapper.dashboard .dashboard-agent-section {
     padding: 1rem;
     height: auto;
+  }
+
+  .page-wrapper.dashboard .openstreetmap-frame {
+    height: 280px;
   }
 
   .page-wrapper.dashboard .dashboard-agent-section .agent-panel {

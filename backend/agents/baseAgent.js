@@ -11,6 +11,187 @@
 
 const { chatJson, resolveCloudConfig } = require('../services/ollamaClient');
 
+function normalizeCitationEntry(entry, fallbackTitle = 'Source') {
+  if (!entry) {
+    return null;
+  }
+
+  if (typeof entry === 'string') {
+    const trimmed = entry.trim();
+    if (!trimmed) {
+      return null;
+    }
+
+    if (/^https?:\/\//i.test(trimmed)) {
+      return {
+        title: fallbackTitle,
+        url: trimmed,
+        snippet: '',
+      };
+    }
+
+    return {
+      title: trimmed,
+      url: '',
+      snippet: '',
+    };
+  }
+
+  if (typeof entry !== 'object') {
+    return null;
+  }
+
+  const title = String(entry.title || entry.name || entry.label || fallbackTitle || '').trim();
+  const url = String(entry.url || entry.link || entry.href || '').trim();
+  const snippet = String(entry.snippet || entry.summary || entry.content || entry.whyRelevant || '').trim();
+
+  if (!title && !url) {
+    return null;
+  }
+
+  return {
+    title: title || url || fallbackTitle,
+    url,
+    snippet,
+  };
+}
+
+function collectCitationEntries(toolResults = [], finalResponse = null) {
+  const collected = [];
+  const seen = new Set();
+
+  const addEntry = (entry) => {
+    const normalized = normalizeCitationEntry(entry, `Source ${collected.length + 1}`);
+
+    if (!normalized || !normalized.url) {
+      return;
+    }
+
+    const key = normalized.url.toLowerCase();
+    if (seen.has(key)) {
+      return;
+    }
+
+    seen.add(key);
+    collected.push(normalized);
+  };
+
+  for (const toolResult of toolResults) {
+    const result = toolResult?.result || {};
+    const candidateGroups = [
+      result.citations,
+      result.sources,
+      result.recommendedSources,
+      result.results,
+      result.citation ? [result.citation] : [],
+      result.source ? [result.source] : [],
+    ];
+
+    for (const group of candidateGroups) {
+      if (!Array.isArray(group)) {
+        continue;
+      }
+
+      for (const entry of group) {
+        addEntry(entry);
+      }
+    }
+  }
+
+  if (finalResponse) {
+    const finalGroups = [
+      finalResponse.citations,
+      finalResponse.sources,
+      finalResponse.recommendedSources,
+    ];
+
+    for (const group of finalGroups) {
+      if (!Array.isArray(group)) {
+        continue;
+      }
+
+      for (const entry of group) {
+        addEntry(entry);
+      }
+    }
+  }
+
+  return collected.map((citation, index) => ({
+    index: index + 1,
+    title: citation.title || `Source ${index + 1}`,
+    url: citation.url,
+    snippet: citation.snippet || '',
+  }));
+}
+
+function hasSourcesSection(message = '') {
+  return /(^|\n)\s*(\*\*)?Sources(\*\*)?\s*:/i.test(String(message || ''));
+}
+
+function formatSourcesSection(citations = []) {
+  if (!Array.isArray(citations) || citations.length === 0) {
+    return '';
+  }
+
+  return citations
+    .filter((citation) => citation && citation.url)
+    .map((citation, index) => {
+      const title = citation.title || `Source ${index + 1}`;
+      return `- [${title}](${citation.url})`;
+    })
+    .join('\n');
+}
+
+function splitProgressMessage(message = '') {
+  const text = String(message || '').trim();
+
+  if (!text) {
+    return [];
+  }
+
+  const paragraphs = text.split(/\n\s*\n/).map((chunk) => chunk.trim()).filter(Boolean);
+
+  if (paragraphs.length > 1) {
+    return paragraphs;
+  }
+
+  const sentences = text
+    .split(/(?<=[.!?])\s+/)
+    .map((chunk) => chunk.trim())
+    .filter(Boolean);
+
+  if (sentences.length > 1) {
+    return sentences;
+  }
+
+  const chunkSize = Math.max(80, Math.floor(text.length / 3));
+  const chunks = [];
+
+  for (let index = 0; index < text.length; index += chunkSize) {
+    chunks.push(text.slice(index, index + chunkSize).trim());
+  }
+
+  return chunks.filter(Boolean);
+}
+
+function summarizeToolResult(result = {}) {
+  if (!result || typeof result !== 'object') {
+    return 'no structured result';
+  }
+
+  const summary = result.summary || result.message || result.analysis || '';
+  if (summary) {
+    return String(summary).replace(/\s+/g, ' ').slice(0, 180);
+  }
+
+  const keys = Object.keys(result).filter((key) => !['success', 'error'].includes(key));
+  if (keys.length > 0) {
+    return `keys: ${keys.slice(0, 6).join(', ')}`;
+  }
+
+  return result.error ? `error: ${result.error}` : 'no summary';
+}
+
 class BaseAgent {
   constructor(options = {}) {
     this.name = options.name || 'BaseAgent';
@@ -65,6 +246,9 @@ class BaseAgent {
         toolsUsed: response.toolsUsed || [],
         analysis: response.analysis || null,
         updatedPlan: response.updatedPlan || null,
+        citations: response.citations || [],
+        sources: response.sources || [],
+        confidence: response.confidence ?? null,
         status: 'SUCCESS'
       };
     } catch (error) {
@@ -98,10 +282,12 @@ class BaseAgent {
     let updatedPlan = this.state.currentPlan;
     const allToolResults = [];
     let loopIteration = 0;
-    const maxIterations = 2;
+    const configuredMaxIterations = Number(process.env.AGENT_MAX_ITERATIONS);
+    const maxIterations = Number.isFinite(configuredMaxIterations) && configuredMaxIterations > 0
+      ? Math.floor(configuredMaxIterations)
+      : 8;
     let finalResponse = null;
     let lastAgentResponse = null;
-    let initialMessage = '';
     let toolsCalledList = [];
 
     while (loopIteration < maxIterations) {
@@ -138,17 +324,20 @@ ${this.systemPrompt}
 
 Behavior rules:
 - Use the smallest possible set of tools needed to answer the user.
+- You may use multiple tool rounds. Continue until you have enough evidence or the next tool call would be redundant.
 - Do not invent trip facts, dates, availability, prices, or confirmations.
 - If the user asks to shorten, extend, or otherwise change trip length, use the dedicated duration tool.
 - If the user asks for a summary, answer from the current plan without unnecessary tool calls.
 - When a tool changes the plan, explain the change clearly and mention the updated facts.
 - Keep the user-facing message concise, informative, and explanatory.
+- When tools return source URLs, cite them inline or in a compact Sources section so the user can verify factual claims.
 
 Output contract:
 - Return valid JSON only.
 - The JSON must contain thought, message, toolsToCall, and confidence.
 - toolsToCall must be an array of objects shaped like {"name": "toolName", "args": {}}.
 - Use an empty toolsToCall array when no more tools are needed.
+- If you used research tools, you may also include sources and citations arrays containing {title, url, snippet} objects.
 
 Available tools:
 ${toolDescriptions}`;
@@ -166,9 +355,7 @@ User request:
 ${userMessage}
 
 Iteration guidance:
-${loopIteration === 1
-  ? 'This is the first pass. Call only the essential tools you need and explain your intent clearly.'
-  : 'This is the final pass. Do not call any more tools. Synthesize a complete, useful answer from the tool results.'}`;
+Continue using tools if they materially improve the answer. There is no fixed two-pass limit here. Only stop when you have enough context to answer well, or when the next tool call would be repetitive.`;
 
       console.log(`[${this.name}] Iteration ${loopIteration}: Calling Gemma cloud model ${cloudConfig.model}...`);
 
@@ -211,20 +398,12 @@ ${loopIteration === 1
 
       lastAgentResponse = agentResponse;
 
-      if (agentResponse.thought) {
-        onProgress({ type: 'message', content: `💭 **Agent Thinking:** ${agentResponse.thought}` });
-      }
-
-      if (loopIteration === 1 && agentResponse.message && agentResponse.toolsToCall.length > 0) {
-        onProgress({ type: 'message', content: agentResponse.message });
-        initialMessage = agentResponse.message;
-      }
-
       const hasToolsToCall = agentResponse.toolsToCall.length > 0;
 
       if (hasToolsToCall) {
         if (loopIteration === 1) {
           toolsCalledList = agentResponse.toolsToCall.map((tool) => tool.name || tool.toolName || tool.qualifiedName).filter(Boolean);
+          onProgress({ type: 'message', content: '🔎 Gathering live context before I answer...' });
         }
 
         for (const toolCall of agentResponse.toolsToCall) {
@@ -261,6 +440,12 @@ ${loopIteration === 1
               updatedPlan = result.updatedPlan;
               this.state.currentPlan = updatedPlan;
             }
+
+            onProgress({
+              type: 'tool_end',
+              tool: toolName,
+              content: result.error ? `⚠ ${result.error}` : resultText,
+            });
           } catch (toolError) {
             allToolResults.push({
               tool: toolName,
@@ -290,13 +475,21 @@ ${loopIteration === 1
       };
     }
 
+    const citations = collectCitationEntries(allToolResults, finalResponse);
+    const hasCitations = citations.length > 0;
+
     let finalMessage = '';
 
-    if (initialMessage) {
-      finalMessage += `${initialMessage}\n`;
+    if (finalResponse.message) {
+      finalMessage += finalResponse.message;
     }
 
-    if (allToolResults.length > 0) {
+    if (hasCitations && !hasSourcesSection(finalMessage)) {
+      const sourcesSection = formatSourcesSection(citations.slice(0, 5));
+      if (sourcesSection) {
+        finalMessage += `\n\nSources:\n${sourcesSection}`;
+      }
+    } else if (!hasCitations && allToolResults.length > 0) {
       finalMessage += `\n📊 ${toolsCalledList.join(', ')}:\n`;
 
       for (const toolResult of allToolResults) {
@@ -324,12 +517,15 @@ ${loopIteration === 1
       }
     }
 
-    if (finalResponse.message) {
-      finalMessage += finalResponse.message;
-    }
-
     if (!finalMessage) {
       finalMessage = 'Processing complete.';
+    }
+
+    for (const chunk of splitProgressMessage(finalMessage)) {
+      onProgress({
+        type: 'message',
+        content: chunk,
+      });
     }
 
     return {
@@ -338,6 +534,9 @@ ${loopIteration === 1
       analysis: finalResponse.analysis,
       thought: finalResponse.thought,
       updatedPlan,
+      citations,
+      sources: citations,
+      confidence: finalResponse.confidence ?? null,
       systemPrompt: `You are ${this.name}.\n\n${this.systemPrompt}`
     };
   }
@@ -346,8 +545,9 @@ ${loopIteration === 1
    * Call a specific tool
    */
   async callTool(toolName, args) {
-    console.log(`[${this.name}] Calling tool: ${toolName}`);
-    console.log(`[${this.name}] Tool args:`, Object.keys(args || {}));
+    const startedAt = Date.now();
+    console.log(`[${this.name}] TOOL START: ${toolName}`);
+    console.log(`[${this.name}] TOOL ARGS:`, Object.keys(args || {}));
 
     const tool = this.tools.find((candidate) => candidate.name === toolName);
 
@@ -358,10 +558,13 @@ ${loopIteration === 1
 
     try {
       const result = await tool.execute(args);
-      console.log(`[${this.name}] Tool execution complete. Result keys:`, Object.keys(result || {}));
+      const elapsedMs = Date.now() - startedAt;
+      console.log(`[${this.name}] TOOL END: ${toolName} (${elapsedMs}ms)`);
+      console.log(`[${this.name}] TOOL RESULT SUMMARY:`, summarizeToolResult(result));
       return result;
     } catch (error) {
-      console.error(`[${this.name}] Tool execution error:`, error.message);
+      const elapsedMs = Date.now() - startedAt;
+      console.error(`[${this.name}] TOOL ERROR: ${toolName} (${elapsedMs}ms):`, error.message);
       return { error: error.message };
     }
   }

@@ -10,8 +10,36 @@
  * - addConstraint() - Add travel preferences
  * - analyzePlanCost() - Break down costs
  * - suggestAlternatives() - Suggest different options
+ * - searchPlaces() - Search Google Places or Ola Maps for restaurants and attractions
+ * - searchWeb() - Search live web sources for current information
+ * - readUrl() - Read a specific URL and extract key facts
  * - generateEmail() - Create email summary
  */
+
+const {
+  searchWeb: searchTravelWeb,
+  readUrlContent: readTravelUrlContent,
+} = require('../../services/internalLab');
+
+const {
+  getGooglePlacesConfig,
+  isGooglePlacesConfigured,
+  getGoogleRestaurants,
+  getGoogleAttractions,
+  buildPlacesCategoriesFromAttractions,
+  buildFoodSectionsFromRestaurants,
+} = require('../../services/googlePlaces');
+const {
+  getOlaMapsConfig,
+  isOlaMapsConfigured,
+  searchOlaPlaces,
+  getOlaDirections,
+  getOlaDistanceMatrix,
+} = require('../../services/olaMaps');
+const {
+  buildOpenStreetMapSearchUrl,
+  resolveOpenStreetMapLocation,
+} = require('../../services/openStreetMap');
 
 function clonePlan(plan) {
   return JSON.parse(JSON.stringify(plan || {}));
@@ -49,6 +77,81 @@ function toNumber(value, fallback = 0) {
 
 function toInteger(value, fallback = 0) {
   return Math.max(0, Math.round(toNumber(value, fallback)));
+}
+
+function normalizePlacesFocus(value = 'all') {
+  const normalized = toText(value, 'all').toLowerCase();
+
+  if (/(food|restaurant|restaurants|dining|eat|meal)/.test(normalized)) {
+    return 'restaurants';
+  }
+
+  if (/(place|places|attraction|attractions|things to do|sightseeing|landmark|visit)/.test(normalized)) {
+    return 'attractions';
+  }
+
+  return 'all';
+}
+
+function normalizePlacesProvider(value = 'auto') {
+  const normalized = toText(value, 'auto').toLowerCase();
+
+  if (/(google|google_places|googleplaces|maps-google)/.test(normalized)) {
+    return 'google';
+  }
+
+  if (/(ola|olamaps|ola_maps|maps-ola)/.test(normalized)) {
+    return 'ola';
+  }
+
+  return 'auto';
+}
+
+function formatOlaPlaceLine(place, fallbackLabel) {
+  const name = toText(place?.name, fallbackLabel);
+  const description = toText(place?.description || place?.location || '', '');
+  const type = toText(place?.type, '');
+  const rawLink = toText(place?.link || place?.olaMapsUrl || place?.googleMapsUrl || '', '');
+  const link = rawLink && !/olamaps?/i.test(rawLink)
+    ? rawLink
+    : buildOpenStreetMapSearchUrl(name);
+  const label = link ? `[${name}](${link})` : name;
+  return `- ${label}${type ? ` [${type}]` : ''}${description ? ` — ${description}` : ''}`;
+}
+
+function formatGooglePlacesLine(place, fallbackLabel) {
+  const name = toText(place?.name, fallbackLabel);
+  const url = toText(place?.googleMapsUrl, '');
+  const label = url ? `[${name}](${url})` : name;
+  const rating = toNumber(place?.rating, 0);
+  const details = [
+    toText(place?.cuisine || place?.type || '', ''),
+    rating > 0 ? `${rating.toFixed(1).replace(/\.0$/, '')}/5` : '',
+    toText(place?.location || place?.area || place?.description || '', ''),
+  ].filter(Boolean).join(', ');
+
+  return `- ${label}${details ? ` — ${details}` : ''}`;
+}
+
+function buildGooglePlacesCitation(place, fallbackLabel) {
+  const url = toText(place?.googleMapsUrl, '');
+
+  if (!url) {
+    return null;
+  }
+
+  const rating = toNumber(place?.rating, 0);
+  const snippetParts = [
+    toText(place?.cuisine || place?.type || '', ''),
+    rating > 0 ? `${rating.toFixed(1).replace(/\.0$/, '')}/5` : '',
+    toText(place?.location || place?.area || place?.description || '', ''),
+  ].filter(Boolean);
+
+  return {
+    title: toText(place?.name, fallbackLabel),
+    url,
+    snippet: snippetParts.join(' • '),
+  };
 }
 
 function formatCurrency(value) {
@@ -375,6 +478,29 @@ TripOptimizer Assistant
   `.trim();
 }
 
+function formatWebSource(source) {
+  if (!source) {
+    return '';
+  }
+
+  if (typeof source === 'string') {
+    return source.trim();
+  }
+
+  if (typeof source === 'object') {
+    const title = toText(source.title || source.name || source.label, '');
+    const url = toText(source.url || source.link, '');
+
+    if (title && url) {
+      return `${title} (${url})`;
+    }
+
+    return title || url || '';
+  }
+
+  return String(source);
+}
+
 class PlanAccessTool {
   constructor(name = 'accessPlan') {
     this.name = name;
@@ -474,8 +600,8 @@ class ModifyGroupSizeTool {
       return { error: 'Plan and newGroupSize required' };
     }
 
-    if (newGroupSize < 2 || newGroupSize > 100) {
-      return { error: 'Group size must be between 2 and 100' };
+    if (newGroupSize < 1 || newGroupSize > 100) {
+      return { error: 'Group size must be between 1 and 100' };
     }
 
     const updatedPlan = applyGroupSizeChange(plan, newGroupSize);
@@ -639,6 +765,557 @@ class SuggestAlternativesTool {
   }
 }
 
+class SearchPlacesTool {
+  constructor(name = 'searchPlaces') {
+    this.name = name;
+    this.description = 'Search Google Places or Ola Maps for destination-specific restaurants and attractions';
+  }
+
+  async execute(args) {
+    const destination = toText(args.destination || args.query || args.place || args.location, '');
+
+    if (!destination) {
+      return { error: 'Destination required' };
+    }
+
+    const config = getGooglePlacesConfig();
+    const olaConfig = getOlaMapsConfig();
+    if (!isGooglePlacesConfigured(config)) {
+      if (!isOlaMapsConfigured(olaConfig)) {
+        return { error: 'Neither Google Places nor Ola Maps is configured' };
+      }
+    }
+
+    const focus = normalizePlacesFocus(args.focus || args.category || args.type || 'all');
+    const providerRequested = normalizePlacesProvider(args.provider || args.source || args.mapProvider || 'auto');
+    const normalizedLimit = Math.max(1, Math.min(toInteger(args.limit, 6), 12));
+    const wantsRestaurants = focus === 'all' || focus === 'restaurants';
+    const wantsAttractions = focus === 'all' || focus === 'attractions';
+    let providerUsed = providerRequested;
+
+    if (providerRequested === 'auto') {
+      providerUsed = isOlaMapsConfigured(olaConfig)
+        ? 'ola'
+        : (isGooglePlacesConfigured(config) ? 'google' : 'ola');
+    } else if (providerRequested === 'google' && !isGooglePlacesConfigured(config) && isOlaMapsConfigured(olaConfig)) {
+      providerUsed = 'ola';
+    } else if (providerRequested === 'ola' && !isOlaMapsConfigured(olaConfig) && isGooglePlacesConfigured(config)) {
+      providerUsed = 'google';
+    }
+
+    const providerLabel = providerUsed === 'ola' ? 'Ola Maps' : 'Google Places';
+
+    console.log(`[searchPlaces] Starting ${providerLabel} lookup for ${destination}`);
+    console.log(`[searchPlaces] Focus=${focus} limit=${normalizedLimit} provider=${providerUsed}`);
+
+    if (providerUsed === 'ola') {
+      const results = await searchOlaPlaces(destination, normalizedLimit, focus, olaConfig);
+      const finalResults = results.map((place, index) => {
+        const name = toText(place?.name, `Place ${index + 1}`);
+        const rawLink = toText(place?.link || place?.olaMapsUrl || place?.googleMapsUrl || '', '');
+        const workingLink = rawLink && !/olamaps?/i.test(rawLink)
+          ? rawLink
+          : buildOpenStreetMapSearchUrl(name);
+
+        return {
+          ...place,
+          link: workingLink,
+          openStreetMapUrl: workingLink,
+          olaMapsUrl: toText(place?.olaMapsUrl, ''),
+          googleMapsUrl: toText(place?.googleMapsUrl, ''),
+        };
+      });
+
+      const summary = `Ola Maps autocomplete returned ${finalResults.length} suggestion(s) for ${destination}.`;
+      const analysisParts = [
+        'Provider: Ola Maps',
+        `Autocomplete query for "${destination}"`,
+        `Focus: ${focus === 'all' ? 'restaurants and attractions' : focus}`,
+        finalResults.length > 0
+          ? `Suggestions:\n${finalResults.map((place, index) => formatOlaPlaceLine(place, `Place ${index + 1}`)).join('\n')}`
+          : 'No suggestions found.',
+      ].filter(Boolean);
+
+      console.log(`[searchPlaces] Completed Ola Maps lookup for ${destination}: results=${finalResults.length}`);
+
+      return {
+        success: true,
+        provider: 'ola',
+        providerLabel,
+        providerRequested,
+        destination,
+        focus,
+        limit: normalizedLimit,
+        summary,
+        results: finalResults,
+        suggestions: finalResults,
+        citations: [],
+        sources: [],
+        analysis: analysisParts.join('\n\n'),
+        message: summary,
+      };
+    }
+
+    const [restaurants, attractions] = await Promise.all([
+      wantsRestaurants ? getGoogleRestaurants(destination, normalizedLimit, config) : Promise.resolve([]),
+      wantsAttractions ? getGoogleAttractions(destination, normalizedLimit, config) : Promise.resolve([]),
+    ]);
+
+    const places = wantsAttractions
+      ? { categories: buildPlacesCategoriesFromAttractions(attractions, { toPlace: destination }) }
+      : { categories: [] };
+
+    const food = wantsRestaurants
+      ? buildFoodSectionsFromRestaurants(restaurants, { toPlace: destination })
+      : { restaurants: [], localSpecialties: [], streetFood: [] };
+
+    const citations = [];
+    const seenUrls = new Set();
+    const addCitation = (entry, fallbackLabel) => {
+      const citation = buildGooglePlacesCitation(entry, fallbackLabel);
+      if (!citation || !citation.url) {
+        return;
+      }
+
+      const key = citation.url.toLowerCase();
+      if (seenUrls.has(key)) {
+        return;
+      }
+
+      seenUrls.add(key);
+      citations.push({
+        index: citations.length + 1,
+        ...citation,
+      });
+    };
+
+    restaurants.slice(0, 3).forEach((restaurant) => addCitation(restaurant, 'Restaurant'));
+    attractions.slice(0, 3).forEach((attraction) => addCitation(attraction, 'Attraction'));
+
+    const analysisParts = [
+      'Provider: Google Places',
+      `Google Places results for "${destination}"`,
+      `Focus: ${focus === 'all' ? 'restaurants and attractions' : focus}`,
+      restaurants.length > 0
+        ? `Restaurants:\n${restaurants.slice(0, normalizedLimit).map((restaurant) => formatGooglePlacesLine(restaurant, 'Restaurant')).join('\n')}`
+        : '',
+      attractions.length > 0
+        ? `Attractions:\n${attractions.slice(0, normalizedLimit).map((attraction) => formatGooglePlacesLine(attraction, 'Attraction')).join('\n')}`
+        : '',
+    ].filter(Boolean);
+
+    const summary = `Google Places found ${restaurants.length} restaurants and ${attractions.length} attractions in ${destination}.`;
+
+    console.log(`[searchPlaces] Completed lookup for ${destination}: restaurants=${restaurants.length}, attractions=${attractions.length}, citations=${citations.length}`);
+
+    return {
+      success: true,
+      provider: 'google',
+      providerLabel,
+      providerRequested,
+      destination,
+      focus,
+      limit: normalizedLimit,
+      summary,
+      restaurants,
+      attractions,
+      places,
+      food,
+      citations,
+      sources: citations,
+      analysis: analysisParts.join('\n\n'),
+      message: summary,
+    };
+  }
+}
+
+class OlaMapsTool {
+  constructor(name = 'olaMaps') {
+    this.name = name;
+    this.description = 'Use Ola Maps for India-first place discovery, route directions, and distance matrix lookups';
+  }
+
+  async execute(args) {
+    const config = getOlaMapsConfig();
+
+    if (!isOlaMapsConfigured(config)) {
+      return { error: 'Ola Maps is not configured. Set OLA_MAPS_API_KEY or OLA_MAPS_CLIENT_ID and OLA_MAPS_CLIENT_SECRET.' };
+    }
+
+    const mode = toText(args.mode || args.type || '', '').toLowerCase();
+    const normalizedFocus = normalizePlacesFocus(args.focus || args.category || args.queryType || 'all');
+    const normalizedLimit = Math.max(1, Math.min(toInteger(args.limit, 6), 12));
+    const placeQuery = toText(args.destination || args.query || args.place || args.location, '');
+
+    if (mode === 'directions' || mode === 'route' || mode === 'navigation') {
+      const origin = toText(args.origin, '');
+      const destination = toText(args.destination, '');
+
+      if (!origin || !destination) {
+        return { error: 'Origin and destination are required for Ola Maps directions' };
+      }
+
+      const directions = await getOlaDirections({
+        origin,
+        destination,
+        waypoints: args.waypoints,
+        mode: args.travelMode || args.transportMode || 'driving',
+        alternatives: args.alternatives,
+        steps: args.steps,
+        overview: args.overview,
+        language: args.language,
+        trafficMetadata: args.trafficMetadata,
+        routePreference: args.routePreference || args.route_preference || 'fastest',
+        auth: args.auth || 'auto',
+      }, config);
+
+      const route = directions?.route || null;
+      const routeSummary = route?.summary || directions?.summary || `Directions ready for ${origin} to ${destination}.`;
+
+      return {
+        success: true,
+        provider: 'ola',
+        providerLabel: 'Ola Maps',
+        mode: 'directions',
+        origin,
+        destination,
+        summary: routeSummary,
+        route,
+        routes: directions?.routes || [],
+        analysis: [
+          'Provider: Ola Maps',
+          `🗺️ Directions for ${origin} → ${destination}`,
+          routeSummary ? `Summary: ${routeSummary}` : '',
+          route?.legs?.[0]?.readable_distance ? `First leg distance: ${route.legs[0].readable_distance}` : '',
+          route?.legs?.[0]?.readable_duration ? `First leg duration: ${route.legs[0].readable_duration}` : '',
+        ].filter(Boolean).join('\n\n'),
+        message: `Ola Maps directions complete for ${origin} to ${destination}.`,
+      };
+    }
+
+    if (mode === 'distance' || mode === 'matrix' || mode === 'distancematrix') {
+      const origins = args.origins || args.origin || [];
+      const destinations = args.destinations || args.destination || [];
+
+      const matrix = await getOlaDistanceMatrix({
+        origins,
+        destinations,
+        mode: args.travelMode || args.transportMode || 'driving',
+        routePreference: args.routePreference || args.route_preference || 'fastest',
+        auth: args.auth || 'auto',
+      }, config);
+
+      return {
+        success: true,
+        provider: 'ola',
+        providerLabel: 'Ola Maps',
+        mode: 'distanceMatrix',
+        origins: matrix?.origins,
+        destinations: matrix?.destinations,
+        rowCount: matrix?.rowCount || 0,
+        matrix: matrix?.matrix || [],
+        summary: matrix?.summary || 'Distance matrix ready.',
+        analysis: [
+          'Provider: Ola Maps',
+          matrix?.summary || 'Distance matrix ready.',
+        ].filter(Boolean).join('\n\n'),
+        message: 'Ola Maps distance matrix complete.',
+      };
+    }
+
+    if (!placeQuery) {
+      return { error: 'A destination or query is required for Ola Maps place search' };
+    }
+
+    const results = await searchOlaPlaces(placeQuery, normalizedLimit, normalizedFocus, config);
+    const normalizedResults = results.map((place, index) => {
+      const name = toText(place?.name, `Place ${index + 1}`);
+      const rawLink = toText(place?.link || place?.olaMapsUrl || place?.googleMapsUrl || '', '');
+      const workingLink = rawLink && !/olamaps?/i.test(rawLink)
+        ? rawLink
+        : buildOpenStreetMapSearchUrl(name);
+
+      return {
+        ...place,
+        link: workingLink,
+        openStreetMapUrl: workingLink,
+        olaMapsUrl: toText(place?.olaMapsUrl, ''),
+        googleMapsUrl: toText(place?.googleMapsUrl, ''),
+      };
+    });
+
+    const analysisParts = [
+      'Provider: Ola Maps',
+      `🗺️ Ola Maps place search for "${placeQuery}"`,
+      normalizedResults.length > 0
+        ? `Suggestions:\n${normalizedResults.map((place, index) => formatOlaPlaceLine(place, `Place ${index + 1}`)).join('\n')}`
+        : 'No suggestions found.',
+    ];
+
+    return {
+      success: true,
+      provider: 'ola',
+      providerLabel: 'Ola Maps',
+      destination: placeQuery,
+      focus: normalizedFocus,
+      limit: normalizedLimit,
+      summary: `Ola Maps found ${normalizedResults.length} place suggestion(s) for ${placeQuery}.`,
+      results: normalizedResults,
+      suggestions: normalizedResults,
+      citations: [],
+      sources: [],
+      analysis: analysisParts.join('\n\n'),
+      message: `Ola Maps search complete for "${placeQuery}".`,
+    };
+  }
+}
+
+class OpenStreetMapTool {
+  constructor(name = 'openStreetMap') {
+    this.name = name;
+    this.description = 'Resolve a destination into an embedded OpenStreetMap preview with a shareable map link';
+  }
+
+  async execute(args) {
+    const destination = toText(args.destination || args.query || args.place || args.location, '');
+
+    if (!destination) {
+      return { error: 'Destination required' };
+    }
+
+    const zoom = Math.max(4, Math.min(19, toInteger(args.zoom, 13)));
+    const location = await resolveOpenStreetMapLocation(destination, { zoom, limit: 1 });
+
+    if (!location) {
+      return {
+        success: true,
+        provider: 'openstreetmap',
+        providerLabel: 'OpenStreetMap',
+        destination,
+        summary: `OpenStreetMap search ready for ${destination}.`,
+        searchUrl: buildOpenStreetMapSearchUrl(destination),
+        mapUrl: buildOpenStreetMapSearchUrl(destination),
+        embedUrl: '',
+        coordinates: null,
+        citations: [{
+          index: 1,
+          title: destination,
+          url: buildOpenStreetMapSearchUrl(destination),
+          snippet: destination,
+        }],
+        sources: [{
+          title: destination,
+          url: buildOpenStreetMapSearchUrl(destination),
+        }],
+        analysis: [
+          'Provider: OpenStreetMap',
+          `OpenStreetMap search for "${destination}"`,
+          `Search link: [${destination}](${buildOpenStreetMapSearchUrl(destination)})`,
+        ].join('\n\n'),
+        message: `OpenStreetMap search ready for "${destination}".`,
+      };
+    }
+
+    return {
+      success: true,
+      provider: 'openstreetmap',
+      providerLabel: 'OpenStreetMap',
+      destination,
+      summary: `OpenStreetMap preview ready for ${location.displayName || destination}.`,
+      location,
+      searchUrl: location.searchUrl,
+      mapUrl: location.mapUrl,
+      embedUrl: location.embedUrl,
+      coordinates: location.coordinates,
+      citations: [{
+        index: 1,
+        title: location.displayName || destination,
+        url: location.mapUrl,
+        snippet: location.displayName || destination,
+      }],
+      sources: [{
+        title: location.displayName || destination,
+        url: location.mapUrl,
+      }],
+      analysis: [
+        'Provider: OpenStreetMap',
+        `OpenStreetMap preview for "${destination}"`,
+        `Location: ${location.displayName || destination}`,
+        `Map link: [${location.displayName || destination}](${location.mapUrl})`,
+      ].join('\n\n'),
+      message: `OpenStreetMap preview ready for "${destination}".`,
+    };
+  }
+}
+
+class SearchWebTool {
+  constructor(name = 'searchWeb') {
+    this.name = name;
+    this.description = 'Search the live web, read source pages, and summarize current travel information with citations';
+  }
+
+  async execute(args) {
+    const { query, limit = 5 } = args;
+    const normalizedQuery = toText(query, '');
+
+    if (!normalizedQuery) {
+      return { error: 'Query required' };
+    }
+
+    const normalizedLimit = Math.max(1, Math.min(toInteger(limit, 5), 10));
+    const result = await searchTravelWeb(normalizedQuery, normalizedLimit);
+    const summary = toText(result.summary || result.synthesis?.summary, '');
+    const sourcePages = Array.isArray(result.sourcePages) ? result.sourcePages.slice(0, 3) : [];
+    const citations = Array.isArray(result.citations) && result.citations.length > 0
+      ? result.citations.slice(0, 3)
+      : sourcePages.map((source, index) => ({
+        index: index + 1,
+        title: toText(source?.title, `Source ${index + 1}`),
+        url: toText(source?.url, ''),
+        snippet: toText(source?.snippet || source?.content || '', ''),
+      }));
+    const topResults = Array.isArray(result.results) ? result.results.slice(0, normalizedLimit) : [];
+    const providerLabel = toText(result.providerLabel || result.provider, 'DuckDuckGo HTML');
+
+    const keyPointLines = Array.isArray(result.keyPoints)
+      ? result.keyPoints.map((point) => {
+        if (typeof point === 'string') {
+          return `- ${point}`;
+        }
+
+        const pointText = toText(point?.point || point?.text || '', '');
+        const sourceIndexes = Array.isArray(point?.sourceIndexes)
+          ? point.sourceIndexes
+          : Array.isArray(point?.sources)
+            ? point.sources
+            : [];
+        const citationSuffix = sourceIndexes.length > 0 ? ` [${sourceIndexes.join(', ')}]` : '';
+        return pointText ? `- ${pointText}${citationSuffix}` : '';
+      }).filter(Boolean)
+      : [];
+
+    const resultLines = topResults.map((item) => {
+      const title = toText(item?.title, 'Untitled result');
+      const url = toText(item?.url, '');
+      const snippet = toText(item?.snippet, '');
+      return `- ${title}${url ? ` (${url})` : ''}${snippet ? ` — ${snippet}` : ''}`;
+    });
+
+    const recommendedSourceLines = Array.isArray(result.recommendedSources)
+      ? result.recommendedSources
+      : [];
+
+    const sourceLines = recommendedSourceLines
+      .map((source) => formatWebSource(source))
+      .filter(Boolean)
+      .map((source) => `- ${source}`);
+
+    const analysisParts = [
+      `Provider: ${providerLabel}`,
+      `🌐 Live web research for "${normalizedQuery}"`,
+      summary ? `Summary: ${summary}` : '',
+      keyPointLines.length > 0 ? `Key points:\n${keyPointLines.join('\n')}` : '',
+      sourcePages.length > 0 ? `Source pages read:\n${sourcePages.map((source, index) => {
+        const title = toText(source?.title, `Source ${index + 1}`);
+        const url = toText(source?.url, '');
+        const preview = toText(source?.snippet || source?.content || '', '').slice(0, 180);
+        const link = url ? `[${title}](${url})` : title;
+        return `- ${link}${preview ? ` — ${preview}` : ''}`;
+      }).join('\n')}` : '',
+      resultLines.length > 0 ? `Top results:\n${resultLines.join('\n')}` : '',
+      sourceLines.length > 0 ? `Recommended sources:\n${sourceLines.join('\n')}` : '',
+    ].filter(Boolean);
+
+    return {
+      success: true,
+      query: normalizedQuery,
+      count: result.count || topResults.length,
+      provider: result.provider || 'duckduckgo',
+      providerLabel,
+      summary,
+      sources: sourcePages,
+      citations,
+      results: topResults,
+      recommendedSources: result.recommendedSources || [],
+      followUpQuery: result.followUpQuery || normalizedQuery,
+      ollamaTimedOut: Boolean(result.ollamaTimedOut),
+      analysis: analysisParts.join('\n\n'),
+      message: `Live web search complete for "${normalizedQuery}".`,
+    };
+  }
+}
+
+class ReadUrlTool {
+  constructor(name = 'readUrl') {
+    this.name = name;
+    this.description = 'Read a specific URL and extract the most useful facts for the trip';
+  }
+
+  async execute(args) {
+    const { url } = args;
+    const normalizedUrl = toText(url, '');
+
+    if (!normalizedUrl) {
+      return { error: 'URL required' };
+    }
+
+    let parsedUrl;
+    try {
+      parsedUrl = new URL(normalizedUrl);
+    } catch {
+      return { error: 'A valid URL is required' };
+    }
+
+    const result = await readTravelUrlContent(parsedUrl.toString());
+    const summary = toText(result.summary || result.insight?.summary, '');
+    const keyFacts = Array.isArray(result.keyFacts) ? result.keyFacts : Array.isArray(result.insight?.keyFacts) ? result.insight.keyFacts : [];
+    const risks = Array.isArray(result.risks) ? result.risks : Array.isArray(result.insight?.risks) ? result.insight.risks : [];
+    const recommendedAction = toText(result.recommendedAction || result.insight?.recommendedAction, '');
+    const title = result.title || parsedUrl.hostname;
+    const sourceLink = `[${title}](${parsedUrl.toString()})`;
+
+    const analysisParts = [
+      `📄 Read URL: ${sourceLink}`,
+      `URL: ${parsedUrl.toString()}`,
+      summary ? `Summary: ${summary}` : '',
+      keyFacts.length > 0 ? `Key facts:\n${keyFacts.map((fact) => `- ${fact}`).join('\n')}` : '',
+      risks.length > 0 ? `Risks:\n${risks.map((risk) => `- ${risk}`).join('\n')}` : '',
+      recommendedAction ? `Recommended action: ${recommendedAction}` : '',
+    ].filter(Boolean);
+
+    return {
+      success: true,
+      url: parsedUrl.toString(),
+      title,
+      summary,
+      keyFacts,
+      risks,
+      recommendedAction,
+      contentType: result.contentType,
+      ollamaTimedOut: Boolean(result.ollamaTimedOut),
+      pageInsight: result.insight || null,
+      source: {
+        title,
+        url: parsedUrl.toString(),
+        summary,
+      },
+      citation: {
+        title,
+        url: parsedUrl.toString(),
+        snippet: summary || keyFacts[0] || '',
+      },
+      citations: [{
+        index: 1,
+        title,
+        url: parsedUrl.toString(),
+        snippet: summary || keyFacts[0] || '',
+      }],
+      analysis: analysisParts.join('\n\n'),
+      message: `Read and summarized ${result.title || parsedUrl.hostname}.`,
+    };
+  }
+}
+
 class GenerateEmailTool {
   constructor(name = 'generateEmail') {
     this.name = name;
@@ -674,6 +1351,11 @@ module.exports = {
   AddConstraintTool,
   AnalyzeCostTool,
   SuggestAlternativesTool,
+  SearchPlacesTool,
+  OlaMapsTool,
+  OpenStreetMapTool,
+  SearchWebTool,
+  ReadUrlTool,
   GenerateEmailTool,
   buildPlanSnapshot,
   
@@ -689,6 +1371,11 @@ module.exports = {
       new AddConstraintTool(),
       new AnalyzeCostTool(),
       new SuggestAlternativesTool(),
+      new SearchPlacesTool(),
+      new OlaMapsTool(),
+      new OpenStreetMapTool(),
+      new SearchWebTool(),
+      new ReadUrlTool(),
       new GenerateEmailTool()
     ];
   }

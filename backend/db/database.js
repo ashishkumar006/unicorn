@@ -77,6 +77,19 @@ class Database {
         )
       `);
 
+      this.db.run(`
+        CREATE TABLE IF NOT EXISTS internal_memory_notes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          userId TEXT NOT NULL,
+          title TEXT NOT NULL,
+          content TEXT NOT NULL,
+          tags TEXT,
+          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(userId) REFERENCES users(id)
+        )
+      `);
+
       console.log('✅ Database tables initialized');
     });
   }
@@ -203,6 +216,75 @@ class Database {
               keywords: JSON.parse(row.keywords)
             })) : [];
             resolve(docs);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Save internal memory note
+   */
+  saveInternalMemoryNote(userId, title, content, tags = []) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        `INSERT INTO internal_memory_notes (userId, title, content, tags, updatedAt)
+         VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`,
+        [userId, title, content, JSON.stringify(tags)],
+        function(err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(this.lastID);
+          }
+        }
+      );
+    });
+  }
+
+  /**
+   * Get internal memory notes for a user
+   */
+  getInternalMemoryNotes(userId) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        'SELECT * FROM internal_memory_notes WHERE userId = ? ORDER BY createdAt DESC',
+        [userId],
+        (err, rows) => {
+          if (err) {
+            reject(err);
+            return;
+          }
+
+          const notes = rows ? rows.map((row) => ({
+            id: row.id,
+            userId: row.userId,
+            title: row.title,
+            content: row.content,
+            tags: row.tags ? JSON.parse(row.tags) : [],
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+          })) : [];
+
+          resolve(notes);
+        }
+      );
+    });
+  }
+
+  /**
+   * Delete an internal memory note
+   */
+  deleteInternalMemoryNote(userId, noteId) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'DELETE FROM internal_memory_notes WHERE userId = ? AND id = ?',
+        [userId, noteId],
+        function(err) {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(this.changes > 0);
           }
         }
       );

@@ -44,6 +44,10 @@ An AI-powered travel planning application that creates personalized itineraries 
    OPENROUTER_API_KEY=your_api_key_here
    LLM_MODEL=anthropic/claude-3.5-sonnet
    PORT=5000
+   OLA_MAPS_API_KEY=your_ola_maps_api_key
+   OLA_MAPS_CLIENT_ID=your_ola_maps_client_id
+   OLA_MAPS_CLIENT_SECRET=your_ola_maps_client_secret
+   OLA_MAPS_AUTH_MODE=api-key
    ```
    
    **Get your OpenRouter API key:**
@@ -162,6 +166,7 @@ Here are some ideas to make this even better:
 - **Frontend**: React, CSS3, Lucide Icons
 - **Backend**: Node.js, Express
 - **AI/ML**: OpenRouter API (supports multiple LLM providers)
+- **Maps**: Google Places plus Ola Maps for India-first place and routing support
 - **Styling**: Custom CSS with modern gradients and animations
 
 ## ⚠️ Security & File Organization

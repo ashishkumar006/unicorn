@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/conversationSidebar.css';
 
-const ConversationSidebar = ({ userId, onSelectConversation, currentConversationId }) => {
+const ConversationSidebar = ({ userId, onSelectConversation, currentConversationId, sources = [] }) => {
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedSidebar, setExpandedSidebar] = useState(true);
@@ -67,6 +67,32 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
     setExpandedSidebar(!expandedSidebar);
   };
 
+  const normalizedSources = Array.isArray(sources)
+    ? sources
+        .map((source, index) => {
+          if (!source) {
+            return null;
+          }
+
+          if (typeof source === 'string') {
+            return {
+              title: source,
+              url: source,
+              snippet: '',
+              index: index + 1,
+            };
+          }
+
+          return {
+            title: source.title || source.name || source.label || `Source ${index + 1}`,
+            url: source.url || source.link || source.href || '',
+            snippet: source.snippet || source.summary || '',
+            index: source.index || index + 1,
+          };
+        })
+        .filter((source) => source && source.url)
+    : [];
+
   if (!expandedSidebar) {
     return (
       <button type="button" className="sidebar-toggle-btn" onClick={toggleSidebar} title="Show conversations">
@@ -82,6 +108,32 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
         <button type="button" className="sidebar-toggle-btn" onClick={toggleSidebar} title="Hide sidebar">
           ✕
         </button>
+      </div>
+
+      <div className="sidebar-source-card">
+        <div className="sidebar-source-header">
+          <div>
+            <div className="sidebar-source-kicker">Perplexity-style reading</div>
+            <h4>Sources read</h4>
+          </div>
+          <span className="sidebar-source-count">{normalizedSources.length}</span>
+        </div>
+
+        {normalizedSources.length > 0 ? (
+          <div className="sidebar-source-list">
+            {normalizedSources.slice(0, 5).map((source, idx) => (
+              <article key={`${source.url}-${idx}`} className="sidebar-source-item">
+                <a className="sidebar-source-link" href={source.url} target="_blank" rel="noreferrer">
+                  <span className="sidebar-source-index">{source.index || idx + 1}</span>
+                  <span className="sidebar-source-title">{source.title}</span>
+                </a>
+                {source.snippet && <p className="sidebar-source-snippet">{source.snippet}</p>}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="sidebar-source-empty">Ask the agent to search the web and the sources it reads will appear here.</p>
+        )}
       </div>
 
       {loading ? (

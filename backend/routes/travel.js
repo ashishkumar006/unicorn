@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { getTravelPlan, getTravelDetails } = require('../services/travelPlanner');
+const { generateTravelPackage, getTravelDetails } = require('../services/travelPlanner');
 
 router.post('/plan', async (req, res) => {
   try {
@@ -25,9 +25,10 @@ router.post('/plan', async (req, res) => {
       provider 
     });
 
-    const plan = await getTravelPlan({ fromPlace, toPlace, budget, luxuryType, days, startDate, endDate, travelers, provider });
+    const packageData = await generateTravelPackage({ fromPlace, toPlace, budget, luxuryType, days, startDate, endDate, travelers, provider });
+    const plan = packageData.plan;
 
-    res.json({ success: true, data: plan });
+    res.json({ success: true, data: plan, meta: packageData.meta || null });
   } catch (error) {
     console.error('❌ Error generating travel plan:', error.message);
     res.status(500).json({

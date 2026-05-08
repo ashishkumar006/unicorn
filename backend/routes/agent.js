@@ -44,6 +44,33 @@ function getAgent(userId, agentModel = 'gemma-cloud') {
 // Chat with agent about current plan (Streams responses)
 // ============================================================
 router.post('/chat', async (req, res) => {
+  const sendStreamEvent = (payload) => {
+    if (res.writableEnded || res.destroyed) {
+      return false;
+    }
+
+    try {
+      const serialized = typeof payload === 'string' ? payload : JSON.stringify(payload);
+      res.write(`data: ${serialized}\n\n`);
+      return true;
+    } catch (streamError) {
+      console.warn('[AGENT API] Failed to write SSE update:', streamError.message);
+      return false;
+    }
+  };
+
+  const endStream = () => {
+    if (res.writableEnded) {
+      return;
+    }
+
+    try {
+      res.end();
+    } catch (endError) {
+      console.warn('[AGENT API] Failed to close SSE response:', endError.message);
+    }
+  };
+
   try {
     const { userId, message, planId, agentModel } = req.body;
 
@@ -80,7 +107,7 @@ router.post('/chat', async (req, res) => {
         type: update.type,
         content: update.content?.substring(0, 80) || update.tool || 'N/A'
       });
-      res.write(`data: ${JSON.stringify(update)}\n\n`);
+      sendStreamEvent(update);
     };
 
     try {
@@ -94,12 +121,22 @@ router.post('/chat', async (req, res) => {
 
       // Process message with streaming progress updates
       const response = await agent.processMessage(message, onProgress);
+
+      if (!response || response.error) {
+        throw new Error(response?.error || 'Agent returned an error');
+      }
+
+      const agentMessage = typeof response.message === 'string' ? response.message : '';
+
+      if (!agentMessage) {
+        throw new Error('Agent returned an empty response');
+      }
       
       // Save agent response to database
-      const agentMsgId = await db.saveMessage(userId, response.message, 'agent');
+      const agentMsgId = await db.saveMessage(userId, agentMessage, 'agent');
       console.log('[AGENT API] 💾 Saved agent response:', { 
         userId, 
-        messageLength: response.message.length, 
+        messageLength: agentMessage.length, 
         dbId: agentMsgId 
       });
 
@@ -115,19 +152,19 @@ router.post('/chat', async (req, res) => {
       const agentContext = ragStore.buildAgentContext(userId, agent.getPlan());
 
       // Send the final summary response
-      res.write(`data: ${JSON.stringify({ 
+      sendStreamEvent({ 
         type: 'final', 
         success: true, 
         response: response, 
         agentStatus: agent.getStatus(),
         ragContext: agentContext 
-      })}\n\n`);
-      res.write(`data: [DONE]\n\n`);
-      res.end();
+      });
+      sendStreamEvent('[DONE]');
+      endStream();
     } catch (error) {
       console.error('[AGENT API] Processing error:', error);
-      res.write(`data: ${JSON.stringify({ type: 'error', error: error.message })}\n\n`);
-      res.end();
+      sendStreamEvent({ type: 'error', error: error.message });
+      endStream();
     } finally {
       activeChatRequests.delete(userId);
     }
@@ -136,7 +173,7 @@ router.post('/chat', async (req, res) => {
     if (!res.headersSent) {
       res.status(500).json({ error: error.message });
     } else {
-      res.end();
+      endStream();
     }
   }
 });

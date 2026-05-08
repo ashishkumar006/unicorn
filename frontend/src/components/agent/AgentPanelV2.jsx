@@ -1,10 +1,34 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { createPortal } from 'react-dom';
+import { createPortal, flushSync } from 'react-dom';
 import { Maximize2, Minimize2 } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import useAgent from '../../hooks/useAgent';
 import AgentService from '../../services/agentService';
 import './agentPanel.css';
+
+const markdownComponents = {
+  a: ({ children, ...props }) => <a {...props} target="_blank" rel="noreferrer">{children}</a>,
+};
+
+const LOADING_MESSAGE = 'Checking live sources and shaping the answer...';
+
+function getToolProgressMessage(toolName) {
+  const normalizedTool = String(toolName || '').toLowerCase();
+
+  if (normalizedTool.includes('searchplaces') || normalizedTool.includes('olamaps') || normalizedTool.includes('google')) {
+    return '🔎 Searching live places and map data...';
+  }
+
+  if (normalizedTool.includes('searchweb') || normalizedTool.includes('readurl')) {
+    return '🌐 Reading live sources...';
+  }
+
+  if (normalizedTool.includes('modify') || normalizedTool.includes('analyze')) {
+    return '🧩 Updating your trip plan...';
+  }
+
+  return `⏳ Working on ${toolName}...`;
+}
 
 /**
  * AGENT PANEL V2 - IMPROVED VERSION
@@ -30,6 +54,7 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
   const inputRef = useRef(null);
   const hasInitializedRef = useRef(false);
   const sendLockRef = useRef(false);
+  const activeMessageIdRef = useRef(null);
 
   const destinationLabel = currentPlan?.destination || currentPlan?.toPlace || 'your trip';
   const formatCurrency = (value) => {
@@ -66,6 +91,11 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
       prompt: 'Compare a few better route, stay, or timing options for this trip.',
     },
     {
+      key: 'research',
+      label: 'Live research',
+      prompt: 'Search the web for current travel information relevant to this trip and summarize the best sources.',
+    },
+    {
       key: 'email',
       label: 'Draft message',
       prompt: 'Draft a polished message I can send to my group.',
@@ -79,7 +109,15 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
     });
   };
 
-  const handleClearChat = () => {
+  const handleClearChat = async () => {
+    const result = await reset();
+
+    if (!result || !result.success) {
+      setError('Failed to reset agent conversation');
+      return;
+    }
+
+    activeMessageIdRef.current = null;
     setMessages([buildWelcomeMessage()]);
     setInput('');
     setError(null);
@@ -92,7 +130,8 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
   const {
     isLoading,
     setPlan,
-    sendMessage
+    sendMessage,
+    reset,
   } = useAgent(userId, agentModel);
 
   // Keep the backend agent synced with the latest plan.
@@ -175,27 +214,79 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
       type: 'user',
       text: input
     };
+    const assistantMessageId = `msg-${Date.now()}-assistant`;
 
     sendLockRef.current = true;
-    setIsSending(true);
-    setMessages(prev => [...prev, userMessage]);
     const messageText = input;
     setInput('');
 
+    flushSync(() => {
+      setIsSending(true);
+      activeMessageIdRef.current = assistantMessageId;
+      setMessages(prev => [...prev, userMessage, {
+        id: assistantMessageId,
+        type: 'agent',
+        text: LOADING_MESSAGE,
+        toolsUsed: [],
+      }]);
+    });
+
+    await new Promise((resolve) => window.requestAnimationFrame(resolve));
+
+    const appendProgress = (text) => {
+      if (!text || !activeMessageIdRef.current) {
+        return;
+      }
+
+      setMessages((prev) => prev.map((message) => {
+        if (message.id !== activeMessageIdRef.current) {
+          return message;
+        }
+
+        const currentText = message.text || '';
+        const nextText = currentText && currentText !== LOADING_MESSAGE
+          ? `${currentText}\n\n${text}`
+          : text;
+
+        return {
+          ...message,
+          text: nextText,
+        };
+      }));
+    };
+
     try {
-      const result = await sendMessage(messageText);
+      const result = await sendMessage(messageText, (event) => {
+        if (!event) {
+          return;
+        }
+
+        if (event.type === 'tool_start' && event.tool) {
+          appendProgress(getToolProgressMessage(event.tool));
+        } else if (event.type === 'tool_result_chunk' && event.content) {
+          appendProgress(event.content);
+        } else if (event.type === 'tool_end' && event.tool) {
+          appendProgress(`✓ ${event.tool} finished.`);
+        } else if (event.type === 'message' && event.content) {
+          appendProgress(event.content);
+        } else if (event.type === 'error' && event.error) {
+          appendProgress(`❌ Error: ${event.error}`);
+        }
+      });
 
       if (result && result.success) {
         const responseText = AgentService.formatResponse(result.response);
         const updatedPlan = result.updatedPlan || result.response?.updatedPlan || null;
-        const agentMessage = {
-          id: `msg-${Date.now()}`,
-          type: 'agent',
-          text: responseText,
-          toolsUsed: AgentService.getToolsUsed(result.response) || []
-        };
-
-        setMessages(prev => [...prev, agentMessage]);
+        const toolsUsed = AgentService.getToolsUsed(result.response) || [];
+        setMessages(prev => prev.map((message) => (
+          message.id === assistantMessageId
+            ? {
+              ...message,
+              text: message.text && message.text !== LOADING_MESSAGE ? message.text : responseText,
+              toolsUsed,
+            }
+            : message
+        )));
         setError(null);
 
         // If plan was modified, notify parent
@@ -203,26 +294,32 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
           onPlanUpdate(updatedPlan);
         }
       } else {
-        const errorMessage = {
-          id: `msg-${Date.now()}`,
-          type: 'error',
-          text: `Error: ${result?.error || 'Failed to process message'}`
-        };
-        setMessages(prev => [...prev, errorMessage]);
-        setError(result?.error || 'Failed to process message');
+        const errorText = result?.error || 'Failed to process message';
+        setMessages(prev => prev.map((message) => (
+          message.id === assistantMessageId
+            ? {
+              ...message,
+              text: `Error: ${errorText}`,
+            }
+            : message
+        )));
+        setError(errorText);
       }
     } catch (err) {
-      const errorMessage = {
-        id: `msg-${Date.now()}`,
-        type: 'error',
-        text: `Connection error: ${err.message}`
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => prev.map((message) => (
+        message.id === assistantMessageId
+          ? {
+            ...message,
+            text: `Connection error: ${err.message}`,
+          }
+          : message
+      )));
       setError(err.message);
       console.error(err);
     } finally {
       setIsSending(false);
       sendLockRef.current = false;
+      activeMessageIdRef.current = null;
       window.requestAnimationFrame(() => {
         inputRef.current?.focus();
       });
@@ -296,7 +393,7 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
               <div className="message-content">
                 {msg.type === 'agent' ? (
                   <div className="message-markdown">
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    <ReactMarkdown components={markdownComponents}>{msg.text}</ReactMarkdown>
                   </div>
                 ) : (
                   msg.text
@@ -327,7 +424,7 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
                 handleSendMessage();
               }
             }}
-            placeholder="Ask about routes, budget, itinerary changes, or a message for your group..."
+            placeholder="Ask about routes, budget, live research, itinerary changes, or a message for your group..."
             disabled={isLoading || isSending}
             className="agent-input"
           />

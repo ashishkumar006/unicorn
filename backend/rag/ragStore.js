@@ -15,22 +15,26 @@ const crypto = require('crypto');
 const db = require('../db/database');
 
 function getPlanSummary(plan = {}) {
-  return plan.summary && typeof plan.summary === 'object' ? plan.summary : {};
+  const safePlan = plan || {};
+  return safePlan.summary && typeof safePlan.summary === 'object' ? safePlan.summary : {};
 }
 
 function getPlanOrigin(plan = {}) {
   const summary = getPlanSummary(plan);
-  return summary.fromPlace || plan.origin || plan.fromPlace || null;
+  const safePlan = plan || {};
+  return summary.fromPlace || safePlan.origin || safePlan.fromPlace || null;
 }
 
 function getPlanDestination(plan = {}) {
   const summary = getPlanSummary(plan);
-  return summary.toPlace || plan.destination || plan.toPlace || null;
+  const safePlan = plan || {};
+  return summary.toPlace || safePlan.destination || safePlan.toPlace || null;
 }
 
 function getPlanBudget(plan = {}) {
   const summary = getPlanSummary(plan);
-  const value = summary.totalBudget || plan.estimatedBudget || plan.budget || 0;
+  const safePlan = plan || {};
+  const value = summary.totalBudget || safePlan.estimatedBudget || safePlan.budget || 0;
 
   if (typeof value === 'number') {
     return value;
@@ -42,14 +46,16 @@ function getPlanBudget(plan = {}) {
 
 function getPlanTravelers(plan = {}) {
   const summary = getPlanSummary(plan);
-  const value = summary.travelers || plan.groupSize || 0;
+  const safePlan = plan || {};
+  const value = summary.travelers || safePlan.groupSize || 0;
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
 
 function getPlanDuration(plan = {}) {
   const summary = getPlanSummary(plan);
-  const value = summary.duration || plan.totalDays || plan.nights || (Array.isArray(plan.itinerary) ? plan.itinerary.length : 0);
+  const safePlan = plan || {};
+  const value = summary.duration || safePlan.totalDays || safePlan.nights || (Array.isArray(safePlan.itinerary) ? safePlan.itinerary.length : 0);
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
 }
@@ -235,9 +241,10 @@ class RAGStore {
    */
   buildAgentContext(userId, currentPlan) {
     const recentPlans = this.getRecentPlans(userId, 3);
-    const currentDestination = getPlanDestination(currentPlan);
-    const currentBudget = getPlanBudget(currentPlan);
-    const currentGroupSize = getPlanTravelers(currentPlan);
+    const safeCurrentPlan = currentPlan || {};
+    const currentDestination = getPlanDestination(safeCurrentPlan);
+    const currentBudget = getPlanBudget(safeCurrentPlan);
+    const currentGroupSize = getPlanTravelers(safeCurrentPlan);
     
     const context = {
       currentPlan,
@@ -258,10 +265,10 @@ class RAGStore {
       },
       currentTrip: {
         destination: currentDestination,
-        origin: getPlanOrigin(currentPlan),
+        origin: getPlanOrigin(safeCurrentPlan),
         budget: currentBudget,
         travelers: currentGroupSize,
-        duration: getPlanDuration(currentPlan)
+        duration: getPlanDuration(safeCurrentPlan)
       },
       commonPreferences: this.extractCommonPreferences(recentPlans)
     };

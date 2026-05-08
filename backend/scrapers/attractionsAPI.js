@@ -1,9 +1,31 @@
 /**
- * Attractions API - Uses Wikipedia API + OpenStreetMap Nominatim
- * Both are COMPLETELY FREE with no authentication needed
+ * Attractions API - Uses Google Places first, then Wikipedia + OpenStreetMap
  */
 
 const axios = require('axios');
+const {
+  getGooglePlacesConfig,
+  isGooglePlacesConfigured,
+  getGoogleAttractions,
+} = require('../services/googlePlaces');
+
+async function getAttractionsFromGooglePlaces(destination, limit = 8) {
+  try {
+    const config = getGooglePlacesConfig();
+
+    if (!isGooglePlacesConfigured(config)) {
+      return [];
+    }
+
+    console.log(`🔍 Fetching attractions from Google Places for ${destination}`);
+    const attractions = await getGoogleAttractions(destination, limit, config);
+    console.log(`✅ Found ${attractions.length} attractions from Google Places`);
+    return attractions;
+  } catch (error) {
+    console.error('❌ Google Places attractions error:', error.message);
+    return [];
+  }
+}
 
 /**
  * Get attractions from Wikipedia (free API)
@@ -149,6 +171,12 @@ async function getPlacesFromOpenStreetMap(destination, placeType = null) {
  */
 async function getAttractions(destination) {
   try {
+    const googleAttractions = await getAttractionsFromGooglePlaces(destination);
+
+    if (googleAttractions.length > 0) {
+      return googleAttractions.sort((a, b) => b.rating - a.rating);
+    }
+
     // Try to get from multiple sources and combine
     const [wikipediaAttractions, osmPlaces] = await Promise.all([
       getAttractionsFromWikipedia(destination),
@@ -205,6 +233,7 @@ function generateGenericAttractions(destination) {
 }
 
 module.exports = {
+  getAttractionsFromGooglePlaces,
   getAttractionsFromWikipedia,
   getPlacesFromOpenStreetMap,
   getAttractions
