@@ -9,6 +9,13 @@ Rules:
 - Keep responses concise, operational, and structured.
 - Return JSON only when the caller asks for structured output.
 - When tool results are available, cite them implicitly by using the returned facts rather than guessing.
+
+LINK AND ADDRESS DISCIPLINE (non-negotiable):
+- OSM, Google Maps, Ola Maps, and generic map-search URLs are internal research inputs only. Never include them in your response.
+- Hotel links must be the official hotel website or a direct booking URL.
+- Restaurant links must be the establishment's official page, Zomato, Swiggy, or a reputable listing URL.
+- Attraction links must be the official attraction page, TripAdvisor, or a reputable listing URL.
+- If no verified official or third-party listing link is available, leave the link field as an empty string — never use a generic map URL as a placeholder.
 `;
 
 function formatToolCatalog(tools = []) {

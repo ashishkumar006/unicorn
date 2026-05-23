@@ -7,6 +7,8 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
   const [conversations, setConversations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [expandedSidebar, setExpandedSidebar] = useState(true);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
 
   useEffect(() => {
     if (userId) {
@@ -56,14 +58,27 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
     return groups.reverse(); // Show newest first
   };
 
-  const deleteConversation = async (convId, e) => {
-    e.stopPropagation();
-    // This would require a delete endpoint on backend - for now just remove from UI
-    setConversations(prev => prev.filter(c => c.id !== convId));
-  };
-
   const toggleSidebar = () => {
     setExpandedSidebar(!expandedSidebar);
+  };
+
+  const confirmDeleteConversation = (convId, e) => {
+    e.stopPropagation();
+    setPendingDeleteId(convId);
+    setShowDeleteConfirm(true);
+  };
+
+  const executeDelete = () => {
+    if (pendingDeleteId) {
+      setConversations(prev => prev.filter(c => c.id !== pendingDeleteId));
+    }
+    setShowDeleteConfirm(false);
+    setPendingDeleteId(null);
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false);
+    setPendingDeleteId(null);
   };
 
   const normalizedSources = Array.isArray(sources)
@@ -162,7 +177,7 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
               <button
                 type="button"
                 className="conversation-delete"
-                onClick={(e) => deleteConversation(conv.id, e)}
+                onClick={(e) => confirmDeleteConversation(conv.id, e)}
                 title="Delete"
                 aria-label="Remove conversation from list"
               >
@@ -176,6 +191,19 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
       <button type="button" className="sidebar-refresh-btn" onClick={loadConversations}>
         <RefreshCw size={14} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'text-bottom' }} /> Refresh
       </button>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="sidebar-delete-confirm-overlay" onClick={cancelDelete}>
+          <div className="sidebar-delete-confirm-dialog" onClick={(e) => e.stopPropagation()}>
+            <p className="delete-confirm-text">Remove this conversation?</p>
+            <div className="delete-confirm-actions">
+              <button type="button" className="delete-confirm-btn cancel" onClick={cancelDelete}>Cancel</button>
+              <button type="button" className="delete-confirm-btn confirm" onClick={executeDelete}>Delete</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { Loader2, AlertCircle } from 'lucide-react';
 import './styles/designSystem.css';
+import './styles/cinematicOverrides.css';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
 import AgentPage from './pages/AgentPage';
@@ -204,7 +205,7 @@ function LoadingScreen({ error, tripMeta = {} }) {
         {/* Perplexity-style dynamic multi-agent search stream */}
         <div className="loading-perplexity-log" style={{
           marginTop: '1rem',
-          background: 'rgba(255, 255, 255, 0.45)',
+          background: 'var(--perplexity-log-bg)',
           border: '1px solid var(--border-glass)',
           borderRadius: 'var(--radius-lg)',
           padding: '1.25rem',

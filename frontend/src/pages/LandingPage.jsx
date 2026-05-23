@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Target, MapPin, Calendar, IndianRupee, Users, Sparkles, ArrowRight, Bot, TrendingUp } from 'lucide-react';
+import { motion } from 'framer-motion';
+import toast from 'react-hot-toast';
 import '../styles/designSystem.css';
 import ThemeToggle from '../components/ThemeToggle';
 
@@ -13,8 +15,52 @@ const DEFAULT_TRIP = {
   userPreferences: '',
 };
 
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+      delayChildren: 0.2,
+    },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
+};
+
+const formVariants = {
+  hidden: { opacity: 0, scale: 0.95 },
+  visible: {
+    opacity: 1,
+    scale: 1,
+    transition: { duration: 0.6, ease: 'easeOut' },
+  },
+};
+
+const featureCardVariants = {
+  hidden: { opacity: 0, y: 30 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.5, ease: 'easeOut' },
+  },
+  hover: {
+    y: -5,
+    transition: { duration: 0.2 },
+  },
+};
+
 export default function LandingPage({ onPlanTrip }) {
   const [formData, setFormData] = useState(DEFAULT_TRIP);
+  const formRef = useRef(null);
+  const featuresRef = useRef(null);
 
   const normalizedFromPlace = formData.fromPlace.trim();
   const normalizedToPlace = formData.toPlace.trim();
@@ -47,8 +93,28 @@ export default function LandingPage({ onPlanTrip }) {
     e.preventDefault();
 
     if (formError) {
+      toast.error(formError, {
+        position: 'top-center',
+        duration: 4000,
+        style: {
+          background: 'var(--bg-card)',
+          color: 'var(--error)',
+          border: '1px solid var(--error)',
+        },
+      });
       return;
     }
+
+    toast.success('Planning your trip...', {
+      position: 'top-center',
+      duration: 2000,
+      icon: '✈️',
+      style: {
+        background: 'var(--bg-card)',
+        color: 'var(--primary-coral)',
+        border: '1px solid var(--primary-coral)',
+      },
+    });
 
     onPlanTrip({
       ...formData,
@@ -59,40 +125,91 @@ export default function LandingPage({ onPlanTrip }) {
   };
 
   return (
-    <div className="page-wrapper landing">
+    <motion.div 
+      className="page-wrapper landing page-shell"
+      initial="hidden"
+      animate="visible"
+      variants={containerVariants}
+    >
       {/* Decorative Luminous Orbs */}
-      <div className="gradient-orbs">
+      <motion.div 
+        className="gradient-orbs"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
         <div className="orb orb-1"></div>
         <div className="orb orb-2"></div>
         <div className="orb orb-3"></div>
-      </div>
+      </motion.div>
 
-      <div className="landing-shell">
-        <div className="brand-header landing-brand-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '820px', margin: '0 auto 2.5rem auto' }}>
+      <motion.div 
+        className="landing-shell"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.8 }}
+      >
+        <motion.div 
+          className="brand-header landing-brand-header" 
+          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '1240px', margin: '0 auto 2rem auto' }}
+          variants={itemVariants}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Sparkles className="brand-icon" size={22} />
-            <span className="brand-name" style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 700 }}>
+            <motion.div
+              initial={{ rotate: -10, scale: 0.8 }}
+              animate={{ rotate: 0, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <Sparkles className="brand-icon" size={22} />
+            </motion.div>
+            <motion.span 
+              className="brand-name" 
+              style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 700 }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
               Wanderlust
-            </span>
+            </motion.span>
           </div>
-          <ThemeToggle />
-        </div>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.7 }}
+          >
+            <ThemeToggle />
+          </motion.div>
+        </motion.div>
 
-        <div className="landing-hero">
-          <p className="landing-subtitle">Wanderlust AI Travel Planner</p>
-          <h1 className="landing-title">
-            Plan your journey, <span>feel the destination</span>
+        {/* Landing Hero Text */}
+        <motion.div className="landing-hero-text" variants={itemVariants}>
+          <span className="eyebrow hero-eyebrow">AI Trip Planning, Perfected</span>
+          <h1 className="landing-heading">
+            Your Journey. <span>Intelligently Planned.</span>
           </h1>
-          <p className="landing-description">
-            Experience premium, bespoke itineraries with automated real-time local budget estimations, live maps preview, and intelligent guidance.
+          <p className="landing-subheading">
+            Our AI crafts personalized itineraries that balance where you want to go with how you want to travel — 
+            from hidden gems to local eats, optimized routes to real-time budgets, all in under a minute.
           </p>
-        </div>
+        </motion.div>
 
         <div className="landing-content">
           {/* Form Card */}
-          <div className="landing-form-card">
-            <form onSubmit={handleSubmit}>
-              <div className="landing-form-grid">
+<motion.div 
+          className="landing-form-card"
+          variants={formVariants}
+          initial="hidden"
+          animate="visible"
+          whileHover={{ boxShadow: 'var(--shadow-lg)' }}
+          ref={formRef}
+        >
+          <form onSubmit={handleSubmit}>
+            <motion.div 
+              className="landing-form-grid"
+              initial="hidden"
+              animate="visible"
+              variants={containerVariants}
+            >
                 
                 <div className="form-group">
                   <label className="form-label">
@@ -230,57 +347,99 @@ export default function LandingPage({ onPlanTrip }) {
                   </div>
                 </div>
 
-              </div>
+              </motion.div>
 
               {/* SUBMIT BUTTON */}
               <div className="submit-container">
                 <button type="submit" className="btn btn-primary" style={{ width: '100%', maxWidth: '320px' }} disabled={Boolean(formError)}>
                   <Sparkles size={18} />
-                  Start Planning
+                  Start planning
                   <ArrowRight size={16} />
                 </button>
               </div>
             </form>
-          </div>
+          </motion.div>
 
           {/* Bespoke Features Showcase */}
-          <div className="landing-features-grid">
-            <div className="landing-feature-card">
-              <div className="feature-icon-box">
+          <motion.div 
+            className="landing-features-grid"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+            ref={featuresRef}
+          >
+            <motion.div 
+              key="bespoke"
+              className="landing-feature-card"
+              variants={featureCardVariants}
+              whileHover="hover"
+            >
+              <motion.div 
+                className="feature-icon-box"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.2 }}
+              >
                 <Sparkles size={20} />
-              </div>
-              <h3>Bespoke Itineraries</h3>
-              <p>Tailored routing designed around your preferences, group size, and timeline constraints.</p>
-            </div>
-            <div className="landing-feature-card">
-              <div className="feature-icon-box">
+              </motion.div>
+              <h3>Bespoke itineraries</h3>
+              <p>Tailored routing designed around your preferences, pace, and trip rhythm.</p>
+            </motion.div>
+            <motion.div 
+              key="optimizer"
+              className="landing-feature-card"
+              variants={featureCardVariants}
+              whileHover="hover"
+            >
+              <motion.div 
+                className="feature-icon-box"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.2 }}
+              >
                 <TrendingUp size={20} />
-              </div>
-              <h3>Live Cost Optimizer</h3>
-              <p>Instant per-person splits, real-time cost estimations, and local transport options.</p>
-            </div>
-            <div className="landing-feature-card">
-              <div className="feature-icon-box">
+              </motion.div>
+              <h3>Budget intelligence</h3>
+              <p>Clear per-person splits, realistic cost cues, and smarter transport pacing.</p>
+            </motion.div>
+            <motion.div 
+              key="maps"
+              className="landing-feature-card"
+              variants={featureCardVariants}
+              whileHover="hover"
+            >
+              <motion.div 
+                className="feature-icon-box"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.2 }}
+              >
                 <MapPin size={20} />
-              </div>
-              <h3>Interactive Maps</h3>
-              <p>Explore stay clusters, restaurants, and attractions mapped directly onto OpenStreetMap.</p>
-            </div>
-            <div className="landing-feature-card">
-              <div className="feature-icon-box">
+              </motion.div>
+              <h3>Spatial clarity</h3>
+              <p>Stay clusters, restaurants, and attractions layered into a navigable plan.</p>
+            </motion.div>
+            <motion.div 
+              key="ai"
+              className="landing-feature-card"
+              variants={featureCardVariants}
+              whileHover="hover"
+            >
+              <motion.div 
+                className="feature-icon-box"
+                whileHover={{ scale: 1.1, rotate: 5 }}
+                transition={{ duration: 0.2 }}
+              >
                 <Bot size={20} />
-              </div>
-              <h3>AI Co-Pilot Assistant</h3>
-              <p>Talk to a dedicated 24/7 travel assistant who instantly edits your schedule and researches places.</p>
-            </div>
-          </div>
+              </motion.div>
+              <h3>AI co-pilot</h3>
+              <p>Refine the plan with live research, itinerary edits, and summary drafts.</p>
+            </motion.div>
+          </motion.div>
 
           {/* Footer */}
           <footer className="landing-footer">
             <p>© {new Date().getFullYear()} Wanderlust AI Travel Co. Crafted for bespoke journeys.</p>
           </footer>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 }

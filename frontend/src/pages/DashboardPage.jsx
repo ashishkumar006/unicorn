@@ -22,6 +22,8 @@ import {
   Bot
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
+import toast from 'react-hot-toast';
 import InternalToolsRail from '../components/internal/InternalToolsRail';
 import '../styles/designSystem.css';
 
@@ -31,6 +33,29 @@ const BUDGET_SPLITS = [
   { name: 'Food', percentage: 20, color: '#F0B342' },
   { name: 'Activities', percentage: 15, color: '#2A3C4B' },
 ];
+
+const tabContentVariants = {
+  hidden: { opacity: 0, y: 10 },
+  visible: { 
+    opacity: 1, 
+    y: 0,
+    transition: { duration: 0.3, ease: 'easeOut' }
+  },
+  exit: { 
+    opacity: 0, 
+    y: -10,
+    transition: { duration: 0.2 }
+  }
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.05, duration: 0.4, ease: 'easeOut' }
+  })
+};
 
 const buildBudgetData = (budgetAmount) => BUDGET_SPLITS.map((item) => ({
   ...item,
@@ -124,6 +149,7 @@ export default function DashboardPage({
   const [showResearchDrawer, setShowResearchDrawer] = useState(false);
   const [activeResearchTab, setActiveResearchTab] = useState('accommodation');
   const [showCoPilot, setShowCoPilot] = useState(false);
+  const [showPlanAnotherConfirm, setShowPlanAnotherConfirm] = useState(false);
   const [selectedTravelIdx, setSelectedTravelIdx] = useState(0);
   const [selectedHotelIdx, setSelectedHotelIdx] = useState(0);
   const [selectedFoodIdx, setSelectedFoodIdx] = useState(0);
@@ -275,7 +301,8 @@ export default function DashboardPage({
     }
 
     flashNotice('Travel assistant updated the plan');
-  };
+               toast.success('Plan updated successfully', { position: 'top-center' });
+   };
 
   // Load tab data when the active tab changes
   useEffect(() => {
@@ -339,16 +366,16 @@ export default function DashboardPage({
   };
 
   return (
-    <div className="page-wrapper dashboard">
+    <div className="page-wrapper dashboard page-shell">
       {/* Top Navbar */}
       <div className="dash-nav">
         <button className="back-link" onClick={onBackToHome}>
           <ArrowLeft size={16} />
-          Back to Home
+          Back to planner
         </button>
         <div className="brand-header nav-brand">
           <Sparkles className="brand-icon" size={20} />
-          <span className="brand-name">TripOptimizer</span>
+          <span className="brand-name">Wanderlust</span>
         </div>
       </div>
 
@@ -357,7 +384,7 @@ export default function DashboardPage({
         <div className="watercolor-bg"></div>
         <div className="dash-hero">
           <p className="dash-hero-label">
-            <MapPin size={12} /> YOUR OPTIMIZED TRIP
+            <MapPin size={12} /> YOUR ITINERARY
           </p>
           <h1 className="dash-hero-title">
             {fromPlace} <span className="arrow">→</span> {toPlace}
@@ -370,18 +397,18 @@ export default function DashboardPage({
           </div>
 
           <div className="hero-actions">
-            <button type="button" className="button button-secondary hero-action" onClick={copyTripSummary}>
+            <button type="button" className="btn btn-secondary hero-action" onClick={copyTripSummary}>
               <Copy size={14} /> Copy summary
             </button>
-            <button type="button" className="button button-secondary hero-action" onClick={() => openTab('Hotels')}>
+            <button type="button" className="btn btn-secondary hero-action" onClick={() => openTab('Hotels')}>
               <Hotel size={14} /> View hotels
             </button>
-            <button type="button" className="button button-secondary hero-action" onClick={() => openTab('Food')}>
+            <button type="button" className="btn btn-secondary hero-action" onClick={() => openTab('Food')}>
               <Utensils size={14} /> View food
             </button>
             <button
               type="button"
-              className="button button-secondary hero-action"
+              className="btn btn-secondary hero-action"
               onClick={() => (activeTab !== 'Itinerary' ? fetchTabData(activeTab) : flashNotice('The itinerary is already loaded'))}
             >
               <RefreshCw size={14} /> Refresh tab
@@ -563,52 +590,53 @@ export default function DashboardPage({
             </div>
           )}
 
-          <div className="content-section openstreetmap-section">
-            <div className="openstreetmap-header">
-              <h2 className="section-title">
-                <MapPin size={16} /> OpenStreetMap Preview
-              </h2>
-              <a
-                className="openstreetmap-link"
-                href={openStreetMapMapUrl}
-                target="_blank"
-                rel="noreferrer"
-              >
-                Open in OpenStreetMap <ExternalLink size={14} />
-              </a>
-            </div>
-
-            <div className="openstreetmap-card">
-              {openStreetMapEmbedUrl ? (
-                <iframe
-                  className="openstreetmap-frame"
-                  title={`OpenStreetMap preview for ${openStreetMapLabel}`}
-                  src={openStreetMapEmbedUrl}
-                  loading="lazy"
-                  referrerPolicy="no-referrer-when-downgrade"
-                />
-              ) : (
-                <div className="openstreetmap-fallback">
-                  <p>Map preview is loading for {openStreetMapLabel}.</p>
-                  <a href={openStreetMapMapUrl} target="_blank" rel="noreferrer">
-                    Open the map page
+          {openStreetMapEmbedUrl || openStreetMapMapUrl ? (
+            <div className="content-section openstreetmap-section">
+              <div className="openstreetmap-header">
+                <h2 className="section-title">
+                  <MapPin size={16} /> OpenStreetMap Preview
+                </h2>
+                {openStreetMapMapUrl ? (
+                  <a
+                    className="openstreetmap-link"
+                    href={openStreetMapMapUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Open in OpenStreetMap <ExternalLink size={14} />
                   </a>
-                </div>
-              )}
+                ) : null}
+              </div>
 
-              <div className="openstreetmap-meta">
-                <span className="openstreetmap-pill">{openStreetMapLabel}</span>
-                {openStreetMapMeta?.lat != null && openStreetMapMeta?.lon != null && (
-                  <span className="openstreetmap-coordinates">
-                    {Number(openStreetMapMeta.lat).toFixed(4)}, {Number(openStreetMapMeta.lon).toFixed(4)}
-                  </span>
-                )}
-                {openStreetMapMeta?.summary && (
-                  <span className="openstreetmap-summary">{openStreetMapMeta.summary}</span>
-                )}
+              <div className="openstreetmap-card">
+                {openStreetMapEmbedUrl ? (
+                  <iframe
+                    className="openstreetmap-frame"
+                    title={`OpenStreetMap preview for ${openStreetMapLabel}`}
+                    src={openStreetMapEmbedUrl}
+                    loading="lazy"
+                    referrerPolicy="no-referrer-when-downgrade"
+                  />
+                ) : null}
+
+                {(openStreetMapMeta?.lat != null && openStreetMapMeta?.lon != null) || openStreetMapMeta?.summary ? (
+                  <div className="openstreetmap-meta">
+                    {openStreetMapMeta?.displayName && (
+                      <span className="openstreetmap-pill">{openStreetMapMeta.displayName}</span>
+                    )}
+                    {openStreetMapMeta?.lat != null && openStreetMapMeta?.lon != null && (
+                      <span className="openstreetmap-coordinates">
+                        {Number(openStreetMapMeta.lat).toFixed(4)}, {Number(openStreetMapMeta.lon).toFixed(4)}
+                      </span>
+                    )}
+                    {openStreetMapMeta?.summary && (
+                      <span className="openstreetmap-summary">{openStreetMapMeta.summary}</span>
+                    )}
+                  </div>
+                ) : null}
               </div>
             </div>
-          </div>
+          ) : null}
 
           {/* Trip Summary Block */}
           <div className="content-section summary-block">
@@ -660,61 +688,99 @@ export default function DashboardPage({
         </div>
           </div>
 
-          {/* Tab Content */}
-          <div className="tab-content-container">
-        
-        {/* Itinerary Tab */}
-        {activeTab === 'Itinerary' && (
-          <div className="tab-content fade-in">
-            <div className="itinerary-grid">
+{/* Tab Content */}
+            <div className="tab-content-container">
+              <AnimatePresence mode="wait">
+                {/* Itinerary Tab */}
+               {activeTab === 'Itinerary' && (
+                 <motion.div 
+                   className="tab-content fade-in"
+                   variants={tabContentVariants}
+                   initial="hidden"
+                   animate="visible"
+                   exit="exit"
+                   key="itinerary"
+                 >
+                   <motion.div 
+                     className="itinerary-grid"
+                     initial="hidden"
+                     animate="visible"
+                     variants={{
+                       visible: {
+                         transition: { staggerChildren: 0.1 }
+                       }
+                     }}
+                   >
               {(itinerary.length > 0 ? itinerary : [{ day: 1, date: startDate, title: `${fromPlace} to ${toPlace} - Arrival`, activities: [] }]).map((day) => (
-                <article key={day.day} className="day-card" style={{ animationDelay: `${day.day * 80}ms` }}>
-                  <div className="day-header">
-                    <div className="day-circle">{day.day}</div>
-                    <div className="day-title-group">
-                      <h3>Day {day.day}</h3>
-                      {day.date && <span className="day-date">{day.date}</span>}
-                    </div>
+<motion.article 
+                   key={day.day}
+                   className="day-card"
+                   variants={cardVariants}
+                   custom={day.day}
+                   whileHover={{ y: -2 }}
+                 >
+                   <div className="day-header">
+                     <div className="day-circle">{day.day}</div>
+                     <div className="day-title-group">
+                       <h3>Day {day.day}</h3>
+                       {day.date && <span className="day-date">{day.date}</span>}
+                     </div>
+                   </div>
+
+                   <h4 className="day-theme">{day.title}</h4>
+
+<div>
+                       {(day.activities || []).map((activity, index) => (
+                         <motion.div 
+                           key={`${day.day}-${index}`} 
+                           className="timeline-item"
+                           initial={{ opacity: 0, x: -10 }}
+                           animate={{ opacity: 1, x: 0 }}
+                           transition={{ delay: index * 0.05 }}
+                         >
+                           <div className="timeline-icon-wrapper">
+                             {getTimelineIcon(activity.activity)}
+                           </div>
+                           <div className="timeline-content">
+                             <span className="timeline-time">{activity.time}</span>
+                             <span className="timeline-desc">{activity.activity}</span>
+                           </div>
+                         </motion.div>
+                       ))}
+                     </div>
+                   </motion.article>
+                                ))}
+                          </motion.div>
+                        </motion.div>
+                      )}
+
+                        {/* Travel Tab */}
+                 {activeTab === 'Travel' && (
+                  <motion.div 
+                className="tab-content fade-in"
+                variants={tabContentVariants}
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                key="travel"
+              >
+                {loadingTab === 'Travel' ? (
+                  <div className="loading-spinner">
+                    <Loader2 size={32} className="spinner" />
+                    <p>Finding best transport options...</p>
                   </div>
-
-                  <h4 className="day-theme">{day.title}</h4>
-
-                  <div className="day-list">
-                    {(day.activities || []).map((activity, index) => (
-                      <div key={`${day.day}-${index}`} className="timeline-item" style={{ animationDelay: `${index * 50}ms` }}>
-                        <div className="timeline-icon-wrapper">
-                          {getTimelineIcon(activity.activity)}
-                        </div>
-                        <div className="timeline-content">
-                          <span className="timeline-time">{activity.time}</span>
-                          <span className="timeline-desc">{activity.activity}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Travel Tab */}
-        {activeTab === 'Travel' && (
-          <div className="tab-content fade-in">
-            {loadingTab === 'Travel' ? (
-              <div className="loading-spinner">
-                <Loader2 size={32} className="spinner" />
-                <p>Finding best transport options...</p>
-              </div>
-            ) : tabData['Travel']?.options ? (
-              <div className="options-grid">
-                {tabData['Travel'].options.map((option, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`option-card travel-card ${selectedTravelIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
-                    onClick={() => setSelectedTravelIdx(idx)}
-                    style={{ animationDelay: `${idx * 100}ms`, cursor: 'pointer' }}
-                  >
+                ) : tabData['Travel']?.options ? (
+                  <div className="options-grid">
+                    {tabData['Travel'].options.map((option, idx) => (
+                      <motion.div 
+                        key={idx} 
+                        className={`option-card travel-card ${selectedTravelIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
+                        onClick={() => setSelectedTravelIdx(idx)}
+                        style={{ cursor: 'pointer' }}
+                        variants={cardVariants}
+                        custom={idx}
+                        whileHover={{ y: -3 }}
+                      >
                     <div className="option-card-image-box">
                       <img 
                         src={option.image || option.photoUrl || getOptionImage(option.name, 'travel')} 
@@ -746,41 +812,47 @@ export default function DashboardPage({
                         <Star size={14} className="star-filled" /> {option.rating}
                       </span>
                     </div>
-                    <div className="option-details">
-                      <p><Clock size={13} /> {option.duration}</p>
-                      <p><MapPinIcon size={13} /> {option.departure} - {option.arrival}</p>
-                    </div>
-                    <div className="highlights">
-                      {option.highlights?.map((h, i) => (
-                        <span key={i} className="highlight-tag">{h}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="no-data">No transport options available</div>
-            )}
-          </div>
-        )}
+                      <div className="highlights">
+                        {option.highlights?.map((h, i) => (
+                          <span key={i} className="highlight-tag">{h}</span>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              ) : (
+                <div className="no-data">No transport options available</div>
+              )}
+            </motion.div>
+          )}
 
-        {/* Hotels Tab */}
-        {activeTab === 'Hotels' && (
-          <div className="tab-content fade-in">
-            {loadingTab === 'Hotels' ? (
-              <div className="loading-spinner">
-                <Loader2 size={32} className="spinner" />
-                <p>Finding best hotels...</p>
-              </div>
-            ) : tabData['Hotels']?.options ? (
-              <div className="options-grid">
-                {tabData['Hotels'].options.map((hotel, idx) => (
-                  <div 
-                    key={idx} 
-                    className={`option-card hotel-card ${selectedHotelIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
-                    onClick={() => setSelectedHotelIdx(idx)}
-                    style={{ animationDelay: `${idx * 100}ms`, cursor: 'pointer' }}
+          {/* Hotels Tab */}
+          {activeTab === 'Hotels' && (
+                  <motion.div 
+                    className="tab-content fade-in"
+                    variants={tabContentVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="exit"
+                    key="hotels"
                   >
+{loadingTab === 'Hotels' ? (
+                 <div className="loading-spinner">
+                   <Loader2 size={32} className="spinner" />
+                   <p>Finding best hotels...</p>
+                 </div>
+               ) : tabData['Hotels']?.options ? (
+                 <div className="options-grid">
+                   {tabData['Hotels'].options.map((hotel, idx) => (
+                     <motion.div 
+                       key={idx} 
+                       className={`option-card hotel-card ${selectedHotelIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
+                       onClick={() => setSelectedHotelIdx(idx)}
+                       style={{ cursor: 'pointer' }}
+                       variants={cardVariants}
+                       custom={idx}
+                       whileHover={{ y: -3 }}
+                     >
                     <div className="option-card-image-box">
                       <img 
                         src={hotel.image || hotel.photoUrl || getOptionImage(hotel.name, 'hotel')} 
@@ -816,21 +888,28 @@ export default function DashboardPage({
                     </div>
                     <p className="description">{hotel.highlights?.[0]}</p>
                     <div className="price-section">
-                      <span className="price-label">₹{hotel.pricePerNight}/night</span>
-                      <span className="highlight-tag">Best Value</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="no-data">No hotels available</div>
-            )}
-          </div>
-        )}
+                       <span className="price-label">₹{hotel.pricePerNight}/night</span>
+                       <span className="highlight-tag">Best Value</span>
+                     </div>
+                   </motion.div>
+                 ))}
+               </div>
+             ) : (
+               <div className="no-data">No hotels available</div>
+             )}
+           </motion.div>
+         )}
 
-        {/* Places Tab */}
-        {activeTab === 'Places' && (
-          <div className="tab-content fade-in">
+         {/* Places Tab */}
+         {activeTab === 'Places' && (
+                 <motion.div 
+                   className="tab-content fade-in"
+                   variants={tabContentVariants}
+                   initial="hidden"
+                   animate="visible"
+                   exit="exit"
+                   key="places"
+                 >
             {loadingTab === 'Places' ? (
               <div className="loading-spinner">
                 <Loader2 size={32} className="spinner" />
@@ -872,12 +951,19 @@ export default function DashboardPage({
             ) : (
               <div className="no-data">No places available</div>
             )}
-          </div>
+          </motion.div>
         )}
 
-        {/* Food Tab */}
-        {activeTab === 'Food' && (
-          <div className="tab-content fade-in">
+{/* Food Tab */}
+               {activeTab === 'Food' && (
+                 <motion.div 
+                   className="tab-content fade-in"
+                   variants={tabContentVariants}
+                   initial="hidden"
+                   animate="visible"
+                   exit="exit"
+                   key="food"
+                 >
             {loadingTab === 'Food' ? (
               <div className="loading-spinner">
                 <Loader2 size={32} className="spinner" />
@@ -960,14 +1046,14 @@ export default function DashboardPage({
                   </div>
                 )}
               </div>
-            ) : (
-              <div className="no-data">No restaurants available</div>
-            )}
-          </div>
-        )}
-
-          </div>
-        </div>
+) : (
+                 <div className="no-data">No restaurants available</div>
+               )}
+               </motion.div>
+             )}
+             </AnimatePresence>
+           </div>
+         </div>
 
         {/* Floating Co-Pilot FAB & Drawer Widget */}
         <div className="floating-co-pilot-widget">
@@ -1009,11 +1095,25 @@ export default function DashboardPage({
         </div>
       </div>
 
+      {/* Plan Another Confirmation Dialog */}
+      {showPlanAnotherConfirm && (
+        <div className="plan-another-confirm-overlay" onClick={() => setShowPlanAnotherConfirm(false)}>
+          <div className="plan-another-confirm-dialog" onClick={(e) => e.stopPropagation()}>
+            <p className="delete-confirm-text">Start a new trip plan?</p>
+            <p className="delete-confirm-subtext">This will reset your current trip data.</p>
+            <div className="delete-confirm-actions">
+              <button type="button" className="delete-confirm-btn cancel" onClick={() => setShowPlanAnotherConfirm(false)}>Cancel</button>
+              <button type="button" className="delete-confirm-btn confirm" onClick={() => { setShowPlanAnotherConfirm(false); onPlanAnother(); }}>Plan New</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Plan Another Action */}
       <div className="plan-another-section">
         <h3 className="section-title-large">Ready to Plan Another Trip?</h3>
         <p className="footer-subtext">Discover more destinations with optimized budget planning.</p>
-        <button className="button-plan-another" onClick={onPlanAnother}>
+        <button className="button-plan-another" onClick={() => setShowPlanAnotherConfirm(true)}>
           <Sparkles size={16} /> Plan Another Trip
         </button>
       </div>

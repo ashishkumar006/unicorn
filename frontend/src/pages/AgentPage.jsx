@@ -159,6 +159,10 @@ const AgentPage = () => {
     }
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   const handleSelectConversation = (convId) => {
     // This would load the specific conversation
     // For now, just set the active ID for UI

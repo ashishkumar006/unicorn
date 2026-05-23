@@ -431,6 +431,35 @@
   color: var(--text-secondary);
 }
 
+/* Plan Another Confirmation Dialog */
+.plan-another-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.plan-another-confirm-dialog {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  min-width: 280px;
+  box-shadow: var(--shadow-2xl);
+}
+
+.delete-confirm-subtext {
+  margin: 0 0 var(--spacing-md) 0;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: center;
+}
+
 @media (max-width: 768px) {
   .trip-header h1 {
     flex-direction: column;

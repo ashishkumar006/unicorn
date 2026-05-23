@@ -8,14 +8,10 @@ body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #FAFAF9;
-  background-image:
-    radial-gradient(circle at 10% 20%, rgba(222, 107, 72, 0.08), transparent 35%),
-    radial-gradient(circle at 90% 80%, rgba(69, 183, 160, 0.06), transparent 35%),
-    radial-gradient(circle at 50% 50%, rgba(245, 161, 66, 0.05), transparent 45%);
+  background: var(--bg-luminous);
   background-attachment: fixed;
   min-height: 100vh;
-  color: #0f172a;
+  color: var(--text-primary);
   scroll-behavior: smooth;
 }
 

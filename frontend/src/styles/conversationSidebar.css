@@ -388,6 +388,69 @@
   transform: translateY(-1px);
 }
 
+/* Delete Confirmation Dialog */
+.sidebar-delete-confirm-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.sidebar-delete-confirm-dialog {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  min-width: 260px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+}
+
+.delete-confirm-text {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #2c3e50;
+  text-align: center;
+}
+
+.delete-confirm-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.delete-confirm-btn {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.delete-confirm-btn.cancel {
+  background: #f7fafc;
+  color: #4a5568;
+}
+
+.delete-confirm-btn.cancel:hover {
+  background: #edf2f7;
+}
+
+.delete-confirm-btn.confirm {
+  background: #e53e3e;
+  color: white;
+}
+
+.delete-confirm-btn.confirm:hover {
+  background: #c53030;
+}
+
 @media (max-width: 768px) {
   .conversation-sidebar {
     width: min(100vw, 360px);
@@ -397,4 +460,59 @@
   .conversation-sidebar.open {
     left: 0;
   }
+}
+
+/* ========================================================================== */
+/* Cinematic overrides */
+/* ========================================================================== */
+
+.conversation-sidebar {
+  background: rgba(7, 9, 14, 0.78);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 10px 0 36px rgba(0, 0, 0, 0.35);
+}
+
+.sidebar-header {
+  background: linear-gradient(135deg, rgba(255, 122, 89, 0.22), rgba(49, 213, 200, 0.16));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar-header h3,
+.sidebar-source-header h4,
+.conversation-message,
+.delete-confirm-text {
+  color: var(--text-primary);
+}
+
+.sidebar-source-card,
+.sidebar-delete-confirm-dialog,
+.sidebar-empty,
+.sidebar-loading,
+.conversation-item {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.conversation-item.active {
+  background: linear-gradient(135deg, rgba(255, 122, 89, 0.16), rgba(49, 213, 200, 0.1));
+  border-color: rgba(255, 122, 89, 0.24);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.24);
+}
+
+.conversation-time,
+.conversation-count,
+.sidebar-source-snippet,
+.sidebar-source-empty {
+  color: var(--text-secondary);
+}
+
+.sidebar-refresh-btn {
+  background: linear-gradient(135deg, var(--primary-coral), #f58a5f);
+  color: var(--text-white);
+  border: none;
+}
+
+.sidebar-toggle-btn {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }

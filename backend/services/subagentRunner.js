@@ -58,12 +58,13 @@ async function runAccommodationSubagent(trip, sessionId) {
 
     for (let i = 0; i < Math.min(3, hotelCandidates.length); i++) {
       const candidate = hotelCandidates[i];
+      // Use a neutral status URL — map-service links are internal inputs only and must not surface in the loading screen.
       global.updatePlanningStatus(
         sessionId,
         agentName,
         `Filling out room booking & availability form for "${candidate.name}"...`,
         'searching',
-        candidate.mapsUrl || `https://www.google.com/maps/place/?q=place_id:${candidate.placeId}`
+        details?.website || ''
       );
       await sleep(1000);
 
@@ -74,7 +75,11 @@ async function runAccommodationSubagent(trip, sessionId) {
         location: details?.address || candidate.location || destination,
         pricePerNight: Math.round((budget * 0.35) / days) + (i * 800), // dynamic consistent pricing
         stars: details?.rating ? Math.round(details.rating) : 4,
-        website: details?.website || candidate.mapsUrl || `https://maps.google.com/?q=${encodeURIComponent(candidate.name)}`,
+        // Use only an official website if Google Places returns one.
+        // Never fall back to a Google Maps / OSM / Ola Maps URL — those are internal inputs only.
+        website: details?.website && !/maps\.(google|gstatic|olamaps|kratrim|ola)\.|openstreetmap|nominatim/i.test(details.website)
+          ? details.website
+          : '',
         image: details?.image || candidate.image || '',
         coordinates: candidate.geometry || null
       });
@@ -293,7 +298,7 @@ async function runFoodSubagent(trip, sessionId) {
         agentName,
         `Scanning average plate cost & ratings for "${candidate.name}"...`,
         'searching',
-        candidate.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(candidate.name)}`
+        candidate.website || candidate.link || ''
       );
       await sleep(800);
 
@@ -303,7 +308,11 @@ async function runFoodSubagent(trip, sessionId) {
         area: candidate.location || destination,
         avgCost: Math.max(300, Math.round(budget * 0.05)) + (i * 200),
         rating: candidate.rating || 4.4,
-        link: candidate.mapsUrl || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(candidate.name)}`
+        // Use only an official website/listing URL if available.
+        // Never expose a Google Maps, OSM, or Ola Maps link to the user.
+        link: (candidate.website || candidate.link || '') && !/maps\.(google|gstatic|olamaps|kratrim|ola)\.|openstreetmap|nominatim/i.test(candidate.website || candidate.link || '')
+          ? (candidate.website || candidate.link || '')
+          : ''
       });
     }
 

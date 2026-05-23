@@ -318,11 +318,41 @@
   30% { opacity: 1; transform: translateY(-8px); }
 }
 
-/* Agent Page with Sidebar */
+/* Agent Page with Sidebar — correct flex chain (outer wrapper) */
 .agent-page-with-sidebar {
   display: flex;
   height: 100vh;
   width: 100%;
+  overflow: hidden;
+}
+
+.agent-page-with-sidebar .agent-page {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-height: 0;            /* allow flex child to shrink below content size */
+}
+
+/* Refined agent page refresh */
+.agent-page-with-sidebar {
+  background:
+    radial-gradient(circle at top left, rgba(245, 158, 11, 0.12), transparent 30%),
+    radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, #eef4fa 100%);
+}
+
+.agent-page-with-sidebar .conversation-sidebar {
+  flex-shrink: 0;
+}
+
+.agent-page {
+  position: relative;
+  flex: 1;
+  background:
+    linear-gradient(180deg, rgba(250, 252, 255, 0.96), rgba(241, 245, 249, 0.88));
+  backdrop-filter: blur(24px);
+  color: #0f172a;
 }
 
 .agent-page-with-sidebar .agent-page {
@@ -398,10 +428,10 @@
 }
 
 .agent-page-container {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 24px;
-  gap: 20px;
+  max-width: none;
+  width: 100%;
+  padding: 2rem 2.5rem;
+  box-sizing: border-box;
 }
 
 .agent-page-messages {
@@ -747,8 +777,10 @@
 }
 
 .agent-page-container {
-  max-width: 1160px;
-  gap: 22px;
+  max-width: none;
+  width: 100%;
+  padding: 0 1.5rem;
+  box-sizing: border-box;
 }
 
 .agent-page-messages {
@@ -1246,4 +1278,109 @@
   vertical-align: text-bottom;
   margin-right: 4px;
   color: var(--accent-amber);
+}
+
+/* ========================================================================== */
+/* Cinematic overrides */
+/* ========================================================================== */
+
+.agent-page-with-sidebar {
+  background:
+    radial-gradient(circle at top left, rgba(255, 122, 89, 0.12), transparent 30%),
+    radial-gradient(circle at 86% 10%, rgba(49, 213, 200, 0.12), transparent 24%),
+    linear-gradient(180deg, #06070a 0%, #0a0d14 100%);
+}
+
+.agent-page {
+  background: linear-gradient(180deg, rgba(10, 14, 20, 0.9), rgba(15, 20, 28, 0.86));
+  color: var(--text-primary);
+}
+
+.agent-page-header {
+  background: rgba(7, 9, 14, 0.78);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.32);
+}
+
+.agent-page-title h1 {
+  font-family: var(--font-serif);
+  color: var(--text-white);
+}
+
+.agent-page-subtitle {
+  color: var(--text-secondary);
+}
+
+.agent-page-back-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.agent-page-sources-area,
+.agent-page-live-thoughts-box,
+.agent-page-input-area,
+.agent-page-quick-actions,
+.prompt-card-btn,
+.agent-page-error-banner {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.source-card-item,
+.agent-page-message-agent-content,
+.agent-page-message-error-content {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.source-card-item:hover {
+  border-color: rgba(255, 122, 89, 0.3);
+  box-shadow: var(--shadow-md);
+}
+
+.agent-page-message-user-content {
+  background: linear-gradient(135deg, var(--primary-coral), #f58a5f);
+  color: var(--text-white);
+}
+
+.agent-page-message-error-content {
+  border-color: rgba(255, 122, 89, 0.2);
+  color: #ffb5a7;
+}
+
+.agent-page-input-field {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.agent-page-quick-action-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+}
+
+.agent-page-quick-action-btn:hover {
+  border-color: rgba(255, 122, 89, 0.3);
+}
+
+.prompt-card-icon {
+  background: rgba(255, 122, 89, 0.12);
+  color: var(--primary-coral);
+}
+
+.agent-page-send-btn {
+  background: linear-gradient(135deg, var(--primary-coral), #f58a5f);
+  color: var(--text-white);
+}
+
+.agent-page-input-hint,
+.agent-page-thinking-label,
+.sources-header,
+.source-card-domain,
+.agent-page-message-time,
+.live-thought-item.complete {
+  color: var(--text-secondary);
 }

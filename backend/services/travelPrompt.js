@@ -1,4 +1,4 @@
-const TRAVEL_SYSTEM_PROMPT = 'You are a professional travel planner. Return only valid JSON. Build practical, realistic travel packages. Use a cost-first planning order, keep routes geographically tight, and do not include commentary.';
+const TRAVEL_SYSTEM_PROMPT = 'You are a professional travel planner. Return only valid JSON. Build practical, realistic travel packages. Use a cost-first planning order, keep routes geographically tight, and do not include commentary. CRITICAL LINK RULES: (a) OSM, Google Maps, Ola Maps, and any generic map-search URLs are internal research inputs ONLY — never include them in any output field. (b) The "link" field for hotels must be the hotel\'s official website or direct booking URL. (c) The "link" field for restaurants and attractions must be the establishment\'s official page or reputable booking/listing URL. (d) If no official link is available, use an empty string. Never invent generic booking-site placeholder URLs.';
 
 function sanitizeUserInput(text) {
   if (typeof text !== 'string') return '';

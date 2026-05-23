@@ -545,6 +545,62 @@ body.agent-panel-locked {
   }
 }
 
+/* ========================================================================== */
+/* Cinematic overrides */
+/* ========================================================================== */
+
+.agent-panel {
+  background: rgba(7, 9, 14, 0.78);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.agent-header {
+  background: linear-gradient(135deg, rgba(255, 122, 89, 0.9), rgba(49, 213, 200, 0.78));
+}
+
+.agent-header h3,
+.agent-header-subtitle {
+  color: var(--text-white);
+}
+
+.agent-messages {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0.01));
+}
+
+.message-user .message-content {
+  background: linear-gradient(135deg, var(--primary-coral), #f58a5f);
+  color: var(--text-white);
+}
+
+.message-agent .message-content {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.agent-input-area,
+.quick-actions {
+  background: rgba(255, 255, 255, 0.04);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.agent-input {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.agent-send-btn,
+.quick-action-btn {
+  background: linear-gradient(135deg, var(--primary-coral), #f58a5f);
+  color: var(--text-white);
+}
+
+.tool-badge {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+}
+
 /* Legacy panel polish for the older agent screen */
 .agent-panel-legacy {
   position: fixed;

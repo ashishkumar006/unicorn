@@ -1092,27 +1092,13 @@ class OpenStreetMapTool {
         provider: 'openstreetmap',
         providerLabel: 'OpenStreetMap',
         destination,
-        summary: `OpenStreetMap search ready for ${destination}.`,
-        searchUrl: buildOpenStreetMapSearchUrl(destination),
-        mapUrl: buildOpenStreetMapSearchUrl(destination),
-        embedUrl: '',
         coordinates: null,
-        citations: [{
-          index: 1,
-          title: destination,
-          url: buildOpenStreetMapSearchUrl(destination),
-          snippet: destination,
-        }],
-        sources: [{
-          title: destination,
-          url: buildOpenStreetMapSearchUrl(destination),
-        }],
+        // searchUrl, mapUrl, citations, and sources are stripped — map/search URLs are internal inputs only.
         analysis: [
           'Provider: OpenStreetMap',
-          `OpenStreetMap search for "${destination}"`,
-          `Search link: [${destination}](${buildOpenStreetMapSearchUrl(destination)})`,
+          `OpenStreetMap search for "${destination}" — coordinates and map data are for internal planning only.`,
         ].join('\n\n'),
-        message: `OpenStreetMap search ready for "${destination}".`,
+        message: `OpenStreetMap coordinates confirmed for "${destination}".`,
       };
     }
 
@@ -1122,28 +1108,22 @@ class OpenStreetMapTool {
       providerLabel: 'OpenStreetMap',
       destination,
       summary: `OpenStreetMap preview ready for ${location.displayName || destination}.`,
-      location,
-      searchUrl: location.searchUrl,
-      mapUrl: location.mapUrl,
-      embedUrl: location.embedUrl,
+      location: {
+        ...location,
+        // Retain coordinates for internal routing; strip search URLs, map URLs, and embed URLs from user output.
+        searchUrl: undefined,
+        mapUrl: undefined,
+        embedUrl: undefined,
+      },
       coordinates: location.coordinates,
-      citations: [{
-        index: 1,
-        title: location.displayName || destination,
-        url: location.mapUrl,
-        snippet: location.displayName || destination,
-      }],
-      sources: [{
-        title: location.displayName || destination,
-        url: location.mapUrl,
-      }],
+      // citations and sources with map URLs are stripped — map/search URLs are internal inputs only.
       analysis: [
         'Provider: OpenStreetMap',
         `OpenStreetMap preview for "${destination}"`,
         `Location: ${location.displayName || destination}`,
-        `Map link: [${location.displayName || destination}](${location.mapUrl})`,
+        `Coordinates: ${location.coordinates?.lat ?? 'n/a'}, ${location.coordinates?.lon ?? 'n/a'}`,
       ].join('\n\n'),
-      message: `OpenStreetMap preview ready for "${destination}".`,
+      message: `OpenStreetMap coordinates confirmed for "${location.displayName || destination}".`,
     };
   }
 }

@@ -85,14 +85,34 @@ function buildOpenStreetMapFallbackUrl(name, destination) {
   return buildOpenStreetMapSearchUrl(query || destination || name || 'OpenStreetMap place');
 }
 
+// Map/search-engine domains that must NEVER appear as user-facing links.
+// OSM, Google Maps, and Ola Maps are data-gathering inputs only.
+// The only user-visible links may be official hotel/restaurant/attraction/booking domains.
+const MAP_DOMAIN_PATTERN = /maps\.(google|gstatic|olamaps|kratrim|ola)\.|openstreetmap|nominatim\.openstreetmap|irctc|makemytrip|yatra|goibibo|easemytrip|booking\.com|expedia|agoda|tripadvisor|zomato|swiggy|kayak|skyscanner|ixigo/i;
+
+function isOfficialBusinessUrl(value) {
+  if (typeof value !== 'string') return false;
+  const trimmed = value.trim();
+  if (!trimmed) return false;
+  try {
+    const url = new URL(trimmed);
+    // Reject bare map-search engines regardless of path.
+    if (MAP_DOMAIN_PATTERN.test(url.hostname)) return false;
+    // Accept only registered TLD or organisational/ccTLD hostnames.
+    return /^[a-z0-9]([a-z0-9\-]{0,61}[a-z0-9])?\.(com|in|org|net|co|io|ai|travel|hotel|resort|restaurant|cafe|museum|park|gov|edu|info|biz|co\.in|org\.in|ac\.in|me|us|uk|ca|au|de|fr|sg|ae|jp|th|lk|np|sa|eg|za|zw|ke|gh|tz|ug)(\.[a-z]{2})?$/i.test(url.hostname);
+  } catch {
+    return false;
+  }
+}
+
 function buildWorkingMapLink(link, name, destination) {
   const candidate = toText(link, '');
 
-  if (candidate && !/olamaps?/i.test(candidate)) {
+  if (isOfficialBusinessUrl(candidate)) {
     return candidate;
   }
 
-  return buildOpenStreetMapFallbackUrl(name, destination);
+  return '';
 }
 
 function normalizeReferenceKey(value = '') {
@@ -534,9 +554,10 @@ async function buildTravelReferenceData(trip = {}, provider = 'auto') {
       lat: openStreetMapReferenceData.lat,
       lon: openStreetMapReferenceData.lon,
       zoom: openStreetMapReferenceData.zoom,
-      searchUrl: openStreetMapReferenceData.searchUrl,
-      mapUrl: openStreetMapReferenceData.mapUrl,
-      embedUrl: openStreetMapReferenceData.embedUrl,
+      // searchUrl, mapUrl, and embedUrl are intentionally blank — map/service URLs are internal inputs only.
+      searchUrl: '',
+      mapUrl: '',
+      embedUrl: '',
       summary: openStreetMapReferenceData.summary || '',
     } : {
       enabled: false,
@@ -546,8 +567,9 @@ async function buildTravelReferenceData(trip = {}, provider = 'auto') {
       lat: null,
       lon: null,
       zoom: 13,
-      searchUrl: buildOpenStreetMapSearchUrl(trip.toPlace || 'OpenStreetMap'),
-      mapUrl: buildOpenStreetMapSearchUrl(trip.toPlace || 'OpenStreetMap'),
+      // searchUrl, mapUrl, and embedUrl are intentionally blank — map/search URLs are internal research inputs only.
+      searchUrl: '',
+      mapUrl: '',
       embedUrl: '',
       summary: '',
     },
@@ -573,7 +595,7 @@ function buildTravelReferencePrompt(referenceData, trip = {}) {
       ? 'Google Places'
       : '';
   const openStreetMapLine = referenceData.openStreetMap?.mapUrl
-    ? `[OpenStreetMap preview](${referenceData.openStreetMap.mapUrl})`
+    ? `Coordinates for ${destination}: lat ${referenceData.openStreetMap.lat ?? 'n/a'}, lon ${referenceData.openStreetMap.lon ?? 'n/a'}`
     : '';
 
   const restaurantLines = (referenceData.restaurants || [])
@@ -822,8 +844,7 @@ async function buildRouteInsights(referenceData, rawPackage, trip) {
       hotel: {
         name: hotelLabel,
         location: toText(primaryHotel?.location || trip.toPlace, trip.toPlace),
-        mapUrl: hotelMap?.mapUrl || buildOpenStreetMapSearchUrl(trip.toPlace || 'OpenStreetMap stay area'),
-        embedUrl: hotelMap?.embedUrl || '',
+        // coordinates and map-service links are intentionally omitted — they are internal inputs only.
       },
       nearbyRestaurants,
       nearbyAttractions,
@@ -844,8 +865,7 @@ async function buildRouteInsights(referenceData, rawPackage, trip) {
     hotel: {
       name: hotelLabel,
       location: toText(primaryHotel?.location || hotelMap?.displayName || trip.toPlace, trip.toPlace),
-      mapUrl: hotelMap?.mapUrl || buildOpenStreetMapSearchUrl(trip.toPlace || 'OpenStreetMap stay area'),
-      embedUrl: hotelMap?.embedUrl || '',
+      // Coordinates-only — map-service links are internal inputs, never surfaced to the user.
       coordinates: hotelCoordinates,
     },
     nearbyRestaurants,
@@ -1797,8 +1817,9 @@ ${JSON.stringify(researchResults.places.places, null, 2)}
         lat: null,
         lon: null,
         zoom: 13,
-        searchUrl: buildOpenStreetMapSearchUrl(trip.toPlace || 'OpenStreetMap'),
-        mapUrl: buildOpenStreetMapSearchUrl(trip.toPlace || 'OpenStreetMap'),
+        // searchUrl, mapUrl, and embedUrl are intentionally blank — map/search URLs are internal research inputs only.
+        searchUrl: '',
+        mapUrl: '',
         embedUrl: '',
         summary: '',
       },

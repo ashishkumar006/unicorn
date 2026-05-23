@@ -223,10 +223,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .page-wrapper {
-  max-width: 1040px;
-  margin: 0 auto;
+  max-width: none;
   width: 100%;
-  padding: 3rem 1.5rem;
+  padding: 2rem 2.5rem;
+  box-sizing: border-box;
   animation: pageFadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
@@ -247,45 +247,45 @@ h1, h2, h3, h4, h5, h6 {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  z-index: -2;
+  z-index: -1;
   overflow: hidden;
 }
 
 .orb {
   position: absolute;
   border-radius: var(--radius-full);
-  filter: blur(80px);
-  opacity: 0.45;
-  animation: orbDrift 20s infinite alternate ease-in-out;
+  filter: blur(90px);
+  opacity: 0.5;
+  animation: orbFloat 30s infinite alternate ease-in-out;
 }
 
 .orb-1 {
-  width: 450px;
-  height: 450px;
-  background: radial-gradient(circle, var(--primary-coral-light) 0%, rgba(255, 255, 255, 0) 70%);
-  top: -10%;
-  left: -5%;
-  animation-duration: 25s;
+  width: 480px;
+  height: 480px;
+  background: radial-gradient(circle, var(--primary-coral) 0%, transparent 70%);
+  top: -12%;
+  left: -8%;
+  animation-duration: 35s;
 }
 
 .orb-2 {
-  width: 500px;
-  height: 500px;
-  background: radial-gradient(circle, var(--secondary-teal-light) 0%, rgba(255, 255, 255, 0) 70%);
-  bottom: -15%;
-  right: -5%;
-  animation-duration: 30s;
-  animation-delay: -5s;
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, var(--secondary-teal) 0%, transparent 70%);
+  bottom: -18%;
+  right: -8%;
+  animation-duration: 40s;
+  animation-delay: -8s;
 }
 
 .orb-3 {
-  width: 350px;
-  height: 350px;
-  background: radial-gradient(circle, rgba(245, 161, 66, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
-  top: 40%;
-  left: 35%;
-  animation-duration: 22s;
-  animation-delay: -10s;
+  width: 380px;
+  height: 380px;
+  background: radial-gradient(circle, var(--accent-amber) 0%, transparent 70%);
+  top: 45%;
+  left: 40%;
+  animation-duration: 32s;
+  animation-delay: -12s;
 }
 
 /* ==========================================================================
@@ -403,20 +403,20 @@ h1, h2, h3, h4, h5, h6 {
 .input-field {
   width: 100%;
   padding: 14px 18px;
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: var(--radius-md);
-  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--border-glass);
+  border-radius: 14px;
+  background: var(--bg-elevated);
   font-family: var(--font-sans);
   font-size: var(--font-size-base);
   color: var(--text-primary);
-  transition: all var(--transition-fast);
+  transition: all 0.2s ease;
 }
 
 .input-field:focus {
   outline: none;
   border-color: var(--primary-coral);
-  background: var(--text-white);
-  box-shadow: 0 0 0 4px rgba(222, 107, 72, 0.12);
+  background: var(--bg-card);
+  box-shadow: 0 0 0 4px rgba(255, 107, 74, 0.15);
 }
 
 button:focus-visible,
@@ -443,6 +443,12 @@ a:focus-visible,
   0% { transform: translate(0, 0) scale(1); }
   50% { transform: translate(60px, -40px) scale(1.1); }
   100% { transform: translate(-30px, 50px) scale(0.95); }
+}
+
+@keyframes orbFloat {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(40px, -30px, 0) scale(1.12); }
+  100% { transform: translate3d(-25px, 35px, 0) scale(0.94); }
 }
 
 @keyframes pulseBreathe {
@@ -761,7 +767,8 @@ a:focus-visible,
 
 /* Page Columns */
 .page-wrapper.dashboard {
-  max-width: 1320px !important;
+  max-width: none;
+  width: 100%;
 }
 
 .dashboard-layout {
@@ -780,14 +787,15 @@ a:focus-visible,
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--border-glass);
-  box-shadow: var(--shadow-md);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6);
-  transition: border-color var(--transition-normal);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+  border-radius: 20px;
+  padding: 1.75rem 2rem;
+  transition: all 0.2s ease;
 }
 
 .content-section:hover {
-  border-color: rgba(222, 107, 72, 0.1);
+  border-color: rgba(255, 107, 74, 0.15);
+  transform: translateY(-1px);
 }
 
 .section-title {
@@ -1090,20 +1098,24 @@ a:focus-visible,
 
 .itinerary-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 1.5rem;
+  width: 100%;
 }
 
 .day-card {
-  padding: var(--space-5);
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(0, 0, 0, 0.03);
-  transition: border-color var(--transition-normal);
+  padding: 1.5rem;
+  background: var(--bg-card);
+  border-radius: 18px;
+  border: 1px solid var(--border-glass);
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
 }
 
 .day-card:hover {
-  border-color: rgba(222, 107, 72, 0.12);
+  border-color: var(--primary-coral);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.12);
 }
 
 .day-header {
@@ -1176,15 +1188,16 @@ a:focus-visible,
 }
 
 .option-card, .place-card, .restaurant-card {
-  background: #ffffff;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-light);
-  padding: var(--space-4);
+  background: var(--bg-card);
+  border-radius: 18px;
+  border: 1px solid var(--border-glass);
+  padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--transition-normal), box-shadow var(--transition-normal);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  transition: all 0.2s ease;
+  color: var(--text-primary);
 }
 
 .option-card:hover, .place-card:hover, .restaurant-card:hover {
