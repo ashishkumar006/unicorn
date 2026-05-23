@@ -1,7 +1,36 @@
 const TRAVEL_SYSTEM_PROMPT = 'You are a professional travel planner. Return only valid JSON. Build practical, realistic travel packages. Use a cost-first planning order, keep routes geographically tight, and do not include commentary.';
 
+function sanitizeUserInput(text) {
+  if (typeof text !== 'string') return '';
+  
+  // Strip control characters
+  let clean = text.replace(/[\x00-\x1F\x7F-\x9F]/g, '');
+  
+  // Limit length to 500 chars
+  clean = clean.substring(0, 500);
+  
+  // Remove markdown injection attempts
+  clean = clean.replace(/```/g, '');
+  
+  // Remove prompt injection patterns
+  const injectionPatterns = [
+    /ignore\s+all\s+instructions/gi,
+    /ignore\s+previous\s+instructions/gi,
+    /system\s*:/gi,
+    /assistant\s*:/gi,
+    /user\s*:/gi,
+    /you\s+are\s+a/gi
+  ];
+  
+  injectionPatterns.forEach(pattern => {
+    clean = clean.replace(pattern, '');
+  });
+  
+  return clean.trim();
+}
+
 function buildTravelPackagePrompt(trip) {
-  return `Create a structured travel package for this trip.
+  let prompt = `Create a structured travel package for this trip.
 
 Trip details:
 - From: ${trip.fromPlace}
@@ -12,7 +41,15 @@ Trip details:
 - Travelers: ${trip.travelers}
 - Budget: ${trip.budget}
 - Luxury level: ${trip.luxuryType}
+`;
 
+  const cleanPreferences = trip.userPreferences ? sanitizeUserInput(trip.userPreferences) : '';
+  if (cleanPreferences) {
+    prompt += `\n- Strict Custom Preferences/Constraints specified by user: "${cleanPreferences}"
+You MUST strictly satisfy and incorporate these custom constraints when planning the stays, itinerary, food, and activities. If the user asks for hotel hopping, plan multiple hotels and distribute them across the itinerary days. If the user specifies dietary preferences (like pure vegetarian) or sightseeing pacing (like only sightseeing on the first 3 days), strictly obey them.\n`;
+  }
+
+  prompt += `
 Return a single JSON object with the top-level keys: plan, travel, hotels, places, food, weather, budget.
 
 Rules:
@@ -47,6 +84,8 @@ Output guidance:
 - Make hotel, restaurant, and attraction names map-friendly and specific.
 - Mention practical areas or neighborhoods instead of vague city-wide descriptions.
 - Keep the itinerary balanced, performant, and easy to execute on the ground.`;
+
+  return prompt;
 }
 
 function getTravelPromptPreview(trip) {

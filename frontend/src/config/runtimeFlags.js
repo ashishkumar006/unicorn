@@ -20,7 +20,9 @@ export function isInternalToolsEnabled() {
   const envValue = typeof process !== 'undefined' ? process.env.REACT_APP_ENABLE_INTERNAL_TOOLS : '';
   const envEnabled = TRUTHY_VALUES.has(String(envValue || '').toLowerCase());
 
-  if (internalValue && TRUTHY_VALUES.has(internalValue)) {
+  const isDev = typeof process !== 'undefined' && process.env.NODE_ENV !== 'production';
+
+  if (isDev && internalValue && TRUTHY_VALUES.has(internalValue)) {
     return true;
   }
 

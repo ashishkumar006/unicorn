@@ -10,14 +10,13 @@
  */
 
 import { useState, useCallback } from 'react';
+import { apiFetch, apiUrl } from '../lib/api';
 
 export function useAgent(userId, agentModel = 'gemma-cloud') {
   const [agentStatus, setAgentStatus] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [capabilities, setCapabilities] = useState(null);
-
-  const API_URL = 'http://localhost:5000/api/agent';
 
   /**
    * Set the plan for agent to work with
@@ -29,13 +28,11 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/plan`, {
+      const data = await apiFetch('/agent/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, plan, agentModel: customAgentModel })
       });
-
-      const data = await response.json();
 
       if (data.success) {
         setAgentStatus(data.agentStatus);
@@ -45,7 +42,7 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
           context: data.agentContext
         };
       } else {
-        setError(data.error);
+        setError(data.error?.message || data.error);
         return null;
       }
     } catch (err) {
@@ -66,7 +63,7 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/chat`, {
+      const response = await fetch(apiUrl('/agent/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, message, agentModel })
@@ -74,7 +71,7 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || `HTTP ${response.status}: ${response.statusText}`);
+        throw new Error(errorData.error?.message || errorData.error || `HTTP ${response.status}: ${response.statusText}`);
       }
 
       if (!response.body) throw new Error('Streaming not supported');
@@ -85,8 +82,6 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
       let finalData = null;
       let bufferedSse = '';
       let lastEvent = null;
-      console.log('[useAgent] Starting to read SSE stream for userId:', userId);
-
       const processSseBlock = (block) => {
         const dataLines = block
           .split('\n')
@@ -106,7 +101,6 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
 
         const data = JSON.parse(dataStr);
         lastEvent = data;
-        console.log('[useAgent] Parsed SSE data:', data.type);
 
         if (data.type === 'final') {
           finalData = data;
@@ -123,7 +117,6 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
       while (true) {
         const { value, done } = await reader.read();
         if (done) {
-          console.log('[useAgent] SSE stream ended');
           break;
         }
 
@@ -153,8 +146,6 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
           console.error('[useAgent] Error parsing trailing SSE data:', e, bufferedSse);
         }
       }
-
-      console.log('[useAgent] Final data received:', finalData ? 'yes' : 'no');
 
       if (finalData && finalData.success) {
         return {
@@ -195,13 +186,11 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/modify`, {
+      const data = await apiFetch('/agent/modify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, modification, agentModel })
       });
-
-      const data = await response.json();
 
       if (data.success) {
         setAgentStatus(data.agentStatus);
@@ -210,7 +199,7 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
           result: data.result
         };
       } else {
-        setError(data.error);
+        setError(data.error?.message || data.error);
         return null;
       }
     } catch (err) {
@@ -231,14 +220,13 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/capabilities?userId=${userId}`);
-      const data = await response.json();
+      const data = await apiFetch(`/agent/capabilities?userId=${encodeURIComponent(userId)}`);
 
       if (data.success) {
         setCapabilities(data.capabilities);
         return data.capabilities;
       } else {
-        setError(data.error);
+        setError(data.error?.message || data.error);
         return null;
       }
     } catch (err) {
@@ -256,14 +244,13 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     if (!userId) return null;
 
     try {
-      const response = await fetch(`${API_URL}/status?userId=${userId}`);
-      const data = await response.json();
+      const data = await apiFetch(`/agent/status?userId=${encodeURIComponent(userId)}`);
 
       if (data.success) {
         setAgentStatus(data.status);
         return data;
       } else {
-        setError(data.error);
+        setError(data.error?.message || data.error);
         return null;
       }
     } catch (err) {
@@ -279,13 +266,12 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     if (!userId) return null;
 
     try {
-      const response = await fetch(`${API_URL}/history/${userId}`);
-      const data = await response.json();
+      const data = await apiFetch(`/agent/history/${encodeURIComponent(userId)}`);
 
       if (data.success) {
         return data.history;
       } else {
-        setError(data.error);
+        setError(data.error?.message || data.error);
         return null;
       }
     } catch (err) {
@@ -304,17 +290,15 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     setError(null);
 
     try {
-      const response = await fetch(`${API_URL}/reset/${userId}`, {
+      const data = await apiFetch(`/agent/reset/${encodeURIComponent(userId)}`, {
         method: 'POST'
       });
-
-      const data = await response.json();
 
       if (data.success) {
         setAgentStatus(data.agentStatus);
         return { success: true };
       } else {
-        setError(data.error);
+        setError(data.error?.message || data.error);
         return null;
       }
     } catch (err) {
@@ -332,16 +316,14 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     if (!userId || !query) return null;
 
     try {
-      const response = await fetch(
-        `${API_URL}/rag/search?userId=${userId}&query=${encodeURIComponent(query)}`
+      const data = await apiFetch(
+        `/agent/rag/search?userId=${encodeURIComponent(userId)}&query=${encodeURIComponent(query)}`
       );
-
-      const data = await response.json();
 
       if (data.success) {
         return data.results;
       } else {
-        setError(data.error);
+        setError(data.error?.message || data.error);
         return null;
       }
     } catch (err) {
@@ -357,13 +339,12 @@ export function useAgent(userId, agentModel = 'gemma-cloud') {
     if (!userId) return null;
 
     try {
-      const response = await fetch(`${API_URL}/rag/documents/${userId}`);
-      const data = await response.json();
+      const data = await apiFetch(`/agent/rag/documents/${encodeURIComponent(userId)}`);
 
       if (data.success) {
         return data.documents;
       } else {
-        setError(data.error);
+        setError(data.error?.message || data.error);
         return null;
       }
     } catch (err) {

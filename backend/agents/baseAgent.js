@@ -212,7 +212,7 @@ class BaseAgent {
    */
   async processMessage(userMessage, onProgress = () => {}) {
     console.log(`\n${'='.repeat(60)}`);
-    console.log(`[${this.name}] Processing user message:`, userMessage);
+    console.log(`[${this.name}] Processing user message length:`, String(userMessage || '').length);
     console.log(`[${this.name}] Provider: ${this.state.provider}`);
     console.log(`[${this.name}] Has plan:`, !!this.state.currentPlan);
     console.log(`[${this.name}] Available tools:`, this.tools.map((tool) => tool.name));
@@ -270,7 +270,7 @@ class BaseAgent {
    */
   async generateResponse(userMessage, onProgress = () => {}) {
     console.log(`\n[${this.name}] === AGENTIC LOOP START ===`);
-    console.log(`[${this.name}] User message: "${userMessage}"`);
+    console.log(`[${this.name}] User message length: ${String(userMessage || '').length}`);
 
     const cloudConfig = resolveCloudConfig();
     const toolDescriptions = this.tools.length > 0
@@ -445,6 +445,8 @@ Continue using tools if they materially improve the answer. There is no fixed tw
               type: 'tool_end',
               tool: toolName,
               content: result.error ? `⚠ ${result.error}` : resultText,
+              citations: result.citations || result.sources || [],
+              sources: result.sources || result.citations || []
             });
           } catch (toolError) {
             allToolResults.push({

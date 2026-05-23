@@ -5,6 +5,36 @@ const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-2-70b
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
 
+// Module-level fetch import (Node 18+ native or node-fetch package fallback)
+let fetch;
+try {
+  fetch = (...args) => import('node-fetch').then(({ default: f }) => f(...args));
+} catch (e) {
+  fetch = globalThis.fetch;
+}
+
+// Helper: fetch with AbortController timeout (30 seconds)
+async function fetchWithTimeout(resource, options = {}) {
+  const { timeout = 30000 } = options;
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+  
+  try {
+    const response = await fetch(resource, {
+      ...options,
+      signal: controller.signal
+    });
+    clearTimeout(id);
+    return response;
+  } catch (error) {
+    clearTimeout(id);
+    if (error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeout / 1000} seconds`);
+    }
+    throw error;
+  }
+}
+
 /**
  * Generate a comprehensive travel plan using LLM with automatic fallback
  * Priority: OpenRouter → Gemini → Ollama
@@ -20,7 +50,6 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
  * @param {string} params.provider - LLM Provider (openrouter, gemini, or ollama, default: 'auto')
  */
 async function generateTravelPlan({ fromPlace, toPlace, budget, luxuryType, days, startDate, endDate, travelers = 1, provider = 'auto' }) {
-  const { default: fetch } = await import('node-fetch');
   
   const luxuryLabels = {
     'low': 'Budget-friendly',
@@ -147,8 +176,6 @@ Return ONLY valid JSON, no markdown formatting or explanations.`;
  * Generate travel plan using Gemini
  */
 async function generateWithGemini(prompt) {
-  const { default: fetch } = await import('node-fetch');
-  
   if (!GEMINI_API_KEY) {
     throw new Error('GEMINI_API_KEY is not set in environment variables');
   }
@@ -158,7 +185,7 @@ async function generateWithGemini(prompt) {
     
     const systemPrompt = 'You are a professional travel planner AI. You create detailed, practical, and budget-conscious travel plans. Always respond with valid JSON only.';
     
-    const response = await fetch(geminiUrl, {
+    const response = await fetchWithTimeout(geminiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -216,15 +243,13 @@ async function generateWithGemini(prompt) {
  * Generate travel plan using Ollama
  */
 async function generateWithOllama(prompt) {
-  const { default: fetch } = await import('node-fetch');
-  
   try {
     const ollamaUrl = `${OLLAMA_URL}/api/generate`;
     
     const systemPrompt = 'You are a professional travel planner AI. You create detailed, practical, and budget-conscious travel plans. Always respond with valid JSON only.';
     const fullPrompt = `${systemPrompt}\\n\\n${prompt}`;
     
-    const response = await fetch(ollamaUrl, {
+    const response = await fetchWithTimeout(ollamaUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -270,8 +295,6 @@ async function generateWithOllama(prompt) {
  * Generate travel plan using OpenRouter
  */
 async function generateWithOpenRouter(prompt) {
-  const { default: fetch } = await import('node-fetch');
-  
   if (!OPENROUTER_API_KEY) {
     throw new Error('OPENROUTER_API_KEY is not set in environment variables');
   }
@@ -281,7 +304,7 @@ async function generateWithOpenRouter(prompt) {
     
     const systemPrompt = 'You are a professional travel planner AI. You create detailed, practical, and budget-conscious travel plans. Always respond with valid JSON only.';
     
-    const response = await fetch(openrouterUrl, {
+    const response = await fetchWithTimeout(openrouterUrl, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,

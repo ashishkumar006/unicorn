@@ -8,6 +8,8 @@
 
 import { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { Bot, Loader2, Map, Send, UserRound } from 'lucide-react';
+import { apiFetch, apiUrl } from '../../lib/api';
 import './agentPanel.css';
 
 export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
@@ -66,26 +68,21 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
     const initAgent = async () => {
       try {
         // Set the plan for agent
-        const response = await fetch('http://localhost:5000/api/agent/plan', {
+        const data = await apiFetch('/agent/plan', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, plan: currentPlan })
         });
 
-        const data = await response.json();
-
         if (data.success) {
           // Get agent capabilities
-          const capsResponse = await fetch(
-            `http://localhost:5000/api/agent/capabilities?userId=${userId}`
-          );
-          const capsData = await capsResponse.json();
+          const capsData = await apiFetch(`/agent/capabilities?userId=${encodeURIComponent(userId)}`);
           setAgentCapabilities(capsData.capabilities);
 
           // Add welcome message
           setMessages([{
             role: 'agent',
-            content: `👋 Hi! I can help you refine **${destinationLabel}** with cleaner options, sharper costs, and a polished summary. Ask for a breakdown, a change, or a better alternative.`,
+            content: `Hi! I can help you refine **${destinationLabel}** with cleaner options, sharper costs, and a polished summary. Ask for a breakdown, a change, or a better alternative.`,
             timestamp: new Date()
           }]);
 
@@ -95,7 +92,7 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
         console.error('Error initializing agent:', error);
         setMessages([{
           role: 'agent',
-          content: '❌ Error initializing agent. Please try again.',
+          content: 'Error initializing agent. Please try again.',
           timestamp: new Date()
         }]);
         setShowAgent(true);
@@ -127,7 +124,7 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
     setIsLoading(true);
 
     try {
-      const response = await fetch('http://localhost:5000/api/agent/chat', {
+      const response = await fetch(apiUrl('/agent/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, message: userMessage })
@@ -188,7 +185,7 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
                 const prefix = lastMsg.content ? lastMsg.content + '\n\n' : '';
                 lastMsg.content = prefix + data.content;
               } else if (data.type === 'tool_start') {
-                lastMsg.content += `\n\n⏳ *Calling tool: \`${data.tool}\`...*`;
+                lastMsg.content += `\n\n*Calling tool: \`${data.tool}\`...*`;
               } else if (data.type === 'tool_result_chunk') {
                 lastMsg.content += `\n\n${data.content}`;
               } else if (data.type === 'tool_result') {
@@ -207,7 +204,7 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
                   }
                 }
               } else if (data.type === 'error') {
-                lastMsg.content += `\n\n❌ **Error:** ${data.error}`;
+                lastMsg.content += `\n\n**Error:** ${data.error?.message || data.error}`;
               }
               
               updated[lastIdx] = lastMsg;
@@ -224,7 +221,7 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
       console.error('Error sending message:', error);
       setMessages(prev => [...prev, {
         role: 'agent',
-        content: `❌ Connection error: ${error.message}`,
+        content: `Connection error: ${error.message}`,
         timestamp: new Date()
       }]);
     } finally {
@@ -266,7 +263,7 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
       <div className="agent-panel-hero">
         <div className="agent-panel-copy">
           <span className="agent-panel-kicker">AI travel assistant</span>
-          <h3>🤖 Travel Assistant</h3>
+          <h3><Bot size={18} /> Travel Assistant</h3>
           <p className="agent-subtitle">Modify, compare, and refine your plan in a cleaner workspace.</p>
         </div>
         <div className="agent-panel-status">
@@ -290,7 +287,7 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
       <div className="agent-messages">
         {messages.length === 0 ? (
           <div className="empty-state">
-            <div className="empty-state-icon">🗺️</div>
+            <div className="empty-state-icon"><Map size={22} /></div>
             <h4>Ready to refine the trip</h4>
             <p>Ask for a cost breakdown, a better route, or a polished summary.</p>
           </div>
@@ -298,7 +295,7 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
           messages.map((msg, idx) => (
             <div key={idx} className={`message message-${msg.role}`}>
               <div className="message-avatar">
-                {msg.role === 'user' ? '👤' : '🤖'}
+                {msg.role === 'user' ? <UserRound size={16} /> : <Bot size={16} />}
               </div>
               <div className="message-content">
                 {msg.role === 'agent' ? (
@@ -385,8 +382,9 @@ export default function AgentPanel({ userId, currentPlan, onPlanUpdate }) {
             disabled={isLoading || !input.trim()}
             className="send-btn"
             type="button"
+            aria-label={isLoading ? 'Sending message' : 'Send message'}
           >
-            {isLoading ? '⏳' : '📤'}
+            {isLoading ? <Loader2 size={16} className="spinner" /> : <Send size={16} />}
           </button>
         </div>
         <p className="input-hint">Press Enter to send. Ask for a summary, cost check, or itinerary tweak.</p>

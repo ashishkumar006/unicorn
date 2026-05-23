@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { createPortal, flushSync } from 'react-dom';
-import { Maximize2, Minimize2 } from 'lucide-react';
+import { Maximize2, Minimize2, Bot, Send, Loader2, AlertCircle } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import useAgent from '../../hooks/useAgent';
 import AgentService from '../../services/agentService';
@@ -334,11 +334,18 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
     <div className={`agent-panel ${isExpanded ? 'agent-panel-expanded' : ''}`}>
       <div className="agent-header">
         <div className="agent-header-title">
-          <h3>🤖 Travel Assistant</h3>
+          <h3>
+            <Bot size={18} className="agent-header-icon" style={{ color: 'var(--primary-coral)', marginRight: '6px', display: 'inline-block', verticalAlign: 'middle' }} />
+            Travel Assistant
+          </h3>
           <p className="agent-header-subtitle">{headerSummary || 'Chat with your travel plan'}</p>
         </div>
         <div className="agent-header-actions">
-          {error && <div className="agent-error-badge" title={error}>⚠️</div>}
+          {error && (
+            <div className="agent-error-badge" title={error}>
+              <AlertCircle size={14} style={{ color: 'var(--error)' }} />
+            </div>
+          )}
           <button
             type="button"
             className="agent-expand-btn"
@@ -435,7 +442,11 @@ const AgentPanelV2 = ({ userId, currentPlan, onPlanUpdate, agentModel = 'gemma-c
             className="agent-send-btn"
             title={(isLoading || isSending) ? 'Processing...' : 'Send message'}
           >
-            {(isLoading || isSending) ? '⏳' : '→'}
+            {(isLoading || isSending) ? (
+              <Loader2 size={16} className="spinner" style={{ animation: 'spin 1s linear infinite' }} />
+            ) : (
+              <Send size={16} />
+            )}
           </button>
         </div>
       </div>

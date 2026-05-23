@@ -15,6 +15,7 @@ const {
   isOlaMapsConfigured,
   searchOlaPlaces,
 } = require('./olaMaps');
+const { runDeepResearchSubagents } = require('./subagentRunner');
 
 const packageCache = new Map();
 const inflightPackages = new Map();
@@ -974,13 +975,41 @@ function normalizeActivities(activities, trip, dayIndex) {
     return defaultDay ? defaultDay.activities : [];
   }
 
-  return list.map((activity, index) => ({
-    time: toText(activity.time, ['Morning', 'Afternoon', 'Evening'][index] || 'Anytime'),
-    activity: toText(
-      activity.activity || activity.place || activity.description,
-      `Enjoy ${trip.toPlace} throughout the day`
-    ),
-  }));
+  return list.map((item, index) => {
+    if (typeof item === 'string') {
+      const match = item.match(/^(morning|afternoon|evening|anytime|night)\s*[-:]\s*(.*)$/i);
+      if (match) {
+        return {
+          time: match[1].charAt(0).toUpperCase() + match[1].slice(1).toLowerCase(),
+          activity: match[2].trim()
+        };
+      }
+      return {
+        time: ['Morning', 'Afternoon', 'Evening'][index] || 'Anytime',
+        activity: item.trim()
+      };
+    }
+    
+    const activityObj = item && typeof item === 'object' ? item : {};
+    
+    let activityText = toText(
+      activityObj.activity || activityObj.place || activityObj.description,
+      ''
+    );
+    
+    if (!activityText && typeof item !== 'object' && item != null) {
+      activityText = String(item).trim();
+    }
+    
+    if (!activityText) {
+      activityText = `Enjoy ${trip.toPlace} throughout the day`;
+    }
+
+    return {
+      time: toText(activityObj.time, ['Morning', 'Afternoon', 'Evening'][index] || 'Anytime'),
+      activity: activityText
+    };
+  });
 }
 
 function normalizePlan(rawPlan, trip) {
@@ -1572,8 +1601,94 @@ function normalizeTravelPackage(rawPackage, trip) {
   };
 }
 
+function reconcileBudgetSplits(packageData, trip, routeInsights) {
+  const travelersCount = trip.travelers || 1;
+  const days = trip.days || 1;
+  const totalBudget = trip.budget || 10000;
+
+  // Accommodation actual total
+  const preferredHotel = packageData.hotels?.options?.[0];
+  const hotelPricePerNight = preferredHotel?.pricePerNight || Math.round((totalBudget * 0.35) / days);
+  const accommodationVal = Math.round(hotelPricePerNight * days);
+
+  // Transportation actual total
+  const preferredTravel = packageData.travel?.options?.[0];
+  const travelPrice = preferredTravel?.price || Math.round((totalBudget * 0.25) / travelersCount);
+  const transportationVal = Math.round(travelPrice * travelersCount);
+
+  // Food actual total
+  const preferredRestaurant = packageData.food?.restaurants?.[0];
+  const avgCost = preferredRestaurant?.avgCost || preferredRestaurant?.avg_cost || Math.round((totalBudget * 0.2) / (days * travelersCount));
+  const foodVal = Math.round(avgCost * days * travelersCount);
+
+  // Local Transport actual total
+  const transportMode = routeInsights?.localTransport || {};
+  const dailyFare = transportMode.taxi || transportMode.auto || Math.round((totalBudget * 0.08) / days);
+  const localTransportVal = Math.round(dailyFare * days);
+
+  // Activities actual total
+  let activitiesVal = 0;
+  if (packageData.places?.categories) {
+    packageData.places.categories.forEach(cat => {
+      if (Array.isArray(cat.places)) {
+        cat.places.forEach(p => {
+          const fee = parseInt(String(p.entryFee || p.entry_fee || '0').replace(/[^0-9]/g, '')) || 0;
+          activitiesVal += fee * travelersCount;
+        });
+      }
+    });
+  }
+  if (activitiesVal === 0) {
+    activitiesVal = Math.round(totalBudget * 0.12);
+  }
+
+  // Miscellaneous / Buffer
+  const spent = accommodationVal + transportationVal + foodVal + localTransportVal + activitiesVal;
+  const miscellaneousVal = Math.max(0, totalBudget - spent);
+
+  packageData.budget = {
+    accommodation: {
+      label: 'Accommodation',
+      value: accommodationVal,
+      percentage: Math.round((accommodationVal / totalBudget) * 100),
+      details: `Stays at ${preferredHotel?.name || 'hotel'} for ${days} days`
+    },
+    transportation: {
+      label: 'Transportation',
+      value: transportationVal,
+      percentage: Math.round((transportationVal / totalBudget) * 100),
+      details: `Intercity travel tickets (${preferredTravel?.type || 'Transport'})`
+    },
+    food: {
+      label: 'Food & Dining',
+      value: foodVal,
+      percentage: Math.round((foodVal / totalBudget) * 100),
+      details: `Meals and regional gastronomy`
+    },
+    localTransport: {
+      label: 'Local Transport',
+      value: localTransportVal,
+      percentage: Math.round((localTransportVal / totalBudget) * 100),
+      details: `Local commuting in destination`
+    },
+    activities: {
+      label: 'Activities & Sightseeing',
+      value: activitiesVal,
+      percentage: Math.round((activitiesVal / totalBudget) * 100),
+      details: `Attraction entry fees & local guide fares`
+    },
+    miscellaneous: {
+      label: 'Miscellaneous',
+      value: miscellaneousVal,
+      percentage: Math.round((miscellaneousVal / totalBudget) * 100),
+      details: `Contingency buffer`
+    }
+  };
+}
+
 async function generateTravelPackage(input) {
   const trip = normalizeTripInput(input);
+  const sessionId = input.sessionId || null;
   const provider = normalizeTravelProvider(input?.provider);
   const cacheKey = buildCacheKey(trip, provider);
   const now = Date.now();
@@ -1589,28 +1704,48 @@ async function generateTravelPackage(input) {
 
   const requestPromise = (async () => {
     const config = resolveCloudConfig();
+    
+    // Spawn parallel deep research subagents
+    const researchResults = await runDeepResearchSubagents(trip, sessionId);
+
+    if (global.updatePlanningStatus) {
+      global.updatePlanningStatus(sessionId, 'System Coordinator', 'Gathering deep research summaries from subagents...', 'searching');
+    }
+
     const referenceData = await buildTravelReferenceData(trip, provider);
-    console.log('[TravelPlanner] Reference data prepared:', {
-      destination: trip.toPlace,
-      provider,
-      primaryProvider: referenceData?.primaryProvider || 'none',
-      secondaryProvider: referenceData?.secondaryProvider || 'none',
-      googleRestaurants: referenceData?.googlePlaces?.restaurants || 0,
-      googleAttractions: referenceData?.googlePlaces?.attractions || 0,
-      olaRestaurants: referenceData?.olaPlaces?.restaurants || 0,
-      olaAttractions: referenceData?.olaPlaces?.attractions || 0,
-    });
-
     const budgetPrompt = buildBudgetAllocationPrompt(referenceData, trip);
-    console.log('[TravelPlanner] Budget prompt strategy: model decides final allocation from total budget, luxury, and price signals');
-
     const referencePrompt = buildTravelReferencePrompt(referenceData, trip);
+
+    // Inject deep research summaries into Main Agent prompt context
+    const subagentResearchPrompt = `
+    
+Subagent Deep Research Syntheses:
+The specialized Accommodation, Transit, Gastronomy, and Places subagents have researched official websites, maps, schedules, and forms.
+You MUST strictly incorporate the chosen options below in the final package JSON:
+
+1. Hotels Options (Accommodation Subagent selection):
+${JSON.stringify(researchResults.accommodation.options, null, 2)}
+
+2. Travel Options (Transit Subagent selection):
+${JSON.stringify(researchResults.transit.options, null, 2)}
+
+3. Food Options (Gastronomy Subagent selection):
+${JSON.stringify(researchResults.food.food, null, 2)}
+
+4. Sights Categories (Places Subagent selection):
+${JSON.stringify(researchResults.places.places, null, 2)}
+`;
+
+    if (global.updatePlanningStatus) {
+      global.updatePlanningStatus(sessionId, 'System Coordinator', 'Synthesizing local routes and day-by-day travel map...', 'searching');
+    }
+
     const rawPackage = await chatJson({
       system: TRAVEL_SYSTEM_PROMPT,
       messages: [
         {
           role: 'user',
-          content: `${buildTravelPackagePrompt(trip)}${budgetPrompt}${referencePrompt}`,
+          content: `${buildTravelPackagePrompt(trip)}${budgetPrompt}${referencePrompt}${subagentResearchPrompt}`,
         },
       ],
       model: config.model,
@@ -1626,6 +1761,9 @@ async function generateTravelPackage(input) {
     });
 
     const enrichedRawPackage = mergeGooglePlacesIntoPackage(rawPackage, referenceData);
+    
+
+
     const packageData = normalizeTravelPackage(enrichedRawPackage, trip);
     let routeInsights = {
       enabled: false,
@@ -1640,6 +1778,9 @@ async function generateTravelPackage(input) {
     } catch (error) {
       console.warn(`[TravelPlanner] Route insight build failed for ${trip.toPlace}: ${error.message}`);
     }
+
+    // Dynamic budget splits reconciliation
+    reconcileBudgetSplits(packageData, trip, routeInsights);
 
     packageData.meta = {
       budgetAllocation: packageData.budget,
@@ -1676,9 +1817,14 @@ async function generateTravelPackage(input) {
         summary: '',
       },
       routeInsights,
+      researchArtifacts: researchResults.artifacts,
       model: config.model,
       generatedAt: packageData.generatedAt,
     };
+
+    if (global.updatePlanningStatus) {
+      global.updatePlanningStatus(sessionId, 'System Coordinator', 'Polishing final budget splits and writing dashboard data...', 'complete');
+    }
 
     packageCache.set(cacheKey, {
       timestamp: Date.now(),

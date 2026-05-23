@@ -232,7 +232,7 @@ const userId = 'user-' + Date.now();
 
 // Start chat
 async function chat(message) {
-  const response = await fetch('http://localhost:5000/api/chat', {
+  const response = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ userId, message })
@@ -242,7 +242,7 @@ async function chat(message) {
 
 // Search
 async function search(origin, destination, groupSize) {
-  const response = await fetch('http://localhost:5000/api/search', {
+  const response = await fetch('/api/search', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
@@ -259,7 +259,7 @@ async function search(origin, destination, groupSize) {
 
 // Book
 async function book(optionIndex, travelers) {
-  const response = await fetch('http://localhost:5000/api/book', {
+  const response = await fetch('/api/book', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 

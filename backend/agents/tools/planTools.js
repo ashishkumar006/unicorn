@@ -474,7 +474,7 @@ ${itineraryLines}
 Please review and let me know if you want any more changes.
 
 Best regards,
-TripOptimizer Assistant
+Wanderlust — Your AI Travel Planner Assistant
   `.trim();
 }
 
@@ -813,9 +813,9 @@ class SearchPlacesTool {
       const finalResults = results.map((place, index) => {
         const name = toText(place?.name, `Place ${index + 1}`);
         const rawLink = toText(place?.link || place?.olaMapsUrl || place?.googleMapsUrl || '', '');
-        const workingLink = rawLink && !/olamaps?/i.test(rawLink)
+        const workingLink = rawLink && !/olamaps?|openstreetmap/i.test(rawLink)
           ? rawLink
-          : buildOpenStreetMapSearchUrl(name);
+          : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(name + ' ' + destination)}`;
 
         return {
           ...place,

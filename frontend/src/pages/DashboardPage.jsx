@@ -17,7 +17,9 @@ import {
   Clock,
   Utensils,
   BookOpen,
-  ExternalLink
+  ExternalLink,
+  X,
+  Bot
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import InternalToolsRail from '../components/internal/InternalToolsRail';
@@ -60,6 +62,55 @@ const getBudgetSectionValue = (section, fallback = 0) => {
   return fallback;
 };
 
+const getTimelineIcon = (activityText) => {
+  const text = String(activityText || '').toLowerCase();
+  if (text.includes('eat') || text.includes('food') || text.includes('lunch') || text.includes('dinner') || text.includes('restaurant') || text.includes('breakfast') || text.includes('cafe') || text.includes('dining') || text.includes('gastronomy') || text.includes('snack') || text.includes('tea') || text.includes('coffee') || text.includes('meal')) {
+    return <Utensils size={13} />;
+  }
+  if (text.includes('hotel') || text.includes('stay') || text.includes('resort') || text.includes('inn') || text.includes('checkin') || text.includes('check-in') || text.includes('accommodation') || text.includes('hostel') || text.includes('lodge') || text.includes('room')) {
+    return <Hotel size={13} />;
+  }
+  if (text.includes('train') || text.includes('bus') || text.includes('flight') || text.includes('taxi') || text.includes('drive') || text.includes('transit') || text.includes('travel') || text.includes('cab') || text.includes('airport') || text.includes('station') || text.includes('car') || text.includes('transport') || text.includes('road')) {
+    return <TrainFront size={13} />;
+  }
+  if (text.includes('beach') || text.includes('visit') || text.includes('explore') || text.includes('sightseeing') || text.includes('fort') || text.includes('temple') || text.includes('museum') || text.includes('park') || text.includes('palace') || text.includes('monument') || text.includes('view') || text.includes('sunset') || text.includes('market') || text.includes('sight') || text.includes('walk') || text.includes('scenic')) {
+    return <MapPinIcon size={13} />;
+  }
+  return <Sparkles size={13} />;
+};
+
+const getOptionImage = (name, type = 'hotel') => {
+  const text = String(name || '').toLowerCase();
+  
+  if (type === 'travel' || text.includes('flight') || text.includes('air') || text.includes('fly')) {
+    return 'https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=600&q=80';
+  }
+  if (text.includes('train') || text.includes('rail') || text.includes('express') || text.includes('scenic')) {
+    return 'https://images.unsplash.com/photo-1474487548417-781cb71495f3?auto=format&fit=crop&w=600&q=80';
+  }
+  if (text.includes('car') || text.includes('cab') || text.includes('road') || text.includes('bus') || text.includes('transfer')) {
+    return 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80';
+  }
+
+  if (type === 'food' || text.includes('dine') || text.includes('restaurant') || text.includes('cafe') || text.includes('kitchen') || text.includes('table') || text.includes('flavour') || text.includes('eat')) {
+    if (text.includes('coastal') || text.includes('beach') || text.includes('sea') || text.includes('sunset')) {
+      return 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80';
+    }
+    if (text.includes('cafe') || text.includes('coffee') || text.includes('bakery')) {
+      return 'https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=600&q=80';
+    }
+    return 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=600&q=80';
+  }
+
+  if (text.includes('resort') || text.includes('beach') || text.includes('holiday') || text.includes('villa') || text.includes('village')) {
+    return 'https://images.unsplash.com/photo-1540541338287-41700207dee6?auto=format&fit=crop&w=600&q=80';
+  }
+  if (text.includes('boutique') || text.includes('heritage') || text.includes('palace') || text.includes('stay') || text.includes('taj')) {
+    return 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=600&q=80';
+  }
+  return 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&w=600&q=80';
+};
+
 export default function DashboardPage({
   tripData,
   onBackToHome,
@@ -70,6 +121,12 @@ export default function DashboardPage({
   const [tabData, setTabData] = useState({});
   const [loadingTab, setLoadingTab] = useState(null);
   const [notice, setNotice] = useState('');
+  const [showResearchDrawer, setShowResearchDrawer] = useState(false);
+  const [activeResearchTab, setActiveResearchTab] = useState('accommodation');
+  const [showCoPilot, setShowCoPilot] = useState(false);
+  const [selectedTravelIdx, setSelectedTravelIdx] = useState(0);
+  const [selectedHotelIdx, setSelectedHotelIdx] = useState(0);
+  const [selectedFoodIdx, setSelectedFoodIdx] = useState(0);
   const actionTimerRef = useRef(null);
   const tabs = ['Itinerary', 'Travel', 'Hotels', 'Places', 'Food'];
 
@@ -106,10 +163,7 @@ export default function DashboardPage({
   const travelersCount = parseInt(tripData?.travelers) || 2;
   const travelersText = travelersCount === 1 ? '1 Person' : `${travelersCount} People`;
   const tripDays = plan.totalDays || itinerary.length || 7;
-  const budgetData = buildBudgetData(budgetAmount);
-  const planningHighlights = plan.highlights || [];
-  const agentUserId = tripData?.sessionId || `${fromPlace}-${toPlace}-${startDate}`;
-  const selectedTravel = tabData.Travel?.options?.[0] || {
+  const selectedTravel = tabData.Travel?.options?.[selectedTravelIdx] || {
     name: 'Konkan Scenic Express',
     rating: 4.8,
     duration: '12-14 hours',
@@ -119,7 +173,7 @@ export default function DashboardPage({
     highlights: ['Scenic coastline', 'Budget-friendly', 'Relaxed journey'],
     link: '',
   };
-  const selectedHotel = tabData.Hotels?.options?.[0] || {
+  const selectedHotel = tabData.Hotels?.options?.[selectedHotelIdx] || {
     name: 'Taj Holiday Village',
     rating: 4.8,
     location: 'Calangute Beach',
@@ -127,6 +181,55 @@ export default function DashboardPage({
     highlights: ['Beachfront luxury', 'Resort amenities', 'Great for families'],
     link: '',
   };
+  const selectedFood = tabData.Food?.restaurants?.[selectedFoodIdx] || {
+    name: 'Coastal Spice',
+    rating: 4.6,
+    cuisine: 'Goan Seafood',
+    area: 'Candolim',
+    avgCost: 1200,
+    specialties: ['Fish Thali', 'Prawn Balchao'],
+    vibe: 'Casual Beachside',
+    link: ''
+  };
+
+  const getBudgetValue = (key, fallbackPct) => {
+    if (key === 'accommodation') {
+      return (selectedHotel.pricePerNight || selectedHotel.price || 0) * Math.max(1, tripDays - 1);
+    }
+    if (key === 'transportation') {
+      return (selectedTravel.price || 0);
+    }
+    if (key === 'food') {
+      return (selectedFood.avgCost || 0) * Math.max(1, tripDays);
+    }
+    if (budgetAllocation && budgetAllocation[key]) {
+      return getBudgetSectionValue(budgetAllocation[key]);
+    }
+    return Math.max(1, Math.round((budgetAmount * fallbackPct) / 100));
+  };
+
+  const rawBudgetData = [
+    { name: 'Accommodation', value: getBudgetValue('accommodation', 35), color: '#45B7A0' },
+    { name: 'Travel', value: getBudgetValue('transportation', 25), color: '#DE6B48' },
+    { name: 'Food', value: getBudgetValue('food', 20), color: '#F0B342' },
+    { name: 'Local Transport', value: getBudgetValue('localTransport', 8), color: '#2A3C4B' },
+    { name: 'Activities', value: getBudgetValue('activities', 12), color: '#A78BFA' },
+  ];
+
+  const totalSpent = rawBudgetData.reduce((sum, item) => sum + item.value, 0);
+  const bufferValue = getBudgetValue('miscellaneous', 0) || Math.max(0, budgetAmount - totalSpent);
+  
+  if (bufferValue > 0) {
+    rawBudgetData.push({ name: 'Buffer', value: bufferValue, color: '#64748B' });
+  }
+
+  const finalTotal = totalSpent + bufferValue;
+  const budgetData = rawBudgetData.map(item => ({
+    ...item,
+    percentage: Math.max(1, Math.round((item.value / (finalTotal || 1)) * 100))
+  }));
+  const planningHighlights = plan.highlights || [];
+  const agentUserId = tripData?.sessionId || `${fromPlace}-${toPlace}-${startDate}`;
 
   const detailTabs = ['Travel', 'Hotels', 'Places', 'Food'];
 
@@ -334,9 +437,34 @@ export default function DashboardPage({
 
           {planMeta && (
             <div className="content-section plan-intelligence-section">
-              <h2 className="section-title">
-                <Sparkles size={16} /> Plan Intelligence
-              </h2>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <h2 className="section-title" style={{ margin: 0 }}>
+                  <Sparkles size={16} /> Plan Intelligence
+                </h2>
+                {planMeta?.researchArtifacts && (
+                  <button
+                    onClick={() => setShowResearchDrawer(true)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '6px 14px',
+                      background: 'rgba(255, 107, 74, 0.15)',
+                      border: '1px solid rgba(255, 107, 74, 0.3)',
+                      borderRadius: '8px',
+                      color: 'var(--primary-coral)',
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                    className="research-drawer-btn hover-glow"
+                  >
+                    <BookOpen size={13} />
+                    View Subagent Research Reports
+                  </button>
+                )}
+              </div>
 
               <div className="plan-intelligence-grid">
                 <div className="plan-intelligence-card">
@@ -537,30 +665,33 @@ export default function DashboardPage({
         
         {/* Itinerary Tab */}
         {activeTab === 'Itinerary' && (
-          <div className="itinerary-content fade-in">
+          <div className="tab-content fade-in">
             <div className="itinerary-grid">
-              {(itinerary.length > 0 ? itinerary : [{ day: 1, date: startDate, title: 'Mumbai to Goa - Arrival & Beach Relax', activities: [] }]).map((day) => (
-                <article key={day.day} className="day-card">
+              {(itinerary.length > 0 ? itinerary : [{ day: 1, date: startDate, title: `${fromPlace} to ${toPlace} - Arrival`, activities: [] }]).map((day) => (
+                <article key={day.day} className="day-card" style={{ animationDelay: `${day.day * 80}ms` }}>
                   <div className="day-header">
                     <div className="day-circle">{day.day}</div>
                     <div className="day-title-group">
                       <h3>Day {day.day}</h3>
-                      <span className="day-date">{day.date}</span>
+                      {day.date && <span className="day-date">{day.date}</span>}
                     </div>
                   </div>
 
                   <h4 className="day-theme">{day.title}</h4>
 
-                  <ul className="day-list">
+                  <div className="day-list">
                     {(day.activities || []).map((activity, index) => (
-                      <li key={`${day.day}-${index}`} style={{ animationDelay: `${index * 50}ms` }}>
-                        <span className="list-dot">●</span>
-                        <span>
-                          <strong>{activity.time}</strong> - {activity.activity}
-                        </span>
-                      </li>
+                      <div key={`${day.day}-${index}`} className="timeline-item" style={{ animationDelay: `${index * 50}ms` }}>
+                        <div className="timeline-icon-wrapper">
+                          {getTimelineIcon(activity.activity)}
+                        </div>
+                        <div className="timeline-content">
+                          <span className="timeline-time">{activity.time}</span>
+                          <span className="timeline-desc">{activity.activity}</span>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
+                  </div>
                 </article>
               ))}
             </div>
@@ -578,12 +709,31 @@ export default function DashboardPage({
             ) : tabData['Travel']?.options ? (
               <div className="options-grid">
                 {tabData['Travel'].options.map((option, idx) => (
-                  <div key={idx} className="option-card travel-card" style={{ animationDelay: `${idx * 100}ms` }}>
+                  <div 
+                    key={idx} 
+                    className={`option-card travel-card ${selectedTravelIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
+                    onClick={() => setSelectedTravelIdx(idx)}
+                    style={{ animationDelay: `${idx * 100}ms`, cursor: 'pointer' }}
+                  >
+                    <div className="option-card-image-box">
+                      <img 
+                        src={option.image || option.photoUrl || getOptionImage(option.name, 'travel')} 
+                        alt={option.name} 
+                        className="option-card-image" 
+                        loading="lazy" 
+                      />
+                    </div>
                     <div className="option-header">
                       <div className="card-title-group">
                         <h3>{option.name}</h3>
                         {option.link && (
-                          <a className="card-link-badge" href={option.link} target="_blank" rel="noreferrer">
+                          <a 
+                            className="card-link-badge" 
+                            href={option.link} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             Open <ExternalLink size={12} />
                           </a>
                         )}
@@ -625,12 +775,31 @@ export default function DashboardPage({
             ) : tabData['Hotels']?.options ? (
               <div className="options-grid">
                 {tabData['Hotels'].options.map((hotel, idx) => (
-                  <div key={idx} className="option-card hotel-card" style={{ animationDelay: `${idx * 100}ms` }}>
+                  <div 
+                    key={idx} 
+                    className={`option-card hotel-card ${selectedHotelIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
+                    onClick={() => setSelectedHotelIdx(idx)}
+                    style={{ animationDelay: `${idx * 100}ms`, cursor: 'pointer' }}
+                  >
+                    <div className="option-card-image-box">
+                      <img 
+                        src={hotel.image || hotel.photoUrl || getOptionImage(hotel.name, 'hotel')} 
+                        alt={hotel.name} 
+                        className="option-card-image" 
+                        loading="lazy" 
+                      />
+                    </div>
                     <div className="option-header">
                       <div className="card-title-group">
                         <h3>{hotel.name}</h3>
                         {hotel.link && (
-                          <a className="card-link-badge" href={hotel.link} target="_blank" rel="noreferrer">
+                          <a 
+                            className="card-link-badge" 
+                            href={hotel.link} 
+                            target="_blank" 
+                            rel="noreferrer"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             Open <ExternalLink size={12} />
                           </a>
                         )}
@@ -718,12 +887,31 @@ export default function DashboardPage({
               <div className="food-container">
                 <div className="restaurants-grid">
                   {tabData['Food'].restaurants.map((restaurant, idx) => (
-                    <div key={idx} className="restaurant-card" style={{ animationDelay: `${idx * 100}ms` }}>
+                    <div 
+                      key={idx} 
+                      className={`restaurant-card ${selectedFoodIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
+                      onClick={() => setSelectedFoodIdx(idx)}
+                      style={{ animationDelay: `${idx * 100}ms`, cursor: 'pointer' }}
+                    >
+                      <div className="option-card-image-box">
+                        <img 
+                          src={restaurant.image || restaurant.photoUrl || getOptionImage(restaurant.name, 'food')} 
+                          alt={restaurant.name} 
+                          className="option-card-image" 
+                          loading="lazy" 
+                        />
+                      </div>
                       <div className="restaurant-header">
                         <div className="card-title-group">
                           <h3>{restaurant.name}</h3>
                           {restaurant.link && (
-                            <a className="card-link-badge" href={restaurant.link} target="_blank" rel="noreferrer">
+                            <a 
+                              className="card-link-badge" 
+                              href={restaurant.link} 
+                              target="_blank" 
+                              rel="noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                            >
                               Open <ExternalLink size={12} />
                             </a>
                           )}
@@ -781,14 +969,44 @@ export default function DashboardPage({
           </div>
         </div>
 
-        <aside className="dashboard-side-rail">
-          <InternalToolsRail
-            userId={agentUserId}
-            currentPlan={plan}
-            onPlanUpdate={handleAgentPlanUpdate}
-            agentModel="gemma-cloud"
-          />
-        </aside>
+        {/* Floating Co-Pilot FAB & Drawer Widget */}
+        <div className="floating-co-pilot-widget">
+          {/* FAB Button */}
+          <button 
+            className="co-pilot-fab"
+            onClick={() => setShowCoPilot(!showCoPilot)}
+            title="Ask Travel Assistant"
+          >
+            <Bot size={24} />
+            <span className="fab-pulse"></span>
+          </button>
+
+          {/* Co-Pilot Drawer */}
+          {showCoPilot && (
+            <div className="co-pilot-drawer-card">
+              <div className="co-pilot-drawer-header">
+                <div className="co-pilot-header-title">
+                  <Bot size={20} className="co-pilot-icon" />
+                  <h3>Wanderlust Co-Pilot</h3>
+                </div>
+                <button 
+                  className="co-pilot-drawer-close"
+                  onClick={() => setShowCoPilot(false)}
+                >
+                  <X size={18} />
+                </button>
+              </div>
+              <div className="co-pilot-drawer-body">
+                <InternalToolsRail
+                  userId={agentUserId}
+                  currentPlan={plan}
+                  onPlanUpdate={handleAgentPlanUpdate}
+                  agentModel="gemma-cloud"
+                />
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Plan Another Action */}
@@ -799,6 +1017,115 @@ export default function DashboardPage({
           <Sparkles size={16} /> Plan Another Trip
         </button>
       </div>
+
+      {/* Side-out research reports drawer */}
+      {showResearchDrawer && planMeta?.researchArtifacts && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          width: 'min(90vw, 640px)',
+          height: '100vh',
+          background: 'var(--bg-card)',
+          backdropFilter: 'var(--glass-blur)',
+          borderLeft: '1px solid var(--border-glass)',
+          boxShadow: 'var(--shadow-2xl)',
+          zIndex: '1000',
+          display: 'flex',
+          flexDirection: 'column',
+          animation: 'slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) both'
+        }}>
+          <div style={{
+            padding: '20px 24px',
+            borderBottom: '1px solid var(--border-light)',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
+                Multi-Agent Deep Research Reports
+              </h2>
+              <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', margin: '4px 0 0 0' }}>
+                Unedited research summaries compiled concurrently by cloud subagents
+              </p>
+            </div>
+            <button 
+              onClick={() => setShowResearchDrawer(false)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.05)',
+                border: 'none',
+                borderRadius: '50%',
+                width: '32px',
+                height: '32px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer'
+              }}
+            >
+              <X size={18} />
+            </button>
+          </div>
+
+          {/* Subagent tabs inside drawer */}
+          <div style={{
+            display: 'flex',
+            background: 'rgba(0, 0, 0, 0.1)',
+            padding: '4px',
+            margin: '16px 24px',
+            borderRadius: '8px'
+          }}>
+            {['accommodation', 'transit', 'food', 'places'].map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveResearchTab(tab)}
+                style={{
+                  flex: 1,
+                  padding: '8px 0',
+                  border: 'none',
+                  background: activeResearchTab === tab ? 'var(--bg-elevated)' : 'transparent',
+                  color: activeResearchTab === tab ? 'var(--primary-coral)' : 'var(--text-secondary)',
+                  fontWeight: activeResearchTab === tab ? '600' : '400',
+                  borderRadius: '4px',
+                  fontSize: '12px',
+                  textTransform: 'capitalize',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+              >
+                {tab === 'transit' ? 'Transit' : tab === 'accommodation' ? 'Stays' : tab === 'food' ? 'Gastronomy' : 'Sightseeing'}
+              </button>
+            ))}
+          </div>
+
+          {/* Drawer content area */}
+          <div style={{
+            flex: 1,
+            overflowY: 'auto',
+            padding: '0 24px 24px 24px',
+            fontSize: '14px',
+            lineHeight: '1.6',
+            color: 'var(--text-secondary)'
+          }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.02)',
+              border: '1px solid var(--border-subtle)',
+              borderRadius: '8px',
+              padding: '20px',
+              whiteSpace: 'pre-wrap',
+              fontFamily: 'var(--font-mono), monospace',
+              fontSize: '12px',
+              color: 'var(--text-primary)',
+              maxHeight: 'calc(100vh - 240px)',
+              overflowY: 'auto'
+            }}>
+              {planMeta.researchArtifacts[activeResearchTab] || 'No research log found for this subagent.'}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

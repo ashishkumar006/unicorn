@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, Loader2, AlertCircle } from 'lucide-react';
+import { Routes, Route } from 'react-router-dom';
+import { Loader2, AlertCircle } from 'lucide-react';
 import './styles/designSystem.css';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
+import AgentPage from './pages/AgentPage';
 import InternalLabPage from './pages/InternalLabPage';
 import { isInternalToolsEnabled, getInternalView } from './config/runtimeFlags';
+import { apiFetch } from './lib/api';
 
 const DESTINATION_FACTS = {
   goa: [
@@ -125,64 +128,38 @@ const buildLoadingFacts = (tripMeta = {}) => {
 
 const formatBudget = (value) => `₹${Number(value || 0).toLocaleString()}`;
 
-const PLANNING_STAGES = [
-  {
-    title: 'Reading trip brief',
-    detail: 'Checking route, dates, travelers, and budget constraints.'
-  },
-  {
-    title: 'Checking live maps',
-    detail: 'Pulling place data, stay zones, and route clusters.'
-  },
-  {
-    title: 'Estimating real costs',
-    detail: 'Measuring stay, food, and local transport before locking spend.'
-  },
-  {
-    title: 'Writing the plan',
-    detail: 'Balancing the budget and polishing the final dashboard view.'
-  }
-];
-
-const PLANNING_PROGRESS = [18, 42, 68, 92];
-
 function LoadingScreen({ error, tripMeta = {} }) {
-  const [factIndex, setFactIndex] = useState(0);
-  const [stageIndex, setStageIndex] = useState(0);
-  const facts = buildLoadingFacts(tripMeta);
   const destinationName = tripMeta?.toPlace || 'your destination';
-  const routeLabel = `${tripMeta?.fromPlace || 'your origin'} → ${destinationName}`;
-  const travelersCount = Number.parseInt(tripMeta?.travelers, 10) || 1;
-  const travelersLabel = travelersCount === 1 ? '1 traveler' : `${travelersCount} travelers`;
-  const budgetLabel = formatBudget(tripMeta?.budget || 10000);
-  const currentStage = PLANNING_STAGES[stageIndex] || PLANNING_STAGES[0];
-  const progressValue = PLANNING_PROGRESS[stageIndex] || PLANNING_PROGRESS[PLANNING_PROGRESS.length - 1];
+  const budgetValue = tripMeta?.budget || '10000';
+  const sessionId = tripMeta?.sessionId;
+
+  const [logs, setLogs] = useState([
+    { agent: 'System Coordinator', text: 'Initializing multi-agent planning network...', status: 'searching' }
+  ]);
 
   useEffect(() => {
-    if (error || facts.length <= 1) {
-      return undefined;
-    }
+    if (error) return undefined;
+    if (!sessionId) return undefined;
 
-    setFactIndex(0);
-    const timer = window.setInterval(() => {
-      setFactIndex((previous) => (previous + 1) % facts.length);
-    }, 8000);
+    const fetchStatus = async () => {
+      try {
+        const data = await apiFetch(`/travel/status/${encodeURIComponent(sessionId)}`);
+        if (data.success && Array.isArray(data.logs)) {
+          setLogs(data.logs);
+        }
+      } catch (e) {
+        setLogs((previousLogs) => previousLogs.length > 0
+          ? previousLogs
+          : [{ agent: 'System Coordinator', text: 'Still preparing your trip details...', status: 'searching' }]
+        );
+      }
+    };
 
+    fetchStatus();
+
+    const timer = window.setInterval(fetchStatus, 800);
     return () => window.clearInterval(timer);
-  }, [error, facts.length]);
-
-  useEffect(() => {
-    if (error || PLANNING_STAGES.length <= 1) {
-      return undefined;
-    }
-
-    setStageIndex(0);
-    const timer = window.setInterval(() => {
-      setStageIndex((previous) => Math.min(previous + 1, PLANNING_STAGES.length - 1));
-    }, 2800);
-
-    return () => window.clearInterval(timer);
-  }, [error, destinationName, tripMeta?.fromPlace, tripMeta?.budget, tripMeta?.startDate, tripMeta?.endDate, tripMeta?.travelers]);
+  }, [error, sessionId]);
 
   if (error) {
     return (
@@ -198,69 +175,108 @@ function LoadingScreen({ error, tripMeta = {} }) {
     );
   }
 
-  const currentFact = facts[factIndex] || facts[0];
+  const totalLogs = logs.length || 1;
+  const completedLogs = logs.filter(l => l.status === 'complete').length;
+  const progressValue = Math.min(100, Math.max(10, Math.round((completedLogs / totalLogs) * 100)));
 
   return (
     <div className="loading-screen">
-      <div className="loading-content loading-content-travel">
-        <div className="loading-destination-card">
-          <div className="loading-destination-header">
-            <div>
-              <div className="loading-destination-kicker">Cost-first planning</div>
-              <div className="loading-destination-route">{routeLabel}</div>
-            </div>
-            <div className="loading-destination-pill">
-              <Loader2 className="spinner" size={14} />
-              Planning
-            </div>
-          </div>
-
-          <div className="loading-progress-title">Building a map-aware itinerary</div>
-          <div className="loading-progress-subtitle">
-            Checking live places, distances, hotel zones, food stops, and local fares before the budget is split.
-          </div>
-
-          <div className="loading-hero-metrics">
-            <span className="loading-fact-pill">{tripMeta?.startDate || 'Start date'} → {tripMeta?.endDate || 'End date'}</span>
-            <span className="loading-fact-pill">{travelersLabel}</span>
-            <span className="loading-fact-pill">{budgetLabel}</span>
+      <div className="loading-content" style={{ width: 'min(90vw, 560px)' }}>
+        <div className="loading-wordmark">Wanderlust</div>
+        
+        <div className="loading-ring-container">
+          <svg className="loading-ring" viewBox="0 0 120 120">
+            <circle className="loading-ring-track" cx="60" cy="60" r="52" strokeWidth="2" fill="none" />
+            <circle 
+              className="loading-ring-progress" 
+              cx="60" cy="60" r="52" strokeWidth="3" fill="none"
+              strokeDasharray="327" 
+              strokeDashoffset={327 - (327 * progressValue / 100)}
+            />
+          </svg>
+          <div className="loading-dots">
+            {[0, 1, 2, 3].map((_, index) => (
+              <span key={index} className={`loading-dot ${index * 25 <= progressValue ? 'active' : ''}`} />
+            ))}
           </div>
         </div>
 
-        <div className="loading-progress-panel">
-          <div className="loading-progress-header">
-            <div>
-              <div className="loading-fact-pill">Planning {destinationName}</div>
-              <div className="loading-progress-title">Building your trip</div>
-              <div className="loading-progress-subtitle">{currentStage?.detail}</div>
-            </div>
-            <div className="loading-progress-percent">{progressValue}%</div>
-          </div>
-
-          <div className="loading-progress-track" aria-hidden="true">
-            <div className="loading-progress-fill" style={{ width: `${progressValue}%` }} />
-          </div>
-
-          <div className="loading-progress-steps">
-            {PLANNING_STAGES.map((stage, index) => {
-              const stepState = index < stageIndex ? 'done' : index === stageIndex ? 'active' : 'pending';
+        {/* Perplexity-style dynamic multi-agent search stream */}
+        <div className="loading-perplexity-log" style={{
+          marginTop: '1rem',
+          background: 'rgba(255, 255, 255, 0.45)',
+          border: '1px solid var(--border-glass)',
+          borderRadius: 'var(--radius-lg)',
+          padding: '1.25rem',
+          width: '100%',
+          maxHeight: '280px',
+          overflowY: 'auto',
+          textAlign: 'left',
+          backdropFilter: 'var(--glass-blur)',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
+          <h4 style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '12px', borderBottom: '1px solid var(--border-light)', paddingBottom: '6px' }}>
+            Multi-Agent Intelligence Network (Live)
+          </h4>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {logs.map((log, idx) => {
+              const getHostname = (urlStr) => {
+                try {
+                  return new URL(urlStr).hostname.replace('www.', '') || 'source';
+                } catch (e) {
+                  return 'source';
+                }
+              };
 
               return (
-                <div key={stage.title} className={`loading-progress-step ${stepState}`}>
-                  <div className="loading-progress-step-badge">{index + 1}</div>
-                  <div>
-                    <div className="loading-progress-step-name">{stage.title}</div>
-                    <div className="loading-progress-step-detail">{stage.detail}</div>
-                  </div>
+                <div key={idx} className="fade-in" style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '12px', animation: 'fadeIn 0.3s ease-out both' }}>
+                  <span style={{ minWidth: '130px', fontWeight: 800, color: log.agent === 'System Coordinator' ? 'var(--primary-coral)' : 'var(--secondary-teal)' }}>
+                    [{log.agent}]
+                  </span>
+                  <span style={{ color: log.status === 'searching' ? 'var(--text-primary)' : log.status === 'complete' ? 'var(--text-secondary)' : 'var(--text-tertiary)', fontWeight: log.status === 'searching' ? '600' : '400', flex: 1 }}>
+                    {log.text.replace('{destination}', destinationName).replace('{budget}', formatBudget(budgetValue))}
+                    {log.url && (
+                      <a 
+                        href={log.url} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '2px',
+                          marginLeft: '8px',
+                          padding: '2px 6px',
+                          background: 'rgba(255, 107, 74, 0.12)',
+                          border: '1px solid rgba(255, 107, 74, 0.25)',
+                          borderRadius: '4px',
+                          color: 'var(--primary-coral)',
+                          fontSize: '10px',
+                          fontWeight: '600',
+                          textDecoration: 'none'
+                        }}
+                      >
+                        <span>{getHostname(log.url)}</span>
+                        <span>↗</span>
+                      </a>
+                    )}
+                  </span>
+                  <span style={{ display: 'inline-flex', alignItems: 'center' }}>
+                    {log.status === 'complete' && <span style={{ color: 'var(--success)', fontWeight: 800 }}>✓</span>}
+                    {log.status === 'searching' && <Loader2 size={12} className="spinner" style={{ animation: 'spin 1s linear infinite', color: 'var(--primary-coral)' }} />}
+                    {log.status === 'pending' && <span style={{ color: 'var(--text-tertiary)', fontSize: '8px' }}>•</span>}
+                  </span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        <div className="loading-fact-card" key={`${tripMeta?.toPlace || 'destination'}-${factIndex}`}>
-          <div className="loading-fact-title">{currentFact?.title}</div>
-          <div className="loading-fact-body">{currentFact?.detail}</div>
+        <div className="loading-stage-info" style={{ marginTop: '0.5rem' }}>
+          <div className="loading-stage-title">
+            {logs.find(l => l.status === 'searching')?.text.replace('{destination}', destinationName).replace('{budget}', formatBudget(budgetValue)) || 'Synthesizing plan details...'}
+          </div>
+          <div className="loading-stage-detail">Dynamic multi-agents are resolving hotel official links, transport schedules, and local coordinates in the background.</div>
         </div>
       </div>
     </div>
@@ -331,15 +347,17 @@ function App() {
   const handlePlanTrip = async (formData) => {
     setIsPlanning(true);
     setError(null);
-    setTripData(formData);
+    
+    const sessionId = `trip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+    const formDataWithSession = { ...formData, sessionId };
+    setTripData(formDataWithSession);
 
     try {
-      // Calculate number of days from dates
       const startDate = new Date(formData.startDate);
       const endDate = new Date(formData.endDate);
       const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
 
-      const response = await fetch('/api/travel/plan', {
+      const result = await apiFetch('/travel/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -351,19 +369,14 @@ function App() {
           startDate: formData.startDate,
           endDate: formData.endDate,
           travelers: formData.travelers,
-          provider: 'auto'
+          provider: 'auto',
+          sessionId,
+          userPreferences: formData.userPreferences
         })
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        const sessionId = `trip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
-        setTripData({ ...formData, sessionId, plan: result.data, planMeta: result.meta || null });
-        setHasResults(true);
-      } else {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to generate travel plan');
-      }
+      setTripData({ ...formDataWithSession, plan: result.data, planMeta: result.meta || null });
+      setHasResults(true);
     } catch (err) {
       console.error('Error calling travel plan API:', err);
       setError(err.message || 'An error occurred while generating your trip plan');
@@ -385,21 +398,28 @@ function App() {
 
   return (
     <div className="app-container">
-      {isPlanning && <LoadingScreen error={error} tripMeta={tripData} />}
-      
-      {!isPlanning && !hasResults && (
-        <LandingPage onPlanTrip={handlePlanTrip} />
-      )}
-      
-      {!isPlanning && hasResults && (
-        <DashboardPage
-          tripData={tripData}
-          onBackToHome={handleBackToHome}
-          onPlanAnother={handleBackToHome}
-          onPlanUpdate={handlePlanUpdate}
-          showInternalTools={showInternalTools}
-        />
-      )}
+      <Routes>
+        <Route path="/" element={
+          <>
+            {isPlanning && <LoadingScreen error={error} tripMeta={tripData} />}
+            
+            {!isPlanning && !hasResults && (
+              <LandingPage onPlanTrip={handlePlanTrip} />
+            )}
+            
+            {!isPlanning && hasResults && (
+              <DashboardPage
+                tripData={tripData}
+                onBackToHome={handleBackToHome}
+                onPlanAnother={handleBackToHome}
+                onPlanUpdate={handlePlanUpdate}
+                showInternalTools={showInternalTools}
+              />
+            )}
+          </>
+        } />
+        <Route path="/agent" element={<AgentPage />} />
+      </Routes>
     </div>
   );
 }

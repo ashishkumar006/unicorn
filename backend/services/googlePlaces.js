@@ -269,6 +269,8 @@ function mapGoogleRestaurant(place, destination, index) {
     website: toText(place.website, ''),
     openingHours: getOpeningHoursText(place),
     coordinates: place.geometry || null,
+    image: place.image || '',
+    photoUrl: place.photoUrl || '',
   };
 }
 
@@ -297,6 +299,8 @@ function mapGoogleAttraction(place, destination, index) {
     openingHours: getOpeningHoursText(place),
     bestFor: deriveAttractionBestFor(place),
     coordinates: place.geometry || null,
+    image: place.image || '',
+    photoUrl: place.photoUrl || '',
   };
 }
 
@@ -324,30 +328,40 @@ async function searchGooglePlaces(query, limit = 10, config = getGooglePlacesCon
 
   const results = Array.isArray(response.data?.results) ? response.data.results : [];
 
-  return results.slice(0, limit).map((place, index) => ({
-    placeId: toText(place.place_id, `google-place-${index + 1}`),
-    name: toText(place.name, `Place ${index + 1}`),
-    formattedAddress: toText(place.formatted_address, ''),
-    rating: place.rating != null ? clampRating(place.rating, 4.4) : null,
-    userRatingsTotal: Math.max(0, Math.round(toNumber(place.user_ratings_total, 0))),
-    priceLevel: Number.isFinite(place.price_level) ? place.price_level : null,
-    types: normalizeTypes(place.types),
-    openingHours: place.opening_hours && typeof place.opening_hours === 'object'
-      ? {
-        open_now: place.opening_hours.open_now,
-      }
-      : null,
-    geometry: place.geometry && place.geometry.location
-      ? {
-        lat: toNumber(place.geometry.location.lat, 0),
-        lng: toNumber(place.geometry.location.lng, 0),
-      }
-      : null,
-    businessStatus: toText(place.business_status, ''),
-    source: 'Google Places',
-    website: toText(place.website, ''),
-    mapsUrl: buildGoogleMapsUrl(place),
-  }));
+  return results.slice(0, limit).map((place, index) => {
+    const photoRef = (place.photos && place.photos[0] && place.photos[0].photo_reference) || '';
+    const image = photoRef 
+      ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${photoRef}&key=${config.apiKey}` 
+      : '';
+
+    return {
+      placeId: toText(place.place_id, `google-place-${index + 1}`),
+      name: toText(place.name, `Place ${index + 1}`),
+      formattedAddress: toText(place.formatted_address, ''),
+      rating: place.rating != null ? clampRating(place.rating, 4.4) : null,
+      userRatingsTotal: Math.max(0, Math.round(toNumber(place.user_ratings_total, 0))),
+      priceLevel: Number.isFinite(place.price_level) ? place.price_level : null,
+      types: normalizeTypes(place.types),
+      openingHours: place.opening_hours && typeof place.opening_hours === 'object'
+        ? {
+          open_now: place.opening_hours.open_now,
+        }
+        : null,
+      geometry: place.geometry && place.geometry.location
+        ? {
+          lat: toNumber(place.geometry.location.lat, 0),
+          lng: toNumber(place.geometry.location.lng, 0),
+        }
+        : null,
+      businessStatus: toText(place.business_status, ''),
+      source: 'Google Places',
+      website: toText(place.website, ''),
+      mapsUrl: buildGoogleMapsUrl(place),
+      photoReference: photoRef,
+      image: image,
+      photoUrl: image,
+    };
+  });
 }
 
 async function searchGooglePlacesMultiple(queries, limit = 10, config = getGooglePlacesConfig()) {
@@ -420,6 +434,80 @@ async function getGoogleAttractions(destination, limit = 8, config = getGooglePl
   return results.map((place, index) => mapGoogleAttraction(place, destination, index));
 }
 
+async function getGoogleHotels(destination, limit = 8, config = getGooglePlacesConfig()) {
+  if (!destination || !isGooglePlacesConfigured(config)) {
+    return [];
+  }
+
+  const queries = [
+    `hotels in ${destination}`,
+    `best resorts in ${destination}`,
+  ];
+
+  const results = await searchGooglePlacesMultiple(queries, limit, config);
+  return results.map((place, index) => {
+    const rating = clampRating(place.rating, 4.5);
+    return {
+      id: `google-hotel-${index + 1}`,
+      placeId: place.placeId,
+      name: place.name,
+      rating,
+      reviews: place.userRatingsTotal || 0,
+      price_level: place.priceLevel || 2,
+      location: place.formattedAddress || destination,
+      coordinates: place.geometry || null,
+      image: place.image || '',
+      photoUrl: place.photoUrl || '',
+      googleMapsUrl: place.mapsUrl || buildGoogleMapsUrl(place),
+      website: place.website || '',
+      source: 'Google Places',
+    };
+  });
+}
+
+async function getGooglePlaceDetails(placeId, config = getGooglePlacesConfig()) {
+  if (!placeId || !isGooglePlacesConfigured(config)) {
+    return null;
+  }
+
+  try {
+    const response = await axios.get('https://maps.googleapis.com/maps/api/place/details/json', {
+      params: {
+        place_id: placeId,
+        fields: 'website,photos,url,formatted_phone_number,rating',
+        key: config.apiKey,
+        language: config.language,
+      },
+      timeout: 10000,
+    });
+
+    const status = response.data?.status;
+    if (status && status !== 'OK') {
+      console.warn(`[GooglePlaces] Place Details failed for ID ${placeId}: ${status}`);
+      return null;
+    }
+
+    const place = response.data?.result || {};
+    const photoRef = (place.photos && place.photos[0] && place.photos[0].photo_reference) || '';
+    const image = photoRef 
+      ? `https://maps.googleapis.com/maps/api/place/photo?maxwidth=800&photo_reference=${photoRef}&key=${config.apiKey}` 
+      : '';
+
+    return {
+      website: toText(place.website, ''),
+      googleMapsUrl: toText(place.url, ''),
+      photoReference: photoRef,
+      image: image,
+      photoUrl: image,
+      rating: place.rating != null ? clampRating(place.rating, 4.4) : null,
+      phoneNumber: toText(place.formatted_phone_number, ''),
+    };
+  } catch (error) {
+    console.warn(`[GooglePlaces] Error fetching place details for ${placeId}: ${error.message}`);
+    return null;
+  }
+}
+
 function buildPlacesCategoriesFromAttractions(attractions, trip = {}) {
   const destination = toText(trip.toPlace, 'the destination');
   const sourceAttractions = Array.isArray(attractions) ? attractions : [];
@@ -458,6 +546,8 @@ function buildPlacesCategoriesFromAttractions(attractions, trip = {}) {
       bestFor: Array.isArray(place.bestFor) && place.bestFor.length > 0 ? place.bestFor : ['Sightseeing'],
       googleMapsUrl: place.googleMapsUrl || '',
       source: place.source || 'Google Places',
+      image: place.image || '',
+      photoUrl: place.photoUrl || '',
     });
   });
 
@@ -490,6 +580,8 @@ function buildFoodSectionsFromRestaurants(restaurants, trip = {}) {
     bookingRequired: false,
     googleMapsUrl: restaurant.googleMapsUrl || '',
     source: restaurant.source || 'Google Places',
+    image: restaurant.image || '',
+    photoUrl: restaurant.photoUrl || '',
   }));
 
   const localSpecialties = mappedRestaurants.slice(0, 3).map((restaurant, index) => ({
@@ -514,6 +606,9 @@ function buildGoogleTravelReferencePrompt(referenceData, trip = {}) {
   }
 
   const destination = toText(trip.toPlace, 'the destination');
+  const hotelLines = (referenceData.hotels || [])
+    .slice(0, 5)
+    .map((hotel, index) => `${index + 1}. ${hotel.name} (${hotel.location || destination}, Rating: ${hotel.rating}/5)`);
   const restaurantLines = (referenceData.restaurants || [])
     .slice(0, 5)
     .map((restaurant, index) => `${index + 1}. ${restaurant.name} (${restaurant.cuisine || 'Local cuisine'}, ${restaurant.rating}/5, ${restaurant.area || destination})`);
@@ -524,6 +619,9 @@ function buildGoogleTravelReferencePrompt(referenceData, trip = {}) {
   return `
 
 Verified Google Places reference data for ${destination}:
+Hotels:
+${hotelLines.length > 0 ? hotelLines.join('\n') : 'None found.'}
+
 Restaurants:
 ${restaurantLines.length > 0 ? restaurantLines.join('\n') : 'None found.'}
 
@@ -546,20 +644,22 @@ async function buildGoogleTravelReferenceData(trip = {}) {
   }
 
   try {
-    const [restaurants, attractions] = await Promise.all([
+    const [restaurants, attractions, hotels] = await Promise.all([
       getGoogleRestaurants(destination, 6, config),
       getGoogleAttractions(destination, 9, config),
+      getGoogleHotels(destination, 6, config),
     ]);
 
     return {
       enabled: true,
       restaurants,
       attractions,
+      hotels,
       places: {
         categories: buildPlacesCategoriesFromAttractions(attractions, trip),
       },
       food: buildFoodSectionsFromRestaurants(restaurants, trip),
-      summary: `Google Places found ${restaurants.length} restaurants and ${attractions.length} attractions in ${destination}.`,
+      summary: `Google Places found ${hotels.length} hotels, ${restaurants.length} restaurants, and ${attractions.length} attractions in ${destination}.`,
     };
   } catch (error) {
     console.warn(`[GooglePlaces] Reference data failed for ${destination}: ${error.message}`);
@@ -574,6 +674,8 @@ module.exports = {
   searchGooglePlacesMultiple,
   getGoogleRestaurants,
   getGoogleAttractions,
+  getGoogleHotels,
+  getGooglePlaceDetails,
   buildPlacesCategoriesFromAttractions,
   buildFoodSectionsFromRestaurants,
   buildGoogleTravelReferencePrompt,

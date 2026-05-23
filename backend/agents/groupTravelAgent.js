@@ -13,7 +13,7 @@
  */
 
 const axios = require('axios');
-const MockTravelDataGenerator = require('./mockDataGenerator');
+const MockTravelDataGenerator = require('../scrapers/mockDataGenerator');
 
 class GroupTravelAgent {
   constructor() {
@@ -37,7 +37,7 @@ class GroupTravelAgent {
   // MAIN AGENT LOOP - This is what the user talks to
   // ============================================================
   async chat(userMessage) {
-    console.log(`\n👤 User: ${userMessage}`);
+    console.log(`\nUser message length: ${String(userMessage || '').length}`);
     
     this.conversationHistory.push({
       role: 'user',

@@ -1,0 +1,110 @@
+Created At: 2026-05-22T22:49:19Z
+Completed At: 2026-05-22T22:49:19Z
+File Path: `file:///c:/Users/AISHWARYA/Downloads/New%20folder%20%2815%29/unicorn/frontend/src/pages/DashboardPage.jsx`
+Total Lines: 778
+Total Bytes: 33590
+Showing lines 1 to 778
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1: import React, { useState, useEffect, useRef } from 'react';
+2: import {
+3:   ArrowLeft,
+4:   Calendar,
+5:   Copy,
+6:   RefreshCw,
+7:   Users,
+8:   IndianRupee,
+9:   Sparkles,
+10:   MapPin,
+11:   TrendingUp,
+12:   TrainFront,
+13:   Hotel,
+14:   Loader2,
+15:   Star,
+16:   MapPinIcon,
+17:   Clock,
+18:   Utensils,
+19:   BookOpen,
+20:   ExternalLink
+21: } from 'lucide-react';
+22: import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+23: import InternalToolsRail from '../components/internal/InternalToolsRail';
+24: import '../styles/designSystem.css';
+25: 
+26: const BUDGET_SPLITS = [
+27:   { name: 'Travel', percentage: 30, color: '#DE6B48' },
+28:   { name: 'Accommodation', percentage: 35, color: '#45B7A0' },
+29:   { name: 'Food', percentage: 20, color: '#F0B342' },
+30:   { name: 'Activities', percentage: 15, color: '#2A3C4B' },
+31: ];
+32: 
+33: const buildBudgetData = (budgetAmount) => BUDGET_SPLITS.map((item) => ({
+34:   ...item,
+35:   value: Math.max(1, Math.round((budgetAmount * item.percentage) / 100)),
+36: }));
+37: 
+38: const formatBudget = (value) => `₹${Number(value || 0).toLocaleString()}`;
+39: 
+40: const getBudgetSectionValue = (section, fallback = 0) => {
+41:   if (section == null) {
+42:     return fallback;
+43:   }
+44: 
+45:   if (typeof section === 'number') {
+46:     return Number.isFinite(section) ? section : fallback;
+47:   }
+48: 
+49:   if (typeof section === 'string') {
+50:     const parsed = Number(section);
+51:     return Number.isFinite(parsed) ? parsed : 
+<truncated 33847 bytes>
+an>}
+730:                             <div className="card-title-group">
+731:                               <h4>{specialty.name}</h4>
+732:                               {specialty.link && (
+733:                                 <a className="card-link-badge" href={specialty.link} target="_blank" rel="noreferrer">
+734:                                   Open <ExternalLink size={12} />
+735:                                 </a>
+736:                               )}
+737:                             </div>
+738:                           </div>
+739:                           <p>{specialty.description}</p>
+740:                           <p className="where"><MapPinIcon size={12} /> {specialty.whereToFind}</p>
+741:                         </div>
+742:                       ))}
+743:                     </div>
+744:                   </div>
+745:                 )}
+746:               </div>
+747:             ) : (
+748:               <div className="no-data">No restaurants available</div>
+749:             )}
+750:           </div>
+751:         )}
+752: 
+753:           </div>
+754:         </div>
+755: 
+756:         <aside className="dashboard-side-rail">
+757:           <InternalToolsRail
+758:             userId={agentUserId}
+759:             currentPlan={plan}
+760:             onPlanUpdate={handleAgentPlanUpdate}
+761:             agentModel="gemma-cloud"
+762:           />
+763:         </aside>
+764:       </div>
+765: 
+766:       {/* Plan Another Action */}
+767:       <div className="plan-another-section">
+768:         <h3 className="section-title-large">Ready to Plan Another Trip?</h3>
+769:         <p className="footer-subtext">Discover more destinations with optimized budget planning.</p>
+770:         <button className="button-plan-another" onClick={onPlanAnother}>
+771:           <Sparkles size={16} /> Plan Another Trip
+772:         </button>
+773:       </div>
+774: 
+775:     </div>
+776:   );
+777: }
+778: 
+The above content shows the entire, complete file contents of the requested file.

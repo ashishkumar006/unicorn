@@ -1,17 +1,46 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0ea5e9" />
-    <meta name="description" content="AI-Powered Travel Planner - Plan your perfect trip" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <title>Wanderlust AI - Smart Travel Planner</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="theme-color" content="#0a0f1a" />
+    <meta name="description" content="Wanderlust — AI-powered travel planner. Craft bespoke itineraries with real-time budgets, live hotel and restaurant data, and a dedicated AI co-pilot assistant." />
+    <meta name="author" content="Wanderlust AI Travel Co." />
+
+    <!-- Open Graph SEO Metadata -->
+    <meta property="og:title" content="Wanderlust — AI Travel Planner | Plan Your Dream Trip" />
+    <meta property="og:description" content="Craft bespoke travel itineraries with real-time budgets, live data from Google Places, and a dedicated AI co-pilot." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="%PUBLIC_URL%/hero_travel.png" />
+    <meta property="og:site_name" content="Wanderlust" />
+
+    <!-- Twitter Card Metadata -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Wanderlust — AI Travel Planner" />
+    <meta name="twitter:description" content="Craft bespoke travel itineraries with real-time budgets and a dedicated AI co-pilot." />
+    <meta name="twitter:image" content="%PUBLIC_URL%/hero_travel.png" />
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✈️</text></svg>" />
+
+    <!-- Google Fonts: Inter + Playfair Display -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,400..700;1,400..700&display=swap" rel="stylesheet" />
+
+    <title>Wanderlust — AI Travel Planner | Plan Your Dream Trip</title>
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
     <div id="root"></div>
+    <script>
+      // Apply saved theme preference before React hydrates to prevent flash
+      (function() {
+        var saved = localStorage.getItem('wanderlust-theme');
+        if (saved === 'light' || saved === 'dark') {
+          document.documentElement.setAttribute('data-theme', saved);
+        }
+      })();
+    </script>
   </body>
 </html>

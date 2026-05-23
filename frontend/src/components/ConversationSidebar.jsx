@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { Menu, X, Trash2, RefreshCw } from 'lucide-react';
+import { apiFetch } from '../lib/api';
 import '../styles/conversationSidebar.css';
 
 const ConversationSidebar = ({ userId, onSelectConversation, currentConversationId, sources = [] }) => {
@@ -15,17 +17,14 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
   const loadConversations = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`http://localhost:5000/api/agent/conversation-history/${userId}?limit=100`);
-      if (response.ok) {
-        const data = await response.json();
-        if (data.success && data.history) {
-          // Group messages by conversation (simple: group every N messages or by user intent)
-          const grouped = groupConversations(data.history);
-          setConversations(grouped);
-        }
+      const data = await apiFetch(`/agent/conversation-history/${encodeURIComponent(userId)}?limit=100`);
+      if (data.success && data.history) {
+        // Group messages by conversation (simple: group every N messages or by user intent)
+        const grouped = groupConversations(data.history);
+        setConversations(grouped);
       }
     } catch (err) {
-      console.error('Error loading conversations:', err);
+      setConversations([]);
     } finally {
       setLoading(false);
     }
@@ -95,18 +94,19 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
 
   if (!expandedSidebar) {
     return (
-      <button type="button" className="sidebar-toggle-btn" onClick={toggleSidebar} title="Show conversations">
-        ☰
+      <button type="button" className="sidebar-toggle-btn collapsed" onClick={toggleSidebar} title="Show conversations" aria-label="Show conversations">
+        <Menu size={18} />
       </button>
     );
   }
 
   return (
     <div className="conversation-sidebar">
+      <div className="sidebar-spine"></div>
       <div className="sidebar-header">
-        <h3>💬 Conversations</h3>
-        <button type="button" className="sidebar-toggle-btn" onClick={toggleSidebar} title="Hide sidebar">
-          ✕
+        <h3>Conversations</h3>
+        <button type="button" className="sidebar-toggle-btn" onClick={toggleSidebar} title="Hide sidebar" aria-label="Hide conversations">
+          <X size={18} />
         </button>
       </div>
 
@@ -164,8 +164,9 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
                 className="conversation-delete"
                 onClick={(e) => deleteConversation(conv.id, e)}
                 title="Delete"
+                aria-label="Remove conversation from list"
               >
-                🗑️
+                <Trash2 size={14} style={{ color: 'var(--text-muted)' }} />
               </button>
             </div>
           ))}
@@ -173,7 +174,7 @@ const ConversationSidebar = ({ userId, onSelectConversation, currentConversation
       )}
 
       <button type="button" className="sidebar-refresh-btn" onClick={loadConversations}>
-        🔄 Refresh
+        <RefreshCw size={14} style={{ marginRight: '6px', display: 'inline-block', verticalAlign: 'text-bottom' }} /> Refresh
       </button>
     </div>
   );

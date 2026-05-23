@@ -4,6 +4,7 @@ import axios from 'axios';
 import './styles/designSystem.css';
 import LandingPage from './pages/LandingPage';
 import DashboardPage from './pages/DashboardPage';
+import { API_BASE } from './lib/api';
 
 function AppRoutes() {
   const navigate = useNavigate();
@@ -18,7 +19,7 @@ function AppRoutes() {
       const days = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24));
 
       // Call backend to generate travel plan
-      const response = await axios.post('http://localhost:5000/api/travel/plan', {
+      const response = await axios.post(`${API_BASE}/travel/plan`, {
         fromPlace: formData.fromPlace,
         toPlace: formData.toPlace,
         budget: Math.round(parseFloat(formData.budget)),
@@ -28,7 +29,7 @@ function AppRoutes() {
       });
 
       // Also call the agent API to store the plan
-      await axios.post('http://localhost:5000/api/agent/plan', {
+      await axios.post(`${API_BASE}/agent/plan`, {
         userId,
         plan: {
           ...response.data.data,
