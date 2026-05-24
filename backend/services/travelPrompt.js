@@ -1,4 +1,4 @@
-const TRAVEL_SYSTEM_PROMPT = 'You are a professional travel planner. Return only valid JSON. Build practical, realistic travel packages. Use a cost-first planning order, keep routes geographically tight, and do not include commentary. CRITICAL LINK RULES: (a) OSM, Google Maps, Ola Maps, and any generic map-search URLs are internal research inputs ONLY — never include them in any output field. (b) The "link" field for hotels must be the hotel\'s official website or direct booking URL. (c) The "link" field for restaurants and attractions must be the establishment\'s official page or reputable booking/listing URL. (d) If no official link is available, use an empty string. Never invent generic booking-site placeholder URLs.';
+const TRAVEL_SYSTEM_PROMPT = 'You are a professional travel planner. Return only valid JSON. Build practical, realistic travel packages. Use a cost-first planning order, keep routes geographically tight, and do not include commentary. CRITICAL BUDGET CONSTRAINT — YOU MUST ADHERE TO THIS RULE FIRST: The total trip budget is provided by the user and must NEVER be exceeded. The sum of ALL sections (travel, accommodation, food, local transport, activities, miscellaneous) must equal EXACTLY the user-specified total budget in INR. If a user-suggested option listed by subagents would push the total over budget, replace it with a more affordable alternative — there is no exception to this rule. LINK RULES: (a) OSM raw search/map pages, bare Ola Maps static map tiles, Nominatim geocode URLs, and any IRCTC or train-schedule scheduler pages are background research inputs only — never include them in any output field. (b) The "link" field for hotels must be the hotel\'s official website URL or a direct booking page on a reputable travel site (Booking.com, Agoda, MakeMyTrip, Goibibo, Yatra, OYO). (c) The "link" field for restaurants and attractions should be the establishment\'s official or listing page (Zomato, Swiggy, TripAdvisor, Eazymytrip, MakeMyTrip local listings) — NOT a raw map-drive URL like "google.com/maps/search/?api=1…". (d) If you cannot find a verifiable public page for an option, use only the establishment name with no URL — never invent a URL.';
 
 function sanitizeUserInput(text) {
   if (typeof text !== 'string') return '';
@@ -65,7 +65,7 @@ Rules:
 - Weather should include a weatherInfo object and a forecast for ${trip.days} days.
 - Budget should include accommodation, food, transportation, localTransport, activities, and miscellaneous.
 - Use specific names and practical recommendations.
-- Keep the total within or close to the input budget.
+- Keep the total within or close to the input budget AT ALL COSTS. Never overbudget — if any top-level choice pushes the total over the input budget, downgrade it immediately rather than exceed the cap.
 
 Planning algorithm:
 1. Read the route, duration, travelers, luxury level, and budget as constraints, not as a fixed split.

@@ -189,34 +189,9 @@ export default function DashboardPage({
   const travelersCount = parseInt(tripData?.travelers) || 2;
   const travelersText = travelersCount === 1 ? '1 Person' : `${travelersCount} People`;
   const tripDays = plan.totalDays || itinerary.length || 7;
-  const selectedTravel = tabData.Travel?.options?.[selectedTravelIdx] || {
-    name: 'Konkan Scenic Express',
-    rating: 4.8,
-    duration: '12-14 hours',
-    price: 2000,
-    departure: 'Mumbai CST',
-    arrival: 'Goa Madgaon',
-    highlights: ['Scenic coastline', 'Budget-friendly', 'Relaxed journey'],
-    link: '',
-  };
-  const selectedHotel = tabData.Hotels?.options?.[selectedHotelIdx] || {
-    name: 'Taj Holiday Village',
-    rating: 4.8,
-    location: 'Calangute Beach',
-    pricePerNight: 5000,
-    highlights: ['Beachfront luxury', 'Resort amenities', 'Great for families'],
-    link: '',
-  };
-  const selectedFood = tabData.Food?.restaurants?.[selectedFoodIdx] || {
-    name: 'Coastal Spice',
-    rating: 4.6,
-    cuisine: 'Goan Seafood',
-    area: 'Candolim',
-    avgCost: 1200,
-    specialties: ['Fish Thali', 'Prawn Balchao'],
-    vibe: 'Casual Beachside',
-    link: ''
-  };
+  const selectedTravel = tabData.Travel?.options?.[selectedTravelIdx] || null;
+  const selectedHotel = tabData.Hotels?.options?.[selectedHotelIdx] || null;
+  const selectedFood = tabData.Food?.restaurants?.[selectedFoodIdx] || null;
 
   const getBudgetValue = (key, fallbackPct) => {
     if (key === 'accommodation') {
@@ -744,6 +719,19 @@ export default function DashboardPage({
                            <div className="timeline-content">
                              <span className="timeline-time">{activity.time}</span>
                              <span className="timeline-desc">{activity.activity}</span>
+                            {activity.link && (
+                              <div style={{ marginTop: '6px' }}>
+                                <a
+                                  className="card-link-badge"
+                                  href={activity.link}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  Open <ExternalLink size={12} />
+                                </a>
+                              </div>
+                            )}
                            </div>
                          </motion.div>
                        ))}

@@ -84,8 +84,9 @@ global.updatePlanningStatus = (sessionId, agent, text, status, url = '') => {
     planningStatusStore.set(sessionId, []);
   }
   const logs = planningStatusStore.get(sessionId);
-  const existingLogIdx = logs.findIndex((log) => log.agent === agent && log.text === text);
+  const existingLogIdx = logs.findIndex((log) => log.agent === agent);
   if (existingLogIdx !== -1) {
+    logs[existingLogIdx].text = text;
     logs[existingLogIdx].status = status;
     if (url) logs[existingLogIdx].url = url;
     logs[existingLogIdx].timestamp = new Date();

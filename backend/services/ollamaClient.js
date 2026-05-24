@@ -51,7 +51,7 @@ async function chatJson({
   options = {},
   think = false,
   keepAlive = '10m',
-  timeoutMs = 120000,
+  timeoutMs = 600000,
 }) {
   const config = resolveCloudConfig();
   const resolvedBaseUrl = (baseUrl || config.baseUrl).replace(/\/+$/, '');
@@ -91,7 +91,7 @@ async function chatJson({
         Authorization: `Bearer ${resolvedApiKey}`,
         'Content-Type': 'application/json',
       },
-      timeout: Math.max(1000, Number(timeoutMs) || 120000),
+      timeout: Math.max(1000, Number(timeoutMs) || 600000),
     }
   );
 

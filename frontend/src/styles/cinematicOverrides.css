@@ -190,17 +190,17 @@ select:focus-visible {
 }
 
 .page-wrapper.landing {
-  background-image: var(--landing-overlay), url('travel_hero.png');
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
-  max-width: 100% !important;
-  min-height: 100vh;
-  padding: 5rem 2rem 4rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
+   background-image: var(--landing-overlay), url('travel_resort.png');
+   background-size: cover;
+   background-position: center;
+   background-attachment: scroll;
+   max-width: 100% !important;
+   min-height: 100vh;
+   padding: 5rem 2rem 4rem;
+   display: flex;
+   flex-direction: column;
+   align-items: center;
+ }
 
 .landing-shell {
   width: 100%;

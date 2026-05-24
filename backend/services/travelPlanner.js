@@ -31,19 +31,6 @@ const DAY_THEMES = [
   'Departure and final stop',
 ];
 
-const FALLBACK_CATEGORIES = [
-  'Beaches and Waterfronts',
-  'Heritage and Culture',
-  'Food and Markets',
-];
-
-const FALLBACK_RESTAURANT_NAMES = [
-  'Coastal Table',
-  'Heritage Kitchen',
-  'Sunset Dine',
-  'Local Flavors Cafe',
-];
-
 function toNumber(value, fallback = 0) {
   if (typeof value === 'number' && Number.isFinite(value)) {
     return value;
@@ -964,36 +951,10 @@ function defaultTheme(dayIndex) {
   return DAY_THEMES[dayIndex] || `Day ${dayIndex + 1}`;
 }
 
-function buildDefaultItinerary(trip) {
-  const itinerary = [];
 
-  for (let index = 0; index < trip.days; index += 1) {
-    const dayNumber = index + 1;
-    const dayDate = trip.startDate ? addDays(trip.startDate, index) : `Day ${dayNumber}`;
-    const theme = defaultTheme(index);
-
-    itinerary.push({
-      day: dayNumber,
-      date: dayDate,
-      title: `${trip.toPlace} - ${theme}`,
-      activities: [
-        { time: 'Morning', activity: `Arrive and settle into ${trip.toPlace}` },
-        { time: 'Afternoon', activity: `Explore a local highlight in ${trip.toPlace}` },
-        { time: 'Evening', activity: `Enjoy dinner and a relaxed walk in ${trip.toPlace}` },
-      ],
-    });
-  }
-
-  return itinerary;
-}
 
 function normalizeActivities(activities, trip, dayIndex) {
   const list = Array.isArray(activities) ? activities : [];
-
-  if (list.length === 0) {
-    const defaultDay = buildDefaultItinerary(trip)[dayIndex];
-    return defaultDay ? defaultDay.activities : [];
-  }
 
   return list.map((item, index) => {
     if (typeof item === 'string') {
@@ -1042,10 +1003,7 @@ function normalizePlan(rawPlan, trip) {
     activities: normalizeActivities(day.activities, trip, index),
   }));
 
-  while (itinerary.length < trip.days) {
-    const defaultDay = buildDefaultItinerary(trip)[itinerary.length];
-    itinerary.push(defaultDay);
-  }
+
 
   const plan = {
     summary: sourcePlan.summary || {
@@ -1079,26 +1037,25 @@ function normalizePlan(rawPlan, trip) {
 function normalizeTravel(rawTravel, trip) {
   const sourceTravel = rawTravel && typeof rawTravel === 'object' ? rawTravel : {};
   const rawOptions = Array.isArray(sourceTravel.options) ? sourceTravel.options : [];
-  const fallbackOptions = buildDefaultTravelOptions(trip);
 
-  const options = (rawOptions.length > 0 ? rawOptions : fallbackOptions).map((option, index) => ({
-    name: toText(option.name, fallbackOptions[index]?.name || `Travel option ${index + 1}`),
-    type: toText(option.type, fallbackOptions[index]?.type || 'Transport'),
-    mode: toText(option.mode, fallbackOptions[index]?.mode || toText(option.type, 'Transport')),
-    duration: toText(option.duration, fallbackOptions[index]?.duration || 'Flexible'),
-    price: toNumber(option.price, fallbackOptions[index]?.price || Math.max(1, Math.round(trip.budget * 0.2))),
-    rating: clampRating(option.rating, fallbackOptions[index]?.rating || 4.5),
-    departure: toText(option.departure, fallbackOptions[index]?.departure || trip.fromPlace),
-    arrival: toText(option.arrival, fallbackOptions[index]?.arrival || trip.toPlace),
-    departureTime: toText(option.departureTime, fallbackOptions[index]?.departureTime || 'Flexible'),
-    arrivalTime: toText(option.arrivalTime, fallbackOptions[index]?.arrivalTime || 'Flexible'),
-    highlights: toStringArray(option.highlights, fallbackOptions[index]?.highlights || []),
-    details: toText(option.details || option.description, fallbackOptions[index]?.details || 'Travel option'),
-    description: toText(option.description || option.details, fallbackOptions[index]?.description || 'Travel option'),
+  const options = (rawOptions || []).map((option, index) => ({
+    name: toText(option.name, `Travel option ${index + 1}`),
+    type: toText(option.type, 'Transport'),
+    mode: toText(option.mode, toText(option.type, 'Transport')),
+    duration: toText(option.duration, 'Flexible'),
+    price: toNumber(option.price, 0),
+    rating: clampRating(option.rating, 4.5),
+    departure: toText(option.departure, trip.fromPlace),
+    arrival: toText(option.arrival, trip.toPlace),
+    departureTime: toText(option.departureTime, 'Flexible'),
+    arrivalTime: toText(option.arrivalTime, 'Flexible'),
+    highlights: toStringArray(option.highlights, []),
+    details: toText(option.details || option.description, 'Travel option'),
+    description: toText(option.description || option.details, 'Travel option'),
     bookingRequired: Boolean(option.bookingRequired),
     link: buildWorkingMapLink(
       option.link || option.url,
-      `${toText(option.name, fallbackOptions[index]?.name || `Travel option ${index + 1}`)} ${trip.fromPlace} ${trip.toPlace}`,
+      `${toText(option.name, `Travel option ${index + 1}`)} ${trip.fromPlace} ${trip.toPlace}`,
       trip.toPlace
     ),
   }));
@@ -1109,82 +1066,27 @@ function normalizeTravel(rawTravel, trip) {
   };
 }
 
-function buildDefaultTravelOptions(trip) {
-  const budget = Math.max(1, trip.budget);
-  const perPersonBudget = Math.max(1, Math.round(budget / trip.travelers));
-  const airPrice = Math.max(1, Math.round(perPersonBudget * 0.35));
-  const railPrice = Math.max(1, Math.round(perPersonBudget * 0.22));
-  const roadPrice = Math.max(1, Math.round(perPersonBudget * 0.16));
 
-  return [
-    {
-      name: `${trip.fromPlace} to ${trip.toPlace} Express Flight`,
-      type: 'Flight',
-      mode: 'Air',
-      duration: '1-3 hours',
-      price: airPrice,
-      rating: 4.8,
-      departure: trip.fromPlace,
-      arrival: trip.toPlace,
-      departureTime: 'Morning',
-      arrivalTime: 'Same day',
-      highlights: ['Fastest arrival', 'Best for short trips', 'More time on ground'],
-      details: `Direct flight option from ${trip.fromPlace} to ${trip.toPlace}.`,
-      description: 'Fast air transfer for travelers who want maximum time at the destination.',
-    },
-    {
-      name: `${trip.fromPlace} to ${trip.toPlace} Scenic Rail`,
-      type: 'Train',
-      mode: 'Rail',
-      duration: '10-14 hours',
-      price: railPrice,
-      rating: 4.6,
-      departure: trip.fromPlace,
-      arrival: trip.toPlace,
-      departureTime: 'Afternoon',
-      arrivalTime: 'Next morning',
-      highlights: ['Scenic route', 'Comfortable for overnight travel', 'Budget friendly'],
-      details: `Rail option suited for a relaxed trip from ${trip.fromPlace} to ${trip.toPlace}.`,
-      description: 'Balanced travel choice with a comfortable journey and lower cost.',
-    },
-    {
-      name: `${trip.fromPlace} to ${trip.toPlace} Road Transfer`,
-      type: 'Road',
-      mode: 'Car/Bus',
-      duration: 'Flexible',
-      price: roadPrice,
-      rating: 4.3,
-      departure: trip.fromPlace,
-      arrival: trip.toPlace,
-      departureTime: 'Early morning',
-      arrivalTime: 'Evening',
-      highlights: ['Flexible stops', 'Good for groups', 'Lowest transfer cost'],
-      details: `Road travel option from ${trip.fromPlace} to ${trip.toPlace}.`,
-      description: 'Good for travelers who want flexibility and lower transfer cost.',
-    },
-  ];
-}
 
 function normalizeHotels(rawHotels, trip) {
   const sourceHotels = rawHotels && typeof rawHotels === 'object' ? rawHotels : {};
   const rawOptions = Array.isArray(sourceHotels.options) ? sourceHotels.options : Array.isArray(sourceHotels.topHotels) ? sourceHotels.topHotels : [];
-  const fallbackOptions = buildDefaultHotels(trip);
 
-  const options = (rawOptions.length > 0 ? rawOptions : fallbackOptions).map((hotel, index) => ({
-    name: toText(hotel.name, fallbackOptions[index]?.name || `Stay option ${index + 1}`),
-    rating: clampRating(hotel.rating, fallbackOptions[index]?.rating || 4.5),
-    location: toText(hotel.location, fallbackOptions[index]?.location || trip.toPlace),
-    amenities: toStringArray(hotel.amenities, fallbackOptions[index]?.amenities || []),
-    highlights: toStringArray(hotel.highlights, fallbackOptions[index]?.highlights || []),
-    pricePerNight: toNumber(hotel.pricePerNight || hotel.price, fallbackOptions[index]?.pricePerNight || Math.max(1, Math.round(trip.budget * 0.25))),
-    stars: toInteger(hotel.stars, fallbackOptions[index]?.stars || 4),
-    roomTypes: Array.isArray(hotel.roomTypes) ? hotel.roomTypes : fallbackOptions[index]?.roomTypes || [],
-    facilities: toStringArray(hotel.facilities, fallbackOptions[index]?.facilities || []),
-    checkIn: toText(hotel.checkIn, fallbackOptions[index]?.checkIn || '2:00 PM'),
-    checkOut: toText(hotel.checkOut, fallbackOptions[index]?.checkOut || '11:00 AM'),
+  const options = (rawOptions || []).map((hotel, index) => ({
+    name: toText(hotel.name, `Stay option ${index + 1}`),
+    rating: clampRating(hotel.rating, 4.5),
+    location: toText(hotel.location, trip.toPlace),
+    amenities: toStringArray(hotel.amenities, []),
+    highlights: toStringArray(hotel.highlights, []),
+    pricePerNight: toNumber(hotel.pricePerNight || hotel.price, 0),
+    stars: toInteger(hotel.stars, 4),
+    roomTypes: Array.isArray(hotel.roomTypes) ? hotel.roomTypes : [],
+    facilities: toStringArray(hotel.facilities, []),
+    checkIn: toText(hotel.checkIn, '2:00 PM'),
+    checkOut: toText(hotel.checkOut, '11:00 AM'),
     link: buildWorkingMapLink(
       hotel.link || hotel.website || hotel.url,
-      `${toText(hotel.name, fallbackOptions[index]?.name || `Stay option ${index + 1}`)} ${toText(hotel.location, fallbackOptions[index]?.location || trip.toPlace)} hotel`,
+      `${toText(hotel.name, `Stay option ${index + 1}`)} ${toText(hotel.location, trip.toPlace)} hotel`,
       trip.toPlace
     ),
   }));
@@ -1194,60 +1096,14 @@ function normalizeHotels(rawHotels, trip) {
   };
 }
 
-function buildDefaultHotels(trip) {
-  const perNightBudget = Math.max(1, Math.round(trip.budget * 0.28));
-  const starNames = ['Boutique Stay', 'Comfort Resort', 'City Hotel'];
 
-  return [
-    {
-      name: `${trip.toPlace} ${starNames[0]}`,
-      rating: 4.7,
-      location: `Central ${trip.toPlace}`,
-      amenities: ['WiFi', 'Breakfast', 'AC', 'Housekeeping'],
-      highlights: ['Central access', 'Comfort-first service', 'Good for short stays'],
-      pricePerNight: Math.round(perNightBudget * 0.85),
-      stars: 4,
-      roomTypes: [{ type: 'Standard Room', pricePerNight: Math.round(perNightBudget * 0.85) }],
-      facilities: ['Front desk', 'Room service', 'Laundry'],
-      checkIn: '2:00 PM',
-      checkOut: '11:00 AM',
-    },
-    {
-      name: `${trip.toPlace} ${starNames[1]}`,
-      rating: 4.5,
-      location: `Near ${trip.toPlace} attractions`,
-      amenities: ['Pool', 'WiFi', 'Breakfast', 'Restaurant'],
-      highlights: ['Better for leisure', 'Easy access to attractions', 'Balanced pricing'],
-      pricePerNight: perNightBudget,
-      stars: 4,
-      roomTypes: [{ type: 'Deluxe Room', pricePerNight: perNightBudget }],
-      facilities: ['Restaurant', 'Pool', 'Concierge'],
-      checkIn: '2:00 PM',
-      checkOut: '12:00 PM',
-    },
-    {
-      name: `${trip.toPlace} ${starNames[2]}`,
-      rating: 4.2,
-      location: `Main market area of ${trip.toPlace}`,
-      amenities: ['WiFi', 'AC', 'Breakfast'],
-      highlights: ['Budget-conscious', 'Convenient location', 'Simple and clean'],
-      pricePerNight: Math.round(perNightBudget * 0.7),
-      stars: 3,
-      roomTypes: [{ type: 'Compact Room', pricePerNight: Math.round(perNightBudget * 0.7) }],
-      facilities: ['Front desk', 'Laundry'],
-      checkIn: '3:00 PM',
-      checkOut: '11:00 AM',
-    },
-  ];
-}
 
 function normalizePlaces(rawPlaces, trip) {
   const sourcePlaces = rawPlaces && typeof rawPlaces === 'object' ? rawPlaces : {};
   const rawCategories = Array.isArray(sourcePlaces.categories) ? sourcePlaces.categories : Array.isArray(sourcePlaces.topAttractions) ? groupFlatPlaces(sourcePlaces.topAttractions) : [];
-  const fallbackCategories = buildDefaultPlaces(trip);
 
-  const categories = (rawCategories.length > 0 ? rawCategories : fallbackCategories).map((category, categoryIndex) => ({
-    name: toText(category.name, fallbackCategories[categoryIndex]?.name || FALLBACK_CATEGORIES[categoryIndex] || 'Attractions'),
+  const categories = (rawCategories || []).map((category, categoryIndex) => ({
+    name: toText(category.name, 'Attractions'),
     places: (Array.isArray(category.places) ? category.places : []).map((place, placeIndex) => ({
       name: toText(place.name, `Place ${placeIndex + 1}`),
       type: toText(place.type || place.category, 'Attraction'),
@@ -1289,211 +1145,64 @@ function groupFlatPlaces(flatPlaces) {
   return categories;
 }
 
-function buildDefaultPlaces(trip) {
-  return [
-    {
-      name: `${trip.toPlace} Waterfront Walk`,
-      places: [
-        {
-          name: `${trip.toPlace} Waterfront Walk`,
-          type: 'Scenic Spot',
-          description: `A relaxed route to start exploring ${trip.toPlace}.`,
-          timeRequired: '2-3 hours',
-          entryFee: 'Free',
-          rating: 4.6,
-          distance: `Central ${trip.toPlace}`,
-          openingHours: 'Open all day',
-          bestFor: ['Walks', 'Sunset views'],
-        },
-        {
-          name: `${trip.toPlace} Local Market`,
-          type: 'Market',
-          description: `Browse souvenirs and snacks in ${trip.toPlace}.`,
-          timeRequired: '1-2 hours',
-          entryFee: 'Free',
-          rating: 4.4,
-          distance: `Market area in ${trip.toPlace}`,
-          openingHours: '10:00 AM - 08:00 PM',
-          bestFor: ['Shopping', 'Street food'],
-        },
-      ],
-    },
-    {
-      name: 'Heritage and History',
-      places: [
-        {
-          name: `${trip.toPlace} Heritage Quarter`,
-          type: 'Heritage',
-          description: `A compact heritage walk through the older part of ${trip.toPlace}.`,
-          timeRequired: '2-3 hours',
-          entryFee: 'Free',
-          rating: 4.5,
-          distance: `Historic center of ${trip.toPlace}`,
-          openingHours: '09:00 AM - 05:00 PM',
-          bestFor: ['History', 'Photography'],
-        },
-        {
-          name: `${trip.toPlace} Cultural Museum`,
-          type: 'Museum',
-          description: `Learn the local story and context of ${trip.toPlace}.`,
-          timeRequired: '1-2 hours',
-          entryFee: '₹100',
-          rating: 4.3,
-          distance: `Near city center`,
-          openingHours: '10:00 AM - 06:00 PM',
-          bestFor: ['Museums', 'Family visits'],
-        },
-      ],
-    },
-    {
-      name: 'Food and Leisure',
-      places: [
-        {
-          name: `${trip.toPlace} Sunset Point`,
-          type: 'Viewpoint',
-          description: `A pleasant stop for sunsets and a light evening outing.`,
-          timeRequired: '1-2 hours',
-          entryFee: 'Free',
-          rating: 4.7,
-          distance: `Short ride from central ${trip.toPlace}`,
-          openingHours: 'Late afternoon - evening',
-          bestFor: ['Sunset', 'Photography', 'Relaxing evening'],
-        },
-        {
-          name: `${trip.toPlace} Food Street`,
-          type: 'Food Street',
-          description: `Try regional snacks and simple meals across ${trip.toPlace}.`,
-          timeRequired: '2 hours',
-          entryFee: 'Free',
-          rating: 4.5,
-          distance: `Popular food lane in ${trip.toPlace}`,
-          openingHours: '06:00 PM - 11:00 PM',
-          bestFor: ['Street food', 'Evening walks'],
-        },
-      ],
-    },
-  ];
-}
+
 
 function normalizeFood(rawFood, trip) {
   const sourceFood = rawFood && typeof rawFood === 'object' ? rawFood : {};
   const rawRestaurants = Array.isArray(sourceFood.restaurants) ? sourceFood.restaurants : Array.isArray(sourceFood.topRestaurants) ? sourceFood.topRestaurants : [];
   const rawSpecialties = Array.isArray(sourceFood.localSpecialties) ? sourceFood.localSpecialties : [];
   const rawStreetFood = Array.isArray(sourceFood.streetFood) ? sourceFood.streetFood : [];
-  const fallbackRestaurants = buildDefaultRestaurants(trip);
-  const fallbackSpecialties = buildDefaultSpecialties(trip);
-  const fallbackStreetFood = buildDefaultStreetFood(trip);
 
   return {
-    restaurants: (rawRestaurants.length > 0 ? rawRestaurants : fallbackRestaurants).map((restaurant, index) => ({
-      name: toText(restaurant.name, fallbackRestaurants[index]?.name || `Restaurant ${index + 1}`),
-      cuisine: toText(restaurant.cuisine, fallbackRestaurants[index]?.cuisine || 'Local cuisine'),
-      area: toText(restaurant.area || restaurant.location, fallbackRestaurants[index]?.area || trip.toPlace),
-      specialties: toStringArray(restaurant.specialties || restaurant.dishes, fallbackRestaurants[index]?.specialties || []),
-      vibe: toText(restaurant.vibe || restaurant.ambiance, fallbackRestaurants[index]?.vibe || 'Casual'),
-      avgCost: toNumber(restaurant.avgCost || restaurant.costForTravelers || restaurant.price, fallbackRestaurants[index]?.avgCost || Math.max(1, Math.round(trip.budget * 0.08))),
-      rating: clampRating(restaurant.rating, fallbackRestaurants[index]?.rating || 4.5),
-      description: toText(restaurant.description || restaurant.speciality, fallbackRestaurants[index]?.description || 'Recommended restaurant'),
-      bestFor: toText(restaurant.bestFor, fallbackRestaurants[index]?.bestFor || 'Lunch or dinner'),
-      timings: toText(restaurant.timings || restaurant.timing, fallbackRestaurants[index]?.timings || '10:00 AM - 10:00 PM'),
+    restaurants: (rawRestaurants || []).map((restaurant, index) => ({
+      name: toText(restaurant.name, `Restaurant ${index + 1}`),
+      cuisine: toText(restaurant.cuisine, 'Local cuisine'),
+      area: toText(restaurant.area || restaurant.location, trip.toPlace),
+      specialties: toStringArray(restaurant.specialties || restaurant.dishes, []),
+      vibe: toText(restaurant.vibe || restaurant.ambiance, 'Casual'),
+      avgCost: toNumber(restaurant.avgCost || restaurant.costForTravelers || restaurant.price, 0),
+      rating: clampRating(restaurant.rating, 4.5),
+      description: toText(restaurant.description || restaurant.speciality, 'Recommended restaurant'),
+      bestFor: toText(restaurant.bestFor, 'Lunch or dinner'),
+      timings: toText(restaurant.timings || restaurant.timing, '10:00 AM - 10:00 PM'),
       bookingRequired: Boolean(restaurant.bookingRequired),
       link: buildWorkingMapLink(
         restaurant.link || restaurant.googleMapsUrl || restaurant.website || restaurant.url,
-        `${toText(restaurant.name, fallbackRestaurants[index]?.name || `Restaurant ${index + 1}`)} ${trip.toPlace} restaurant`,
+        `${toText(restaurant.name, `Restaurant ${index + 1}`)} ${trip.toPlace} restaurant`,
         trip.toPlace
       ),
     })),
-    localSpecialties: (rawSpecialties.length > 0 ? rawSpecialties : fallbackSpecialties).map((specialty, index) => ({
-      name: toText(specialty.name, fallbackSpecialties[index]?.name || `Specialty ${index + 1}`),
-      description: toText(specialty.description, fallbackSpecialties[index]?.description || 'Local specialty'),
-      whereToFind: toText(specialty.whereToFind || specialty.whereToTry, fallbackSpecialties[index]?.whereToFind || trip.toPlace),
-      price: toText(specialty.price, fallbackSpecialties[index]?.price || '₹200-400'),
+    localSpecialties: (rawSpecialties || []).map((specialty, index) => ({
+      name: toText(specialty.name, `Specialty ${index + 1}`),
+      description: toText(specialty.description, 'Local specialty'),
+      whereToFind: toText(specialty.whereToFind || specialty.whereToTry, trip.toPlace),
+      price: toText(specialty.price, '₹200-400'),
       mustTry: specialty.mustTry !== false,
-      bestTime: toText(specialty.bestTime, fallbackSpecialties[index]?.bestTime || 'Anytime'),
+      bestTime: toText(specialty.bestTime, 'Anytime'),
       link: buildWorkingMapLink(
         specialty.link || specialty.url,
-        `${toText(specialty.name, fallbackSpecialties[index]?.name || `Specialty ${index + 1}`)} ${trip.toPlace}`,
+        `${toText(specialty.name, `Specialty ${index + 1}`)} ${trip.toPlace}`,
         trip.toPlace
       ),
     })),
-    streetFood: (rawStreetFood.length > 0 ? rawStreetFood : fallbackStreetFood).map((item, index) => ({
-      name: toText(item.name, fallbackStreetFood[index]?.name || `Street food ${index + 1}`),
-      price: toText(item.price, fallbackStreetFood[index]?.price || '₹100-200'),
-      location: toText(item.location, fallbackStreetFood[index]?.location || trip.toPlace),
+    streetFood: (rawStreetFood || []).map((item, index) => ({
+      name: toText(item.name, `Street food ${index + 1}`),
+      price: toText(item.price, '₹100-200'),
+      location: toText(item.location, trip.toPlace),
       link: buildWorkingMapLink(
         item.link || item.url,
-        `${toText(item.name, fallbackStreetFood[index]?.name || `Street food ${index + 1}`)} ${trip.toPlace}`,
+        `${toText(item.name, `Street food ${index + 1}`)} ${trip.toPlace}`,
         trip.toPlace
       ),
     })),
   };
 }
 
-function buildDefaultRestaurants(trip) {
-  return FALLBACK_RESTAURANT_NAMES.map((name, index) => ({
-    name: `${trip.toPlace} ${name}`,
-    cuisine: index === 0 ? 'Local cuisine' : index === 1 ? 'Seafood' : index === 2 ? 'Continental' : 'Cafe',
-    area: `Popular area in ${trip.toPlace}`,
-    specialties: ['Chef recommendation', 'Seasonal dish', 'Signature item'],
-    vibe: index === 2 ? 'Relaxed' : 'Casual',
-    avgCost: Math.max(1, Math.round(trip.budget * (0.07 + index * 0.01))),
-    rating: 4.4 + index * 0.1,
-    description: `A reliable dining option in ${trip.toPlace}.`,
-    bestFor: index === 0 ? 'Dinner' : 'Lunch',
-    timings: '10:00 AM - 10:00 PM',
-  }));
-}
 
-function buildDefaultSpecialties(trip) {
-  return [
-    {
-      name: `${trip.toPlace} Thali`,
-      description: `A complete local meal showcasing ${trip.toPlace}'s flavors.`,
-      whereToFind: `Popular restaurants in ${trip.toPlace}`,
-      price: '₹250-450',
-      bestTime: 'Lunch',
-    },
-    {
-      name: 'Fresh Local Catch',
-      description: `Freshly cooked seafood inspired by the destination cuisine.`,
-      whereToFind: `Coastal restaurants and shacks`,
-      price: '₹300-600',
-      bestTime: 'Dinner',
-    },
-    {
-      name: 'Regional Dessert',
-      description: `A sweet finish from the region.`,
-      whereToFind: `Dessert shops and heritage cafes`,
-      price: '₹100-250',
-      bestTime: 'Evening',
-    },
-  ];
-}
-
-function buildDefaultStreetFood(trip) {
-  return [
-    {
-      name: `${trip.toPlace} Snack Roll`,
-      price: '₹50-100',
-      location: `Street vendors in ${trip.toPlace}`,
-    },
-    {
-      name: 'Spiced Fritters',
-      price: '₹80-150',
-      location: `Evening markets in ${trip.toPlace}`,
-    },
-    {
-      name: 'Local Chaat',
-      price: '₹60-120',
-      location: `Food lanes across ${trip.toPlace}`,
-    },
-  ];
-}
 
 function normalizeWeather(rawWeather, trip) {
   const sourceWeather = rawWeather && typeof rawWeather === 'object' ? rawWeather : {};
   const rawForecast = Array.isArray(sourceWeather.forecast) ? sourceWeather.forecast : [];
-  const fallbackForecast = buildDefaultForecast(trip);
 
   return {
     weatherInfo: sourceWeather.weatherInfo || sourceWeather.current || {
@@ -1502,7 +1211,7 @@ function normalizeWeather(rawWeather, trip) {
       humidity: 68,
       windSpeed: 12,
     },
-    forecast: (rawForecast.length > 0 ? rawForecast : fallbackForecast).slice(0, trip.days).map((day, index) => ({
+    forecast: (rawForecast || []).slice(0, trip.days).map((day, index) => ({
       day: toText(day.day, `Day ${index + 1}`),
       high: toNumber(day.high, 31 + (index % 3)),
       low: toNumber(day.low, 24 + (index % 2)),
@@ -1515,18 +1224,7 @@ function normalizeWeather(rawWeather, trip) {
   };
 }
 
-function buildDefaultForecast(trip) {
-  return Array.from({ length: trip.days }, (_, index) => ({
-    day: `Day ${index + 1}`,
-    high: 31 + (index % 3),
-    low: 24 + (index % 2),
-    condition: index % 2 === 0 ? 'Sunny' : 'Partly Cloudy',
-    humidity: 68 + (index % 4),
-    seaCondition: 'Calm',
-    uvIndex: '8',
-    recommendation: `A comfortable day in ${trip.toPlace}.`,
-  }));
-}
+
 
 function normalizeBudget(rawBudget, trip) {
   const sourceBudget = rawBudget && typeof rawBudget === 'object' ? rawBudget : {};
@@ -1560,27 +1258,153 @@ function normalizeBudgetSection(section, label, fallbackValue, percentage, detai
   };
 }
 
-function mergeGooglePlacesIntoPackage(rawPackage, referenceData) {
-  if (!referenceData) {
-    return rawPackage;
+function mergeGooglePlacesIntoPackage(rawPackage, referenceData, subagentResults) {
+  // 1. Prepare candidate search lists from referenceData and subagentResults
+  const hotelCandidates = [];
+  const travelCandidates = [];
+  const restaurantCandidates = [];
+  const attractionCandidates = [];
+
+  // Add reference data candidates
+  if (referenceData) {
+    if (Array.isArray(referenceData.hotels)) hotelCandidates.push(...referenceData.hotels);
+    if (Array.isArray(referenceData.restaurants)) restaurantCandidates.push(...referenceData.restaurants);
+    if (Array.isArray(referenceData.attractions)) attractionCandidates.push(...referenceData.attractions);
+    if (referenceData.places && Array.isArray(referenceData.places.categories)) {
+      for (const cat of referenceData.places.categories) {
+        if (Array.isArray(cat.places)) attractionCandidates.push(...cat.places);
+      }
+    }
+    if (referenceData.food) {
+      if (Array.isArray(referenceData.food.restaurants)) restaurantCandidates.push(...referenceData.food.restaurants);
+    }
   }
 
-  const places = referenceData.places && Array.isArray(referenceData.places.categories) && referenceData.places.categories.length > 0
-    ? referenceData.places
-    : rawPackage.places;
+  // Add subagent results candidates
+  if (subagentResults) {
+    if (subagentResults.accommodation && Array.isArray(subagentResults.accommodation.options)) {
+      hotelCandidates.push(...subagentResults.accommodation.options);
+    }
+    if (subagentResults.transit && Array.isArray(subagentResults.transit.options)) {
+      travelCandidates.push(...subagentResults.transit.options);
+    }
+    if (subagentResults.food && subagentResults.food.food) {
+      if (Array.isArray(subagentResults.food.food.restaurants)) {
+        restaurantCandidates.push(...subagentResults.food.food.restaurants);
+      }
+      if (Array.isArray(subagentResults.food.food.localSpecialties)) {
+        restaurantCandidates.push(...subagentResults.food.food.localSpecialties);
+      }
+      if (Array.isArray(subagentResults.food.food.streetFood)) {
+        restaurantCandidates.push(...subagentResults.food.food.streetFood);
+      }
+    }
+    if (subagentResults.places && subagentResults.places.places) {
+      if (Array.isArray(subagentResults.places.places.categories)) {
+        for (const cat of subagentResults.places.places.categories) {
+          if (Array.isArray(cat.places)) attractionCandidates.push(...cat.places);
+        }
+      }
+    }
+  }
 
-  const referenceFood = referenceData.food || {};
+  // Helper matching function
+  function findMatch(name, candidates) {
+    if (!name || typeof name !== 'string') return null;
+    const cleanName = name.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+    if (!cleanName) return null;
+
+    // First try exact / full containment match
+    for (const cand of candidates) {
+      if (!cand || !cand.name || typeof cand.name !== 'string') continue;
+      const cleanCandName = cand.name.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+      if (!cleanCandName) continue;
+      if (cleanName === cleanCandName || cleanName.includes(cleanCandName) || cleanCandName.includes(cleanName)) {
+        return cand;
+      }
+    }
+
+    // Secondary soft match: check first 2 words if they are long enough
+    const words = name.toLowerCase().replace(/[^a-z0-9\s]/g, '').split(/\s+/).filter(w => w.length > 3);
+    if (words.length >= 2) {
+      const matchPrefix = words.slice(0, 2).join('');
+      for (const cand of candidates) {
+        if (!cand || !cand.name || typeof cand.name !== 'string') continue;
+        const cleanCandName = cand.name.toLowerCase().replace(/[^a-z0-9]/g, '').trim();
+        if (cleanCandName.includes(matchPrefix)) {
+          return cand;
+        }
+      }
+    }
+    return null;
+  }
+
+  // Helper to enrich a single target object
+  function enrichItem(target, candidates) {
+    if (!target || typeof target !== 'object') return;
+    const matched = findMatch(target.name, candidates);
+    if (matched) {
+      target.link = target.link || matched.link || matched.website || matched.googleMapsUrl || matched.url || '';
+      target.website = target.website || matched.website || matched.link || matched.googleMapsUrl || matched.url || '';
+      if (matched.googleMapsUrl) target.googleMapsUrl = target.googleMapsUrl || matched.googleMapsUrl;
+      if (matched.url) target.url = target.url || matched.url;
+      if (matched.image) target.image = target.image || matched.image;
+      if (matched.photoUrl) target.photoUrl = target.photoUrl || matched.photoUrl;
+      if (matched.coordinates) target.coordinates = target.coordinates || matched.coordinates;
+      if (matched.geometry) target.geometry = target.geometry || matched.geometry;
+      if (matched.rating && !target.rating) target.rating = matched.rating;
+    }
+  }
+
+  // 2. Perform the fallback assignments as originally coded
+  const referencePlaces = referenceData?.places && Array.isArray(referenceData.places.categories) && referenceData.places.categories.length > 0
+    ? referenceData.places
+    : null;
+  const subagentPlaces = subagentResults?.places?.places || null;
+  const places = referencePlaces
+    ? referencePlaces
+    : (rawPackage.places || (subagentPlaces ? { categories: subagentPlaces.categories } : { categories: [] }));
+
+  const referenceFood = referenceData?.food || {};
   const rawFood = rawPackage.food || {};
+  const subagentFood = subagentResults?.food?.food || {};
 
   const restaurants = Array.isArray(referenceFood.restaurants) && referenceFood.restaurants.length > 0
     ? referenceFood.restaurants
-    : rawFood.restaurants;
+    : (Array.isArray(rawFood.restaurants) && rawFood.restaurants.length > 0 ? rawFood.restaurants : (Array.isArray(subagentFood.restaurants) ? subagentFood.restaurants : []));
   const localSpecialties = Array.isArray(referenceFood.localSpecialties) && referenceFood.localSpecialties.length > 0
     ? referenceFood.localSpecialties
-    : rawFood.localSpecialties;
+    : (Array.isArray(rawFood.localSpecialties) && rawFood.localSpecialties.length > 0 ? rawFood.localSpecialties : (Array.isArray(subagentFood.localSpecialties) ? subagentFood.localSpecialties : []));
   const streetFood = Array.isArray(referenceFood.streetFood) && referenceFood.streetFood.length > 0
     ? referenceFood.streetFood
-    : rawFood.streetFood;
+    : (Array.isArray(rawFood.streetFood) && rawFood.streetFood.length > 0 ? rawFood.streetFood : (Array.isArray(subagentFood.streetFood) ? subagentFood.streetFood : []));
+
+  const mergedHotels = rawPackage.hotels || (subagentResults?.accommodation?.options?.length > 0 ? { options: subagentResults.accommodation.options } : { options: [] });
+  const mergedTravel = rawPackage.travel || (subagentResults?.transit?.options?.length > 0 ? { options: subagentResults.transit.options } : { options: [] });
+
+  // 3. Enrich targets in place!
+  if (mergedHotels && Array.isArray(mergedHotels.options)) {
+    mergedHotels.options.forEach(hotel => enrichItem(hotel, hotelCandidates));
+  }
+  if (mergedTravel && Array.isArray(mergedTravel.options)) {
+    mergedTravel.options.forEach(opt => enrichItem(opt, travelCandidates));
+  }
+  if (places && Array.isArray(places.categories)) {
+    places.categories.forEach(cat => {
+      if (Array.isArray(cat.places)) {
+        cat.places.forEach(place => enrichItem(place, attractionCandidates));
+      }
+    });
+  }
+  if (Array.isArray(restaurants)) {
+    restaurants.forEach(rest => enrichItem(rest, restaurantCandidates));
+  }
+  if (Array.isArray(localSpecialties)) {
+    localSpecialties.forEach(spec => enrichItem(spec, restaurantCandidates));
+  }
+  if (Array.isArray(streetFood)) {
+    streetFood.forEach(item => enrichItem(item, restaurantCandidates));
+  }
 
   return {
     ...rawPackage,
@@ -1588,10 +1412,13 @@ function mergeGooglePlacesIntoPackage(rawPackage, referenceData) {
     food: {
       ...rawFood,
       ...referenceFood,
+      ...subagentFood,
       restaurants,
       localSpecialties,
       streetFood,
     },
+    hotels: mergedHotels,
+    travel: mergedTravel,
   };
 }
 
@@ -1780,7 +1607,7 @@ ${JSON.stringify(researchResults.places.places, null, 2)}
       keepAlive: '15m',
     });
 
-    const enrichedRawPackage = mergeGooglePlacesIntoPackage(rawPackage, referenceData);
+    const enrichedRawPackage = mergeGooglePlacesIntoPackage(rawPackage, referenceData, researchResults);
     
 
 
