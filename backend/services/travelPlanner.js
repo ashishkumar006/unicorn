@@ -994,16 +994,31 @@ function normalizeActivities(activities, trip, dayIndex) {
 }
 
 function normalizePlan(rawPlan, trip) {
-  const sourcePlan = rawPlan && typeof rawPlan === 'object' ? rawPlan : {};
-  const itinerarySource = Array.isArray(sourcePlan.itinerary) ? sourcePlan.itinerary : [];
-  const itinerary = itinerarySource.map((day, index) => ({
+  // Handle if rawPlan is directly an array (agent returned plan as array)
+  let sourceArray = [];
+  let sourcePlan = {};
+  
+  if (Array.isArray(rawPlan)) {
+    // If rawPlan is directly an array, treat it as the itinerary
+    sourceArray = rawPlan;
+    sourcePlan = {};
+  } else if (rawPlan && typeof rawPlan === 'object') {
+    sourcePlan = rawPlan;
+    // Try multiple possible keys for the itinerary array
+    sourceArray = Array.isArray(sourcePlan.itinerary) ? sourcePlan.itinerary 
+               : Array.isArray(sourcePlan.days) ? sourcePlan.days
+               : Array.isArray(sourcePlan.plan) ? sourcePlan.plan
+               : [];
+  }
+
+  console.log('[DEBUG normalizePlan] Input type:', typeof rawPlan, 'Is array:', Array.isArray(rawPlan), 'Days found:', sourceArray.length);
+
+  const itinerary = sourceArray.map((day, index) => ({
     day: toInteger(day.day, index + 1),
     date: toText(day.date, trip.startDate ? addDays(trip.startDate, index) : `Day ${index + 1}`),
     title: toText(day.title || day.theme, `${trip.toPlace} - Day ${index + 1}`),
     activities: normalizeActivities(day.activities, trip, index),
   }));
-
-
 
   const plan = {
     summary: sourcePlan.summary || {
@@ -1032,7 +1047,6 @@ function normalizePlan(rawPlan, trip) {
   };
 
   return plan;
-}
 
 function normalizeTravel(rawTravel, trip) {
   const sourceTravel = rawTravel && typeof rawTravel === 'object' ? rawTravel : {};
@@ -1587,6 +1601,15 @@ ${JSON.stringify(researchResults.places.places, null, 2)}
       global.updatePlanningStatus(sessionId, 'System Coordinator', 'Synthesizing local routes and day-by-day travel map...', 'searching');
     }
 
+    // DEBUG: Log subagent results summary
+    console.log('[DEBUG Pipeline] Subagent Results Summary:');
+    console.log(`  - Accommodation options: ${researchResults.accommodation?.options?.length || 0}`);
+    console.log(`  - Transit options: ${researchResults.transit?.options?.length || 0}`);
+    console.log(`  - Food restaurants: ${researchResults.food?.food?.restaurants?.length || 0}`);
+    console.log(`  - Food specialties: ${researchResults.food?.food?.localSpecialties?.length || 0}`);
+    console.log(`  - Food street food: ${researchResults.food?.food?.streetFood?.length || 0}`);
+    console.log(`  - Places categories: ${researchResults.places?.places?.categories?.length || 0}`);
+
     const rawPackage = await chatJson({
       system: TRAVEL_SYSTEM_PROMPT,
       messages: [
@@ -1607,11 +1630,35 @@ ${JSON.stringify(researchResults.places.places, null, 2)}
       keepAlive: '15m',
     });
 
-    const enrichedRawPackage = mergeGooglePlacesIntoPackage(rawPackage, referenceData, researchResults);
-    
+    // DEBUG: Log main agent output
+    console.log('[DEBUG Pipeline] Main Agent Output:');
+    console.log(`  - Travel options: ${rawPackage.travel?.options?.length || 0}`);
+    console.log(`  - Hotels options: ${rawPackage.hotels?.options?.length || 0}`);
+    console.log(`  - Plan days: ${rawPackage.plan?.length || 0}`);
+    console.log(`  - Places categories: ${rawPackage.places?.categories?.length || 0}`);
+    console.log(`  - Food restaurants: ${rawPackage.food?.restaurants?.length || 0}`);
+    console.log(`  - Food specialties: ${rawPackage.food?.localSpecialties?.length || 0}`);
+    console.log(`  - Food street food: ${rawPackage.food?.streetFood?.length || 0}`);
 
+    const enrichedRawPackage = mergeGooglePlacesIntoPackage(rawPackage, referenceData, researchResults);
+
+    // DEBUG: Log merged package
+    console.log('[DEBUG Pipeline] After Merge:');
+    console.log(`  - Travel options: ${enrichedRawPackage.travel?.options?.length || 0}`);
+    console.log(`  - Hotels options: ${enrichedRawPackage.hotels?.options?.length || 0}`);
+    console.log(`  - Plan days: ${enrichedRawPackage.plan?.length || 0}`);
+    console.log(`  - Places categories: ${enrichedRawPackage.places?.categories?.length || 0}`);
+    console.log(`  - Food restaurants: ${enrichedRawPackage.food?.restaurants?.length || 0}`);
 
     const packageData = normalizeTravelPackage(enrichedRawPackage, trip);
+
+    // DEBUG: Log normalized package
+    console.log('[DEBUG Pipeline] After Normalization:');
+    console.log(`  - Travel options: ${packageData.travel?.options?.length || 0}`);
+    console.log(`  - Hotels options: ${packageData.hotels?.options?.length || 0}`);
+    console.log(`  - Plan days: ${packageData.plan?.length || 0}`);
+    console.log(`  - Places categories: ${packageData.places?.categories?.length || 0}`);
+    console.log(`  - Food restaurants: ${packageData.food?.restaurants?.length || 0}`);
     let routeInsights = {
       enabled: false,
       summary: `Distance insights are unavailable for ${trip.toPlace} right now.`,
