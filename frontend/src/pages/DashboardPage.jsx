@@ -195,13 +195,13 @@ export default function DashboardPage({
 
   const getBudgetValue = (key, fallbackPct) => {
     if (key === 'accommodation') {
-      return (selectedHotel.pricePerNight || selectedHotel.price || 0) * Math.max(1, tripDays - 1);
+      return selectedHotel ? (selectedHotel.pricePerNight || selectedHotel.price || 0) * Math.max(1, tripDays - 1) : Math.max(1, Math.round((budgetAmount * fallbackPct) / 100));
     }
     if (key === 'transportation') {
-      return (selectedTravel.price || 0);
+      return selectedTravel ? (selectedTravel.price || 0) : Math.max(1, Math.round((budgetAmount * fallbackPct) / 100));
     }
     if (key === 'food') {
-      return (selectedFood.avgCost || 0) * Math.max(1, tripDays);
+      return selectedFood ? (selectedFood.avgCost || 0) * Math.max(1, tripDays) : Math.max(1, Math.round((budgetAmount * fallbackPct) / 100));
     }
     if (budgetAllocation && budgetAllocation[key]) {
       return getBudgetSectionValue(budgetAllocation[key]);
@@ -256,8 +256,8 @@ export default function DashboardPage({
       `${fromPlace} to ${toPlace}`,
       `${startDate} to ${endDate} | ${tripDays} days | ${travelersText}`,
       `Budget: ${formatBudget(budgetAmount)}`,
-      `Travel: ${selectedTravel.name}`,
-      `Stay: ${selectedHotel.name}`,
+      `Travel: ${selectedTravel?.name || 'TBD'}`,
+      `Stay: ${selectedHotel?.name || 'TBD'}`,
       `Highlights: ${(planningHighlights.slice(0, 3).join(' | ')) || 'Curated trip plan'}`,
     ];
 
@@ -531,7 +531,7 @@ export default function DashboardPage({
                     <>
                       <p className="plan-intelligence-summary">{routeInsights.summary}</p>
                       <div className="plan-intelligence-chip-row">
-                        <span className="plan-intelligence-chip">Stay base {routeInsights.hotel?.name || selectedHotel.name}</span>
+                        <span className="plan-intelligence-chip">Stay base {routeInsights.hotel?.name || selectedHotel?.name || 'Base'}</span>
                         <span className="plan-intelligence-chip">Bus ₹{routeInsights.localTransport?.bus?.toLocaleString?.() || '0'}</span>
                         <span className="plan-intelligence-chip">Auto ₹{routeInsights.localTransport?.auto?.toLocaleString?.() || '0'}</span>
                         <span className="plan-intelligence-chip">Taxi ₹{routeInsights.localTransport?.taxi?.toLocaleString?.() || '0'}</span>
@@ -628,16 +628,16 @@ export default function DashboardPage({
             <div className="summary-label">
               <TrainFront size={14} className="summary-icon"/> SELECTED TRAVEL
             </div>
-            <div className="summary-value">{selectedTravel.name}</div>
-            <div className="summary-subtext">{formatBudget(selectedTravel.price)} · {selectedTravel.duration}</div>
+            <div className="summary-value">{selectedTravel?.name || 'Select travel option'}</div>
+            <div className="summary-subtext">{selectedTravel ? `${formatBudget(selectedTravel.price)} · ${selectedTravel.duration}` : 'Waiting for options'}</div>
           </div>
           
           <div className="summary-item">
             <div className="summary-label">
               <Hotel size={14} className="summary-icon"/> SELECTED HOTEL
             </div>
-            <div className="summary-value">{selectedHotel.name}</div>
-            <div className="summary-subtext">{formatBudget(selectedHotel.pricePerNight)}/night · ⭐ {selectedHotel.rating}</div>
+            <div className="summary-value">{selectedHotel?.name || 'Select accommodation'}</div>
+            <div className="summary-subtext">{selectedHotel ? `${formatBudget(selectedHotel.pricePerNight)}/night · ⭐ ${selectedHotel.rating}` : 'Waiting for options'}</div>
           </div>
 
           <div className="summary-item">
