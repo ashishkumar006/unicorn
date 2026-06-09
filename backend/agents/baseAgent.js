@@ -205,6 +205,9 @@ class BaseAgent {
       provider: options.provider || 'gemma-cloud'
     };
     this.maxHistory = options.maxHistory || 20;
+    let _boot;
+    try { _boot = require('../services/monitorBridge'); } catch {}
+    this._emitEvt = _boot?.emitEvent || null;
   }
 
   /**
@@ -406,6 +409,14 @@ Continue using tools if they materially improve the answer. There is no fixed tw
           onProgress({ type: 'message', content: '🔎 Gathering live context before I answer...' });
         }
 
+        const toolNames = agentResponse.toolsToCall.map(t => t.name || t.toolName || t.qualifiedName).filter(Boolean);
+
+        this._monitorEmit('llm', 'tool_call', {
+          iteration: loopIteration,
+          thought: agentResponse.thought,
+          toolCalls: agentResponse.toolsToCall.map(t => ({ name: t.name || t.toolName, args: t.args || t.arguments })),
+        });
+
         for (const toolCall of agentResponse.toolsToCall) {
           const toolName = toolCall.name || toolCall.toolName || toolCall.qualifiedName;
 
@@ -422,6 +433,15 @@ Continue using tools if they materially improve the answer. There is no fixed tw
 
           try {
             const result = await this.callTool(toolName, toolArgs);
+
+            this._monitorEmit('llm', 'tool_result', {
+              iteration: loopIteration,
+              tool: toolName,
+              argsSummary: Object.keys(toolArgs || {}),
+              success: !result?.error,
+              error: result?.error || null,
+              summary: summarizeToolResult(result),
+            });
 
             allToolResults.push({ tool: toolName, result, iteration: loopIteration });
 
@@ -449,6 +469,11 @@ Continue using tools if they materially improve the answer. There is no fixed tw
               sources: result.sources || result.citations || []
             });
           } catch (toolError) {
+            this._monitorEmit('llm', 'tool_error', {
+              iteration: loopIteration,
+              tool: toolName,
+              error: toolError.message,
+            });
             allToolResults.push({
               tool: toolName,
               result: { error: toolError.message },
@@ -569,6 +594,11 @@ Continue using tools if they materially improve the answer. There is no fixed tw
       console.error(`[${this.name}] TOOL ERROR: ${toolName} (${elapsedMs}ms):`, error.message);
       return { error: error.message };
     }
+  }
+
+  _monitorEmit(layer, event, data, sessionId = 'default') {
+    if (!this._emitEvt) return;
+    try { this._emitEvt(layer, event, data, sessionId); } catch {}
   }
 
   /**

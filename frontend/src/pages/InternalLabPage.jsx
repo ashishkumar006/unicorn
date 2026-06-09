@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, BrainCircuit, ExternalLink, Globe2, History, LayoutPanelTop, Loader2, NotebookTabs, Radar, Save, Search, ShieldCheck, Sparkles, Trash2, WandSparkles, Workflow } from 'lucide-react';
-import { API_BASE } from '../lib/api';
+import { API_BASE, browserApi } from '../lib/api';
 import '../styles/internalLab.css';
 
 const INTERNAL_USER_ID = 'internal-lab';
@@ -208,45 +208,40 @@ export default function InternalLabPage() {
     }
   };
 
-  const runBrowserWorkflow = async (event) => {
-    event.preventDefault();
+   const runBrowserWorkflow = async (event) => {
+     event.preventDefault();
 
-    let parsedActions = [];
-    try {
-      parsedActions = browserActions.trim() ? JSON.parse(browserActions) : [];
-    } catch (error) {
-      setNoteError(`Browser action JSON is invalid: ${error.message}`);
-      return;
-    }
+     let parsedActions = [];
+     try {
+       parsedActions = browserActions.trim() ? JSON.parse(browserActions) : [];
+     } catch (error) {
+       setNoteError(`Browser action JSON is invalid: ${error.message}`);
+       return;
+     }
 
-    setSearchLoading(true);
-    setSearchError('');
+     setSearchLoading(true);
+     setSearchError('');
 
-    try {
-      const response = await fetch(`${API_BASE}/internal/browser/run`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: browserUrl.trim(), goal: browserGoal.trim(), actions: parsedActions }),
-      });
-      const data = await response.json();
+     try {
+       const data = await browserApi.run({
+         url: browserUrl.trim(),
+         goal: browserGoal.trim(),
+         actions: parsedActions,
+       });
 
-      if (!response.ok || !data.success) {
-        throw new Error(data.error || 'Browser workflow failed');
-      }
-
-      setBrowserResult(data);
-      setBrowserInsight(data.insight || {
-        summary: data.summary || '',
-        keyFindings: data.keyFindings || [],
-        nextSteps: data.nextSteps || [],
-        achieved: data.achieved,
-      });
-    } catch (error) {
-      setSearchError(error.message);
-    } finally {
-      setSearchLoading(false);
-    }
-  };
+       setBrowserResult(data);
+       setBrowserInsight(data.insight || {
+         summary: data.summary || '',
+         keyFindings: data.keyFindings || [],
+         nextSteps: data.nextSteps || [],
+         achieved: data.achieved,
+       });
+     } catch (error) {
+       setSearchError(error.message);
+     } finally {
+       setSearchLoading(false);
+     }
+   };
 
   const saveNote = async (event) => {
     event.preventDefault();

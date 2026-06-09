@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Autonomous Browser Agent</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+      min-height: 100vh;
+      color: #eee;
+      padding: 20px;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    h1 { text-align: center; margin-bottom: 30px; color: #4ecca3; }
+    .chat-box {
+      background: rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      height: 400px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+    .message { margin-bottom: 15px; padding: 10px 15px; border-radius: 8px; }
+    .user { background: #4ecca3; color: #1a1a2e; margin-left: 20%; }
+    .agent { background: rgba(255,255,255,0.1); margin-right: 20%; }
+    .loading-status {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(78,204,163,0.22);
+      border-left: 3px solid #4ecca3;
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .loading-kicker {
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #4ecca3;
+    }
+    .loading-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      color: #fff;
+      min-height: 24px;
+    }
+    .loading-dots {
+      min-width: 22px;
+      color: #4ecca3;
+      letter-spacing: 2px;
+    }
+    .loading-note {
+      font-size: 12px;
+      color: rgba(255,255,255,0.72);
+    }
+    .input-area { display: flex; gap: 10px; }
+    input { flex: 1; padding: 15px; border-radius: 8px; border: none; font-size: 16px; }
+    button { padding: 15px 30px; background: #4ecca3; color: #1a1a2e; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    .loading { text-align: center; padding: 20px; color: #888; }
+    .steps { font-size: 12px; color: #888; margin-top: 10px; padding-left: 10px; }
+    .url-input { width: 100%; margin-bottom: 10px; }
+    .captcha-modal {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.9);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .captcha-modal img {
+      max-width: 90%;
+      max-height: 60vh;
+      border: 2px solid #4ecca3;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+    .captcha-modal button {
+      margin: 10px;
+    }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Autonomous Browser Agent</h1>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-area">
+      <input type="text" id="urlInput" class="url-input" placeholder="Website URL (optional, defaults to DuckDuckGo)" />
+      <input type="text" id="userInput" placeholder="Ask me to find anything on the web..." autocomplete="off" />
+      <button id="sendBtn" onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <div id="captchaModal" class="captcha-modal hidden">
+    <h2 style="color: #4ecca3; margin-bottom: 20px;">CAPTCHA Detected - Human Help Needed!</h2>
+    <img id="captchaImg" src="" alt="CAPTCHA screenshot" />
+    <p style="color: #fff; margin: 10px 0;">Please solve the CAPTCHA in the opened browser, then click "Continue"</p>
+    <div>
+      <button onclick="resumeTask()">Continue After Solving</button>
+      <button onclick="cancelCaptcha()">Cancel Task</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const urlInput = document.getElementById('urlInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const captchaModal = document.getElementById('captchaModal');
+    const captchaImg = document.getElementById('captchaImg');
+    
+    let currentTaskId = null;
+    let currentGoal = null;
+    let currentUrl = null;
+    let loadingState = null;
+    let statusPollTimer = null;
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function stopStatusPolling() {
+      if (statusPollTimer) {
+        clearTimeout(statusPollTimer);
+        statusPollTimer = null;
+      }
+    }
+
+    function stopLoadingStatus() {
+      stopStatusPolling();
+      if (!loadingState) return;
+      clearInterval(loadingState.dotTimerId);
+      if (loadingState.element?.parentNode) {
+        loadingState.element.remove();
+      }
+      loadingState = null;
+    }
+
+    function setLoadingText(text, noteText = null) {
+      if (!loadingState) return;
+      loadingState.textEl.textContent = text;
+      if (noteText !== null && loadingState.noteEl) {
+        loadingState.noteEl.textContent = noteText;
+      }
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function startLoadingStatus(initialText, noteText) {
+      stopLoadingStatus();
+
+      const div = document.createElement('div');
+      div.className = 'message agent';
+      div.innerHTML = `
+        <div class="loading-status" role="status" aria-live="polite">
+          <div class="loading-kicker">Agent is working</div>
+          <div class="loading-line">
+            <span class="loading-text">${escapeHtml(initialText)}</span>
+            <span class="loading-dots">.</span>
+          </div>
+          <div class="loading-note">${escapeHtml(noteText || 'Live status updates will appear here while the browser agent works.')}</div>
+        </div>
+      `;
+
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+
+      const textEl = div.querySelector('.loading-text');
+      const dotsEl = div.querySelector('.loading-dots');
+
+      loadingState = {
+        element: div,
+        textEl,
+        noteEl: div.querySelector('.loading-note'),
+        dotTimerId: setInterval(() => {
+          const current = dotsEl.textContent.length;
+          dotsEl.textContent = '.'.repeat((current % 3) + 1);
+          chatBox.scrollTop = chatBox.scrollHeight;
+        }, 450)
+      };
+    }
+
+    function renderResultPayload(data) {
+      let resultHtml = '<strong>Result:</strong> ';
+      if (data.extractedInfo) {
+        if (Array.isArray(data.extractedInfo) && data.extractedInfo[0]?.price) {
+          resultHtml += '<div style="margin-top:10px;">';
+          data.extractedInfo.forEach(bus => {
+            resultHtml += `<div style="background:rgba(255,255,255,0.1);padding:10px;margin:5px 0;border-radius:6px;">
+                <strong>₹${bus.price}</strong> ${bus.operator ? `<span style="color:#4ecca3;">${bus.operator}</span>` : ''}
+                ${bus.departure && bus.arrival ? `<br>🕐 ${bus.departure} → ${bus.arrival}` : ''}
+                ${bus.rating ? ` ⭐ ${bus.rating}` : ''}
+                ${bus.seatsLeft ? ` 🎫 ${bus.seatsLeft} seats left` : ''}
+              </div>`;
+          });
+          resultHtml += '</div>';
+        } else {
+          resultHtml += typeof data.extractedInfo === 'object' ? JSON.stringify(data.extractedInfo, null, 2) : data.extractedInfo;
+        }
+      } else if (data.finalUrl) {
+        resultHtml += `<a href="${data.finalUrl}" target="_blank">${data.finalUrl}</a>`;
+      }
+
+      addMessage(resultHtml, false, data.steps);
+    }
+
+    function showCaptchaState(task) {
+      currentTaskId = task.taskId || currentTaskId;
+      currentGoal = task.goal || currentGoal;
+      currentUrl = task.url || currentUrl;
+      captchaImg.src = task.captchaScreenshot + '?t=' + Date.now();
+      captchaModal.classList.remove('hidden');
+      addMessage(task.statusText || 'CAPTCHA detected! Please solve it in the browser window.', false);
+    }
+
+    function scheduleTaskPoll(taskId) {
+      stopStatusPolling();
+
+      const poll = async () => {
+        try {
+          const response = await fetch(`/api/task/${taskId}`);
+          if (!response.ok) {
+            const errorBody = await response.json().catch(() => ({}));
+            throw new Error(errorBody.error || `Status request failed (${response.status})`);
+          }
+          const task = await response.json();
+
+          if (task.statusText) {
+            setLoadingText(task.statusText);
+          }
+
+          if (task.status === 'needsHuman') {
+            stopLoadingStatus();
+            showCaptchaState(task);
+            return;
+          }
+
+          if (task.status === 'done') {
+            stopLoadingStatus();
+            renderResultPayload(task.result || task);
+            currentTaskId = null;
+            sendBtn.disabled = false;
+            userInput.focus();
+            return;
+          }
+
+          if (task.status === 'error') {
+            stopLoadingStatus();
+            addMessage(`<strong>Error:</strong> ${task.error || task.statusText || 'Task failed'}`, false);
+            currentTaskId = null;
+            sendBtn.disabled = false;
+            userInput.focus();
+            return;
+          }
+
+          statusPollTimer = setTimeout(poll, 1000);
+        } catch (error) {
+          setLoadingText('Reconnecting to live status...');
+          if (error.message.includes('not found')) {
+            stopLoadingStatus();
+            addMessage(`<strong>Error:</strong> ${error.message}`, false);
+            currentTaskId = null;
+            sendBtn.disabled = false;
+            userInput.focus();
+            return;
+          }
+          statusPollTimer = setTimeout(poll, 1200);
+        }
+      };
+
+      statusPollTimer = setTimeout(poll, 500);
+    }
+
+    function addMessage(text, isUser = false, steps = null) {
+      const div = document.createElement('div');
+      div.className = `message ${isUser ? 'user' : 'agent'}`;
+      div.innerHTML = text;
+      if (steps) {
+        const stepsDiv = document.createElement('div');
+        stepsDiv.className = 'steps';
+        stepsDiv.textContent = 'Steps: ' + steps.join(' → ');
+        div.appendChild(stepsDiv);
+      }
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const message = userInput.value.trim();
+      const url = urlInput.value.trim();
+      
+      if (!message) return;
+      
+      addMessage(message, true);
+      userInput.value = '';
+      currentGoal = message;
+      currentUrl = url;
+      sendBtn.disabled = true;
+      startLoadingStatus('Starting browser task...', 'Live status updates will be pulled from the agent.');
+      
+      try {
+        const response = await fetch('/api/task', {
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          body: JSON.stringify({ goal: message, url, stream: true })
+        });
+        const data = await response.json();
+
+        if (data.success) {
+          stopLoadingStatus();
+          renderResultPayload(data);
+          currentTaskId = null;
+          sendBtn.disabled = false;
+          userInput.focus();
+          return;
+        }
+
+        if (data.taskId) {
+          currentTaskId = data.taskId;
+          if (data.statusText) {
+            setLoadingText(data.statusText);
+          }
+          scheduleTaskPoll(data.taskId);
+          return;
+        }
+
+        stopLoadingStatus();
+        addMessage(`<strong>Error:</strong> ${data.error || 'Unable to start task'}`, false);
+      } catch (err) {
+        stopLoadingStatus();
+        addMessage(`<strong>Error:</strong> ${err.message}`, false);
+      }
+      
+      sendBtn.disabled = false;
+      userInput.focus();
+    }
+
+    async function resumeTask() {
+      if (!currentTaskId) return;
+      
+      captchaModal.classList.add('hidden');
+      addMessage('Resuming task after CAPTCHA...', false);
+      startLoadingStatus('Resuming after CAPTCHA...', 'The agent is continuing from where it stopped.');
+      
+      try {
+        const response = await fetch(`/api/resume/${currentTaskId}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ stream: true })
+        });
+        
+        const data = await response.json();
+        if (data.success) {
+          stopLoadingStatus();
+          renderResultPayload(data);
+          currentTaskId = null;
+          sendBtn.disabled = false;
+          userInput.focus();
+          return;
+        }
+
+        if (data.taskId) {
+          if (data.statusText) {
+            setLoadingText(data.statusText);
+          }
+          scheduleTaskPoll(data.taskId);
+          return;
+        }
+
+        stopLoadingStatus();
+        addMessage(`<strong>Error:</strong> ${data.error || 'Unable to resume task'}`, false);
+      } catch (err) {
+        stopLoadingStatus();
+        addMessage(`<strong>Error:</strong> ${err.message}`, false);
+      }
+      
+      currentTaskId = null;
+      sendBtn.disabled = false;
+    }
+
+    function cancelCaptcha() {
+      captchaModal.classList.add('hidden');
+      stopLoadingStatus();
+      currentTaskId = null;
+      addMessage('Task cancelled.', false);
+      sendBtn.disabled = false;
+    }
+
+    userInput.addEventListener('keypress', e => {
+      if (e.key === 'Enter') sendMessage();
+    });
+
+    window.onload = () => {
+      addMessage('I\'m an autonomous browser agent. Ask me to find anything on the web - I\'ll figure out the forms and extract the info automatically using DuckDuckGo! (Note: Some sites use CAPTCHA - I\'ll ask for your help)', false);
+      userInput.focus();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+{
+  "buses": [
+    {
+      "price": 2549,
+      "operator": "Pramukh Travels",
+      "departure": "23:55",
+      "arrival": "07:30",
+      "seatsLeft": 26,
+      "rating": 4.4
+    },
+    {
+      "price": 1950,
+      "operator": "LG Bus",
+      "departure": "20:50",
+      "arrival": "05:15",
+      "seatsLeft": 6,
+      "rating": 4.3
+    },
+    {
+      "price": 4950,
+      "operator": "IntrCity SmartBus",
+      "departure": "22:25",
+      "arrival": "06:50",
+      "seatsLeft": 46,
+      "rating": 4
+    },
+    {
+      "price": 1336,
+      "operator": "SREE KVR TRAVELS",
+      "departure": "22:30",
+      "arrival": "06:30",
+      "seatsLeft": 22,
+      "rating": 3.8
+    },
+    {
+      "price": 1649,
+      "operator": "Sri Krishna Travels",
+      "departure": "23:00",
+      "arrival": "07:45",
+      "seatsLeft": 27,
+      "rating": 3.9
+    },
+    {
+      "price": 1241,
+      "operator": "SVKDT Travels",
+      "departure": "22:30",
+      "arrival": "06:30",
+      "seatsLeft": 21,
+      "rating": 3.8
+    },
+    {
+      "price": 2696,
+      "operator": "VKV Travels",
+      "departure": "22:15",
+      "arrival": "05:55",
+      "seatsLeft": 9,
+      "rating": 3.6
+    },
+    {
+      "price": 4700,
+      "operator": "Vihari Bus",
+      "departure": "23:30",
+      "arrival": "07:00",
+      "seatsLeft": 1,
+      "rating": 3.9
+    }
+  ],
+  "goal": "fetch me the ticket details from vijayawada to chennai on 27th may 2026",
+  "url": "https://www.abhibus.com/bus_search/Gannavaram%20(Vijayawada)/132/Chennai/6/27-05-2026/O",
+  "timestamp": "2026-05-27T02:49:39.150Z"
+}

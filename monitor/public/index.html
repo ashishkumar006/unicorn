@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wanderlust Monitor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #0b0f14; color: #d8e0ec;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; font-size: 14px; }
+
+    .app { display: grid; grid-template-rows: 52px 1fr; height: 100vh; }
+
+    header {
+      display: flex; align-items: center; gap: 12px; padding: 0 18px;
+      background: #0f141e; border-bottom: 1px solid #1e2d44;
+    }
+    header h1 { font-size: 14px; font-weight: 700; }
+    header h1 span { color: #b48cff; }
+    .pill { padding: 4px 10px; border-radius: 999px; font-size: 11px; background: #161f2e;
+      border: 1px solid #1e2d44; color: #607590; display: inline-flex; gap: 6px; align-items: center; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #1e2d44; display: inline-block; }
+    .dot.live { background: #3fb950; box-shadow: 0 0 8px #3fb950; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .spacer { flex: 1; }
+    button { border: none; padding: 6px 14px; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; }
+    button.primary { background: #1f883d; color: white; }
+    button.primary:hover { background: #28a745; }
+    button.primary:disabled { background: #1e2d44; color: #607590; cursor: not-allowed; opacity: .6; }
+    button.ghost { background: transparent; color: #d8e0ec; border: 1px solid #1e2d44; }
+    button.ghost:hover { border-color: #607590; }
+    button:disabled { opacity: .6; cursor: not-allowed; }
+
+    /* diagram */
+    .diagram { overflow: auto; padding: 40px; }
+    .canvas { min-width: 1100px; }
+
+    /* flow area */
+    .flow { display: flex; flex-direction: column; gap: 28px; }
+
+    /* row of nodes */
+    .row { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; }
+
+    /* connector segment between two rows */
+    .connector { display: flex; justify-content: center; }
+    .connector .line { width: 2px; height: 26px; background: #1e2d44; border-radius: 2px; }
+    .connector .line.lit { background: #7c6fff; box-shadow: 0 0 10px rgba(124,111,255,.6); }
+
+    /* node card */
+    .node {
+      width: 220px; background: #0f141e; border: 1.5px solid #1e2d44; border-radius: 16px;
+      cursor: pointer; transition: all .2s; overflow: hidden; display: inline-flex; flex-direction: column;
+    }
+    .node:hover { border-color: #3a5070; transform: translateY(-2px); }
+    .node.active { border-color: #b48cff; box-shadow: 0 0 0 1px rgba(180,140,255,.35), 0 10px 30px rgba(180,140,255,.15); }
+    .node.done  { border-color: #3fb950; box-shadow: 0 0 0 1px rgba(63,185,80,.35); }
+    .node.error { border-color: #f85149; box-shadow: 0 0 0 1px rgba(248,81,73,.35); }
+
+    .node-head {
+      padding: 10px 14px; display: flex; align-items: center; gap: 10px;
+      background: #161f2e; border-bottom: 1px solid #1e2d44;
+    }
+    .node-icon { width: 30px; height: 30px; border-radius: 8px; display: flex; align-items: center;
+      justify-content: center; font-size: 15px; background: #0b0f14; border: 1px solid #1e2d44; }
+    .node-title { font-size: 13px; font-weight: 700; line-height: 1.2; }
+    .node-sub { font-size: 10px; color: #607590; margin-top: 2px; }
+    .node-badge { margin-left: auto; padding: 2px 7px; border-radius: 999px; font-size: 10px;
+      font-weight: 700; background: #0b0f14; border: 1px solid #1e2d44; color: #607590; }
+    .node.active .node-badge { color: #b48cff; border-color: #b48cff; }
+    .node.done .node-badge  { color: #3fb950; border-color: #3fb950; }
+    .node.error .node-badge { color: #f85149; border-color: #f85149; }
+
+    .node-body { padding: 10px 12px 12px; }
+
+    .t-row {
+      padding: 7px 9px; margin: 0 0 7px; border-radius: 8px;
+      border-left: 3px solid #1e2d44; background: #0b0f14; font-size: 11px;
+      animation: slideIn .18s;
+    }
+    .t-row.thought { border-left-color: #b48cff; background: rgba(180,140,255,.04); }
+    .t-row.tool-call { border-left-color: #e5a832; background: rgba(229,168,50,.04); }
+    .t-row.tool-res { border-left-color: #3fb950; background: rgba(63,185,80,.04); }
+    .t-row.observe { border-left-color: #4dd4e8; background: rgba(77,212,232,.04); }
+    .t-row.tool-err { border-left-color: #f85149; background: rgba(248,81,73,.04); }
+    .t-label { font-size: 9px; text-transform: uppercase; letter-spacing: .5px; font-weight: 700; color: #607590; margin-bottom: 3px; }
+    .t-text { color: #d8e0ec; line-height: 1.45; word-break: break-word; }
+    .t-meta { margin-top: 3px; font-size: 9px; color: #607590; font-family: ui-monospace, Menlo, monospace; }
+    .t-meta b { color: #d8e0ec; font-weight: 600; }
+    @keyframes slideIn { from{opacity:0;transform:translateY(-3px)} to{opacity:1;transform:translateY(0)} }
+
+    .empty-sm { color: #607590; font-size: 11px; text-align: center; padding: 10px 4px; font-style: italic; }
+
+    /* detail overlay */
+    .detail {
+      position: fixed; bottom: 0; left: 0; right: 0; background: #0f141e;
+      border-top: 1px solid #1e2d44; transform: translateY(100%); transition: transform .2s;
+      z-index: 100; max-height: 38vh; display: flex; flex-direction: column;
+    }
+    .detail.open { transform: translateY(0); }
+    .detail-head {
+      padding: 10px 18px; border-bottom: 1px solid #1e2d44; display: flex; align-items: center;
+      gap: 10px; background: #161f2e;
+    }
+    .detail-head h3 { font-size: 13px; font-weight: 700; }
+    .detail-head .sub { font-size: 11px; color: #607590; }
+    .detail-close { margin-left: auto; background: transparent; color: #607590; padding: 4px 10px;
+      border-radius: 6px; font-size: 18px; line-height: 1; }
+    .detail-close:hover { color: #d8e0ec; background: #1e2d44; }
+    .detail-body { padding: 14px 18px; overflow-y: auto; flex: 1; }
+    .detail-body pre { background: #0b0f14; padding: 10px; border-radius: 6px; font-size: 12px;
+      overflow-x: auto; color: #d8e0ec; font-family: ui-monospace, Menlo, monospace;
+      white-space: pre-wrap; word-break: break-all; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <h1>🔭 Wanderlust <span>Monitor</span></h1>
+      <div class="pill"><span class="dot live" id="liveDot"></span><span id="status">Connecting…</span></div>
+      <div class="pill">Events: <b id="count">0</b></div>
+      <div class="pill" id="sessionLabel">Session: —</div>
+      <div class="spacer"></div>
+      <button class="ghost" id="clearBtn" disabled>Clear</button>
+      <button class="primary" id="runBtn" disabled>▶ Simulate Plan</button>
+    </header>
+
+    <main class="diagram" id="diagram">
+      <div class="canvas" id="canvas"></div>
+    </main>
+  </div>
+
+  <div class="detail" id="detail">
+    <div class="detail-head">
+      <span id="dIcon"></span>
+      <div>
+        <h3 id="dTitle"></h3>
+        <div class="sub" id="dSub"></div>
+      </div>
+      <button class="detail-close" id="dClose">×</button>
+    </div>
+    <div class="detail-body" id="dBody">
+      <div class="empty-sm">Click a node to inspect its events.</div>
+    </div>
+  </div>
+
+  <script src="./simulator.js"></script>
+  <script>
+    const LAYERS = [
+      { id:'user',       label:'User Input',        sub:'fromPlace · toPlace · budget · days',   icon:'👤' },
+      { id:'orchestrator',label:'Agent Orchestrator', sub:'understand · plan · orchestrate',      icon:'🧠' },
+      { id:'router',     label:'Router / Decision',  sub:'classify · providers · fallbacks',     icon:'🔀' },
+      { id:'cache',      label:'Cache / RAG',        sub:'package cache · semantic search',      icon:'💾' },
+      { id:'api',        label:'API Layer',          sub:'Google Places · Ola Maps · OSM',       icon:'🌐' },
+      { id:'browser',    label:'Browser Automation', sub:'4 parallel research subagents',        icon:'🤖' },
+      { id:'fusion',     label:'Data Fusion',        sub:'normalize · dedupe · score · budget',  icon:'🔗' },
+      { id:'llm',        label:'LLM Reasoning',      sub:'ReAct · thoughts · tool calls',       icon:'💬' },
+      { id:'response',   label:'Response',           sub:'build · validate · deliver',           icon:'📦' },
+      { id:'frontend',   label:'Frontend',           sub:'UI · Maps · Cards · Export',           icon:'🖥️' },
+    ];
+
+    const state = {};
+    LAYERS.forEach(l => state[l.id] = { status:'wait', events:[], node:null });
+
+    const canvas   = document.getElementById('canvas');
+    const countEl  = document.getElementById('count');
+    const runBtn   = document.getElementById('runBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const liveDot  = document.getElementById('liveDot');
+    const statusEl = document.getElementById('status');
+    const sessionLabel = document.getElementById('sessionLabel');
+    let connected = false, total = 0, ws, selectedId = null;
+
+    // Tree structure: parent -> [children]
+    const TREE = {
+      user: ['orchestrator'],
+      orchestrator: ['router'],
+      router: ['cache','api','browser'],
+      cache: ['fusion'],
+      api: ['fusion'],
+      browser: ['fusion'],
+      fusion: ['llm'],
+      llm: ['response'],
+      response: ['frontend'],
+    };
+    const ROOT = 'user';
+
+    function buildRows() {
+      const rows = [];
+      const cols = {};
+      const seen = new Set();
+      function walk(id, depth, col) {
+        if (seen.has(id)) return;
+        seen.add(id);
+        rows[depth] = rows[depth] || [];
+        rows[depth].push(id);
+        cols[id] = col;
+        (TREE[id] || []).forEach((child, i) => walk(child, depth + 1, col + (i - ((TREE[id]||[]).length - 1)/2) * 1.6));
+      }
+      walk(ROOT, 0, 0);
+      return { rows, cols };
+    }
+    const { rows, cols } = buildRows();
+
+    const flow = document.createElement('div');
+    flow.className = 'flow';
+    rows.forEach((rowIds, rowIdx) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.style.justifyContent = 'center';
+      row.style.gap = '28px';
+      rowIds.forEach(id => {
+        const nd = LAYERS.find(l => l.id === id);
+        const card = document.createElement('div');
+        card.className = 'node wait';
+        card.id = 'node-' + id;
+        card.innerHTML = `
+          <div class="node-head">
+            <div class="node-icon">${nd.icon}</div>
+            <div>
+              <div class="node-title">${nd.label}</div>
+              <div class="node-sub" id="sub-${id}">${nd.sub}</div>
+            </div>
+            <div class="node-badge" id="badge-${id}">waiting</div>
+          </div>
+          <div class="node-body" id="body-${id}">
+            <div class="empty-sm" id="empty-${id}">Click ▶ Simulate Plan to watch the live flow…</div>
+          </div>`;
+        card.addEventListener('click', () => selectNode(id));
+        row.appendChild(card);
+        state[id].node = card;
+      });
+      flow.appendChild(row);
+
+      // draw connector lines between this row and the next
+      if (rows[rowIdx + 1]) {
+        const nextRowIds = rows[rowIdx + 1];
+        const conn = document.createElement('div');
+        conn.className = 'connector';
+        conn.innerHTML = '<div class="line" data-connector="' + rowIds.join(',') + '-' + nextRowIds.join(',') + '"></div>';
+        flow.appendChild(conn);
+      }
+    });
+    canvas.appendChild(flow);
+
+    function selectNode(id) {
+      selectedId = id;
+      const nd = LAYERS.find(l => l.id === id);
+      document.getElementById('dIcon').textContent = nd.icon;
+      document.getElementById('dTitle').textContent = nd.label;
+      document.getElementById('dSub').textContent = id + ' · ' + state[id].events.length + ' events · ' + state[id].status;
+      renderDetail(id);
+      document.getElementById('detail').classList.add('open');
+    }
+    document.getElementById('dClose').addEventListener('click', () => {
+      document.getElementById('detail').classList.remove('open');
+      selectedId = null;
+    });
+
+    function renderDetail(id) {
+      const evts = state[id].events;
+      if (!evts.length) { document.getElementById('dBody').innerHTML = '<div class="empty-sm">No events yet.</div>'; return; }
+      document.getElementById('dBody').innerHTML = evts.map(ev => `
+        <div class="t-row layer-${id}">
+          <div class="t-label">${id} · ${ev.event}</div>
+          ${renderBubble(ev.data, ev.event)}
+          <pre style="margin-top:8px">${escapeHtml(JSON.stringify(ev.data, null, 2))}</pre>
+        </div>`).join('');
+    }
+
+    function setStatus(id, status, detail) {
+      if (!state[id]) return;
+      state[id].status = status;
+      const el = state[id].node;
+      if (!el) return;
+      el.classList.remove('active','done','error');
+      if (status === 'active') el.classList.add('active');
+      if (status === 'done') el.classList.add('done');
+      if (status === 'error') el.classList.add('error');
+      const badge = document.getElementById('badge-' + id);
+      if (badge) { badge.className = 'node-badge ' + status; badge.textContent = status; }
+      const sub = document.getElementById('sub-' + id);
+      if (sub && detail) sub.textContent = detail;
+    }
+
+    function pushEvent(id, ev) {
+      if (!state[id]) return;
+      const body = document.getElementById('body-' + id);
+      const empty = document.getElementById('empty-' + id);
+      if (empty) empty.remove();
+      const row = document.createElement('div');
+      row.className = 't-row layer-' + id;
+      row.innerHTML = '<div class="t-label">' + id + ' · ' + ev.event + '</div>' + renderBubble(ev.data, ev.event);
+      body.insertBefore(row, body.firstChild);
+      while (body.children.length > 50) body.removeChild(body.lastChild);
+    }
+
+    function handleEvent(envelope) {
+      if (!envelope || !envelope.layer || !envelope.event) return;
+      total++;
+      countEl.textContent = total;
+      const { layer, event, data, ts } = envelope;
+      if (!state[layer]) return;
+
+      const rec = { event, data, ts };
+      state[layer].events.push(rec);
+      pushEvent(layer, rec);
+
+      if (event === 'error' || event === 'tool_error') setStatus(layer, 'error', 'error');
+      else if (['done','completed','package_ready','subagents_completed'].includes(event)) setStatus(layer, 'done', 'completed');
+      else setStatus(layer, 'active', event);
+
+      const idx = LAYERS.findIndex(l => l.id === layer);
+      if (idx > 0) {
+        for (let i = 0; i < idx; i++) {
+          if (state[LAYERS[i].id].status === 'wait') setStatus(LAYERS[i].id, 'done', 'triggered');
+        }
+      }
+
+      // highlight connector line leading into this node
+      const connector = document.querySelector(`.line[data-connector*="${layer}"]`);
+      if (connector) connector.classList.add('lit');
+
+      if (selectedId === layer) renderDetail(layer);
+    }
+
+    function renderBubble(data, eventType) {
+      if (!data || !data.thought) return '';
+      let cls = 'thought';
+      if (/tool_result|observation/i.test(eventType)) cls = 'tool-res';
+      else if (/tool_call|tool_calls/i.test(eventType)) cls = 'tool-call';
+      else if (/error/i.test(eventType)) cls = 'tool-err';
+      let s = '<div class="t-row ' + cls + '"><div class="t-label">💭 Thought</div><div class="t-text">' + escapeHtml(data.thought) + '</div>';
+      if (data.iteration) s += '<div class="t-meta">iteration <b>#' + data.iteration + '</b></div>';
+      if (data.toolCalls) s += '<div class="t-meta">→ calling: <b>' + escapeHtml(JSON.stringify(data.toolCalls)) + '</b></div>';
+      if (data.observation) s += '<div class="t-meta">observation: <b>' + escapeHtml(data.observation) + '</b></div>';
+      if (data.toolResult && !data.toolCalls) s += '<div class="t-meta">result: <b>' + escapeHtml(compactObj(data.toolResult)) + '</b></div>';
+      s += '</div>';
+      return s;
+    }
+
+    function escapeHtml(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function compactObj(obj) { try { const s = JSON.stringify(obj); return s.length > 200 ? s.slice(0, 197) + '…' : s; } catch { return String(obj); } }
+
+    function setReady() {
+      if (connected) return;
+      connected = true;
+      runBtn.disabled = false;
+      clearBtn.disabled = false;
+      liveDot.classList.add('live');
+      statusEl.textContent = 'Live';
+    }
+    function setDisconnected() {
+      connected = false;
+      runBtn.disabled = true;
+      clearBtn.disabled = true;
+      statusEl.textContent = 'Reconnecting…';
+      liveDot.classList.remove('live');
+    }
+    function connectWs() {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      ws = new WebSocket(`${proto}//${location.host}`);
+      ws.onopen = () => setReady();
+      ws.onclose = () => { setDisconnected(); setTimeout(connectWs, 1500); };
+      ws.onerror = () => setDisconnected();
+      ws.onmessage = (msg) => { setReady(); try { handleEvent(JSON.parse(msg.data)); } catch {} };
+    }
+    connectWs();
+
+    function resetAll() {
+      LAYERS.forEach(l => {
+        state[l.id] = { status:'wait', events:[], node: state[l.id].node };
+        const el = state[l.id].node;
+        if (!el) return;
+        el.classList.remove('active','done','error');
+        const badge = document.getElementById('badge-' + l.id);
+        if (badge) { badge.className = 'node-badge'; badge.textContent = 'waiting'; }
+        const sub = document.getElementById('sub-' + l.id);
+        if (sub) sub.textContent = l.sub;
+        const body = document.getElementById('body-' + l.id);
+        body.innerHTML = '<div class="empty-sm" id="empty-' + l.id + '">Click ▶ Simulate Plan to watch the live flow…</div>';
+      });
+      total = 0; countEl.textContent = '0';
+      document.getElementById('detail').classList.remove('open');
+      selectedId = null;
+      document.querySelectorAll('.line').forEach(l => l.classList.remove('lit'));
+    }
+    clearBtn.addEventListener('click', resetAll);
+
+    document.getElementById('runBtn').addEventListener('click', async () => {
+      if (!connected) await waitForWs();
+      runBtn.disabled = true;
+      document.getElementById('runBtn').textContent = 'Running…';
+      const sid = 'demo-' + Math.random().toString(36).slice(2,7);
+      sessionLabel.textContent = 'Session: ' + sid;
+      resetAll();
+      try {
+        if (typeof window.runSimulation === 'function') await window.runSimulation(sid);
+      } finally {
+        runBtn.disabled = false;
+        document.getElementById('runBtn').textContent = '▶ Simulate Plan';
+      }
+    });
+    document.getElementById('runBtn').addEventListener('contextmenu', e => e.preventDefault());
+
+    function waitForWs() {
+      return new Promise(resolve => {
+        const t0 = Date.now();
+        (function check() { if (connected || Date.now() - t0 > 8000) return resolve(); setTimeout(check, 200); })();
+      });
+    }
+  </script>
+</body>
+</html>

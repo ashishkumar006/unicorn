@@ -1,10 +1,64 @@
 const express = require('express');
 const router = express.Router();
 const { generateTravelPackage, getTravelDetails } = require('../services/travelPlanner');
+const { createRouter } = require('../services/router');
+const { createOrchestrator } = require('../services/orchestrator');
+const { ragStore } = require('../rag/ragStore');
+
+let _mon;
+try {
+  _mon = require('../services/monitorBridge');
+} catch {
+  _mon = { emitEvent: null, emitBatch: null };
+}
+const emitStep = _mon?.emitEvent;
 
 const planningStatusStore = new Map();
 const MAX_PLACE_LENGTH = 80;
 const MAX_PREFERENCES_LENGTH = 2000;
+const routerDecision = createRouter({ enableBrowserEscalation: true });
+const orchestrator = createOrchestrator({
+  tools: [
+    {
+      name: 'generateTravelPackage',
+      description: 'Run API layer + subagents + fusion to build a full trip package (travel, hotels, places, food, weather, budget).',
+      execute: async (args = {}) => {
+        delete args.requestId;
+        delete args.message;
+        delete args.routerDecision;
+        const result = await generateTravelPackage(args);
+        return { success: true, provider: 'travel-planner', data: result };
+      },
+    },
+    {
+      name: 'ragSearch',
+      description: 'Search RAG store for similar past plans, preferences, and context before fetching live data.',
+      execute: async (args = {}) => {
+        const userId = toText(args.userId || args.sessionId || 'anonymous');
+        const query = toText(args.query || args.message || `${args.fromPlace} to ${args.toPlace} trip`);
+        const context = ragStore.buildAgentContext(userId, args.plan || { summary: { toPlace: args.toPlace } });
+        const results = ragStore.searchPlans(userId, query);
+        return { success: true, provider: 'rag', context, results };
+      },
+    },
+    {
+      name: 'browserEscalation',
+      description: 'Fallback to browser automation when APIs return null, timeout, or low confidence for live data.',
+      execute: async (args = {}) => {
+        const { runBrowserWorkflow } = require('../services/browserRunner');
+        const url = toText(args.url, '');
+        if (!url) return { success: false, provider: 'browser', error: 'url required for browser escalation' };
+        return runBrowserWorkflow({ url, goal: toText(args.goal, 'extract travel data'), actions: args.actions || [] });
+      },
+    },
+  ],
+});
+
+function toText(value, fallback = '') {
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return fallback;
+}
 
 function createRequestId(prefix = 'travel') {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
@@ -135,19 +189,7 @@ router.post('/plan', async (req, res) => {
       userPreferences,
     } = value;
 
-    console.info('[TravelAPI] Planning request started', {
-      requestId,
-      fromPlace,
-      toPlace,
-      budget,
-      luxuryType,
-      days,
-      travelers,
-      provider,
-      hasPreferences: Boolean(userPreferences),
-    });
-
-    const packageData = await generateTravelPackage({
+    const travelRequest = {
       fromPlace,
       toPlace,
       budget,
@@ -159,11 +201,103 @@ router.post('/plan', async (req, res) => {
       provider,
       sessionId,
       userPreferences,
+      message: `Plan a trip from ${fromPlace} to ${toPlace} for ${travelers} traveler(s)`,
+      requestId,
+    };
+
+    const decision = routerDecision.decide(travelRequest);
+
+    // ── Emit Router decision to monitor ─────────────────────────────
+    if (emitStep) {
+      emitStep('router', 'decision', {
+        domain: decision.domain,
+        complexity: decision.complexity,
+        executionMode: decision.executionMode,
+        providerPriority: decision.providerPriority,
+        browserEscalation: decision.browserEscalation,
+        fallbackChain: decision.fallbackChain,
+        dataRequirements: decision.dataRequirements,
+      }, sessionId);
+    }
+
+    console.info('[TravelAPI] Planning request started', {
+      requestId,
+      fromPlace,
+      toPlace,
+      budget,
+      luxuryType,
+      days,
+      travelers,
+      provider,
+      hasPreferences: Boolean(userPreferences),
+      routerDecision: {
+        domain: decision.domain,
+        executionMode: decision.executionMode,
+        providerPriority: decision.providerPriority,
+        browserEscalation: decision.browserEscalation,
+      },
     });
+
+    if (global.updatePlanningStatus) {
+      global.updatePlanningStatus(sessionId, 'Router', 'Classified request and chose retrieval path', 'searching');
+    }
+
+    const orchestratorResult = await orchestrator.generate({
+      ...travelRequest,
+      routerDecision: decision,
+      userId: `travel-${requestId}`,
+    });
+
+    // ── Emit orchestrator result summary to monitor ──────────────────
+    if (emitStep) {
+      emitStep('orchestrator', 'generate_completed', {
+        requestId,
+        toolResultsCount: Array.isArray(orchestratorResult?.toolResults)
+          ? orchestratorResult.toolResults.length : 0,
+        toolPlan: orchestratorResult?.toolPlan?.toolCalls
+          ?.map(t => t.toolName || t.name) || [],
+        responseKeys: orchestratorResult?.response
+          ? Object.keys(orchestratorResult.response) : [],
+      }, sessionId);
+    }
+
+    const toolResult = Array.isArray(orchestratorResult?.toolResults)
+      ? orchestratorResult.toolResults.find((item) => item?.result?.success && item?.result?.data)
+      : null;
+
+    const fallbackPackageData = toolResult?.result?.data || null;
+
+    if (global.updatePlanningStatus) {
+      const source = fallbackPackageData ? 'data_retrieved' : 'generating_fallback';
+      global.updatePlanningStatus(sessionId, 'Orchestrator', 'Retrieved travel data through pipeline', source);
+    }
+
+    const packageData = fallbackPackageData || await generateTravelPackage({
+      ...value,
+      routerDecision: decision,
+      requestId,
+    });
+
+    // ── Emit final package summary to monitor ────────────────────────
+    if (emitStep) {
+      emitStep('response', 'package_ready', {
+        requestId,
+        elapsedMs: Date.now() - startedAt,
+        budget: packageData?.budget?.total || value?.budget,
+        itineraryDays: packageData?.plan?.itinerary?.length
+          ?? (Array.isArray(packageData?.plan) ? packageData.plan.length : 0)
+          ?? 0,
+        hotels: packageData?.hotels?.options?.length || 0,
+        travel: packageData?.travel?.options?.length || 0,
+        food: packageData?.food?.restaurants?.length || 0,
+        places: packageData?.places?.categories?.length || 0,
+        warnings: packageData?.meta?.warnings || [],
+      }, sessionId);
+    }
 
     res.json({
       success: true,
-      data: packageData.plan,
+      data: packageData,
       meta: {
         ...(packageData.meta || {}),
         requestId,
@@ -203,6 +337,7 @@ router.post('/details', async (req, res) => {
       endDate,
       travelers,
       provider = 'auto',
+      sessionId,
     } = value;
 
     console.info('[TravelAPI] Details request started', {
@@ -211,10 +346,11 @@ router.post('/details', async (req, res) => {
       fromPlace,
       toPlace,
       provider,
+      hasSessionId: Boolean(sessionId),
     });
 
     const data = await getTravelDetails(
-      { fromPlace, toPlace, budget, luxuryType, days, startDate, endDate, travelers, provider },
+      { fromPlace, toPlace, budget, luxuryType, days, startDate, endDate, travelers, provider, sessionId },
       tabType
     );
 

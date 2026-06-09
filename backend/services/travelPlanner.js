@@ -75,7 +75,7 @@ function buildOpenStreetMapFallbackUrl(name, destination) {
 // Map/search-engine domains that must NEVER appear as user-facing links.
 // OSM, Google Maps, and Ola Maps are data-gathering inputs only.
 // The only user-visible links may be official hotel/restaurant/attraction/booking domains.
-const MAP_DOMAIN_PATTERN = /maps\.(google|gstatic|olamaps|kratrim|ola)\.|openstreetmap|nominatim\.openstreetmap|irctc|makemytrip|yatra|goibibo|easemytrip|booking\.com|expedia|agoda|tripadvisor|zomato|swiggy|kayak|skyscanner|ixigo/i;
+const MAP_DOMAIN_PATTERN = /maps\.(google|gstatic|olamaps|kratrim|ola)\.|openstreetmap|nominatim\.openstreetmap/i;
 
 function isOfficialBusinessUrl(value) {
   if (typeof value !== 'string') return false;
@@ -95,9 +95,22 @@ function isOfficialBusinessUrl(value) {
 function buildWorkingMapLink(link, name, destination) {
   const candidate = toText(link, '');
 
+  if (!candidate) return '';
+
+  // Always keep links that subagents or the main agent explicitly provided,
+  // as long as they are not obvious map/search tool URLs.
   if (isOfficialBusinessUrl(candidate)) {
     return candidate;
   }
+
+  // Fallback: if it at least looks like a real external http(s) URL, keep it
+  // (subagent research links are trusted). Only drop pure map/search junk.
+  try {
+    const url = new URL(candidate);
+    if (!MAP_DOMAIN_PATTERN.test(url.hostname) && /^https?:\/\//i.test(candidate)) {
+      return candidate;
+    }
+  } catch {}
 
   return '';
 }
@@ -1048,6 +1061,8 @@ function normalizePlan(rawPlan, trip) {
 
   return plan;
 
+}
+
 function normalizeTravel(rawTravel, trip) {
   const sourceTravel = rawTravel && typeof rawTravel === 'object' ? rawTravel : {};
   const rawOptions = Array.isArray(sourceTravel.options) ? sourceTravel.options : [];
@@ -1393,8 +1408,20 @@ function mergeGooglePlacesIntoPackage(rawPackage, referenceData, subagentResults
     ? referenceFood.streetFood
     : (Array.isArray(rawFood.streetFood) && rawFood.streetFood.length > 0 ? rawFood.streetFood : (Array.isArray(subagentFood.streetFood) ? subagentFood.streetFood : []));
 
-  const mergedHotels = rawPackage.hotels || (subagentResults?.accommodation?.options?.length > 0 ? { options: subagentResults.accommodation.options } : { options: [] });
-  const mergedTravel = rawPackage.travel || (subagentResults?.transit?.options?.length > 0 ? { options: subagentResults.transit.options } : { options: [] });
+  // Prefer subagent data for hotels/travel (they contain verified deep-researched links).
+  // Only fall back to main agent's version if it has real non-empty options and subagents didn't.
+  const subagentHotels = (subagentResults?.accommodation?.options?.length > 0)
+    ? { options: subagentResults.accommodation.options }
+    : null;
+  const subagentTravel = (subagentResults?.transit?.options?.length > 0)
+    ? { options: subagentResults.transit.options }
+    : null;
+
+  const mainHasRealHotels = Array.isArray(rawPackage.hotels?.options) && rawPackage.hotels.options.length > 0;
+  const mainHasRealTravel = Array.isArray(rawPackage.travel?.options) && rawPackage.travel.options.length > 0;
+
+  const mergedHotels = subagentHotels || (mainHasRealHotels ? rawPackage.hotels : { options: [] });
+  const mergedTravel = subagentTravel || (mainHasRealTravel ? rawPackage.travel : { options: [] });
 
   // 3. Enrich targets in place!
   if (mergedHotels && Array.isArray(mergedHotels.options)) {
@@ -1552,128 +1579,308 @@ async function generateTravelPackage(input) {
   const sessionId = input.sessionId || null;
   const provider = normalizeTravelProvider(input?.provider);
   const cacheKey = buildCacheKey(trip, provider);
+  const startedAt = Date.now();
   const now = Date.now();
   const cached = packageCache.get(cacheKey);
 
+  const emitEventFn = (() => {
+    try { return require('./monitorBridge').emitEvent; } catch { return null; }
+  })();
+
   if (cached && now - cached.timestamp < CACHE_TTL_MS) {
+    if (emitEventFn) {
+      emitEventFn('cache', 'lookup_hit', { key: cacheKey, age: now - cached.timestamp }, sessionId);
+    }
     return cached.data;
   }
 
   if (inflightPackages.has(cacheKey)) {
+    if (emitEventFn) {
+      emitEventFn('cache', 'request_inflight', { key: cacheKey }, sessionId);
+    }
     return inflightPackages.get(cacheKey);
   }
 
   const requestPromise = (async () => {
     const config = resolveCloudConfig();
-    
-    // Spawn parallel deep research subagents
+    const fusion = require('./fusion');
+
+    if (emitEventFn) {
+      emitEventFn('cache', 'lookup_miss', { key: cacheKey, ttlRemaining: 0, reason: 'No cached package for this config' }, sessionId);
+    }
+
+    if (emitEventFn) {
+      emitEventFn('orchestrator', 'generate_started', {
+        trip,
+        provider,
+        complexity: 'moderate',
+      }, sessionId);
+    }
+
     const researchResults = await runDeepResearchSubagents(trip, sessionId);
 
-    if (global.updatePlanningStatus) {
-      global.updatePlanningStatus(sessionId, 'System Coordinator', 'Gathering deep research summaries from subagents...', 'searching');
+    if (emitEventFn) {
+      emitEventFn('browser', 'subagents_completed', {
+        accommodation: researchResults.accommodation ? { options: researchResults.accommodation.options?.length || 0 } : null,
+        transit: researchResults.transit ? { options: researchResults.transit.options?.length || 0 } : null,
+        food: researchResults.food ? { restaurants: researchResults.food.food?.restaurants?.length || 0 } : null,
+        places: researchResults.places ? { categories: researchResults.places.places?.categories?.length || 0 } : null,
+      }, sessionId);
     }
 
     const referenceData = await buildTravelReferenceData(trip, provider);
+
+    if (emitEventFn) {
+      const apiProviders = [referenceData?.googlePlaces, referenceData?.olaPlaces].filter(Boolean);
+      emitEventFn('api', 'reference_built', {
+        primary: referenceData?.primaryProvider || provider,
+        secondary: referenceData?.secondaryProvider || null,
+        destination: trip.toPlace,
+        providers: apiProviders.map(p => ({ name: p.name || p.provider, restaurants: p.restaurants || 0, attractions: p.attractions || 0 })),
+      }, sessionId);
+
+      emitEventFn('api', 'places_fetched', {
+        provider: referenceData?.primaryProvider || 'google',
+        candidates: (referenceData?.restaurants?.length || 0) + (referenceData?.attractions?.length || 0),
+        used: Math.min(12, (referenceData?.restaurants?.length || 0) + (referenceData?.attractions?.length || 0)),
+      }, sessionId);
+    }
+
+    if (emitEventFn) {
+      const rawInputCount = [
+        researchResults.accommodation?.options?.length || 0,
+        researchResults.transit?.options?.length || 0,
+        (referenceData?.restaurants?.length || 0) + (researchResults.food?.food?.restaurants?.length || 0),
+        (referenceData?.attractions?.length || 0) + (researchResults.places?.places?.categories?.length || 0),
+      ].reduce((a, b) => a + b, 0);
+
+      emitEventFn('fusion', 'normalize_started', {
+        sources: [researchResults.accommodation, researchResults.transit, researchResults.food, researchResults.places, referenceData].filter(Boolean).length,
+        rawCount: rawInputCount,
+      }, sessionId);
+    }
+
+    const fusedRestaurants = fusion.mergePlaceSets(
+      referenceData?.restaurants || [], researchResults.food?.food?.restaurants || [],
+      { destination: trip.toPlace, limit: 8, defaultSource: referenceData?.primaryProvider || 'google' }, 'restaurant'
+    );
+    const fusedAttractions = fusion.mergePlaceSets(
+      referenceData?.attractions || [], researchResults.places?.places?.categories?.flatMap(c => c.places || []) || [],
+      { destination: trip.toPlace, limit: 10, defaultSource: referenceData?.primaryProvider || 'google' }, 'attraction'
+    );
+    const fusedHotels = fusion.normalizeHotels({ options: researchResults.accommodation?.options || [] }, trip);
+    const fusedTransit = fusion.normalizeTravel(researchResults.transit?.options || [], trip);
+
+    const scoredHotels = fusion.pickBestCandidates(fusedHotels.options, 6);
+    const scoredTransit = fusion.pickBestCandidates(fusedTransit.options, 6);
+    const scoredRestaurants = fusion.pickBestCandidates(fusedRestaurants, 8);
+    const scoredAttractions = fusion.pickBestCandidates(fusedAttractions, 10);
+
+    const sanitizedRestaurants = fusion.sanitizeReferenceData({ restaurants: scoredRestaurants }).restaurants;
+    const sanitizedAttractions = fusion.sanitizeReferenceData({ attractions: scoredAttractions }).attractions;
+
+    const dedupedCount = {
+      hotels: fusedHotels.options.length - scoredHotels.length,
+      transit: fusedTransit.options.length - scoredTransit.length,
+      restaurants: fusedRestaurants.length - scoredRestaurants.length,
+      attractions: fusedAttractions.length - sanitizedAttractions.length,
+    };
+
+    if (emitEventFn) {
+      emitEventFn('fusion', 'dedup_complete', {
+        duplicatesRemoved: Object.values(dedupedCount).reduce((a, b) => a + b, 0),
+        remaining: scoredHotels.length + scoredTransit.length + sanitizedRestaurants.length + sanitizedAttractions.length,
+        breakdown: dedupedCount,
+      }, sessionId);
+
+      emitEventFn('fusion', 'score_rank', {
+        hotels: scoredHotels.length, transit: scoredTransit.length,
+        restaurants: sanitizedRestaurants.length, attractions: sanitizedAttractions.length,
+      }, sessionId);
+    }
+
     const budgetPrompt = buildBudgetAllocationPrompt(referenceData, trip);
     const referencePrompt = buildTravelReferencePrompt(referenceData, trip);
 
-    // Inject deep research summaries into Main Agent prompt context
-    const subagentResearchPrompt = `
-    
-Subagent Deep Research Syntheses:
-The specialized Accommodation, Transit, Gastronomy, and Places subagents have researched official websites, maps, schedules, and forms.
-You MUST strictly incorporate the chosen options below in the final package JSON:
+    const fusionContextPrompt = `
+Fusion-processed data (normalized, deduped, scored, sanitized):
 
-1. Hotels Options (Accommodation Subagent selection):
-${JSON.stringify(researchResults.accommodation.options, null, 2)}
+Hotels (${scoredHotels.length} options):
+${JSON.stringify(scoredHotels, null, 2)}
 
-2. Travel Options (Transit Subagent selection):
-${JSON.stringify(researchResults.transit.options, null, 2)}
+Travel (${scoredTransit.length} options):
+${JSON.stringify(scoredTransit, null, 2)}
 
-3. Food Options (Gastronomy Subagent selection):
-${JSON.stringify(researchResults.food.food, null, 2)}
+Restaurants (${sanitizedRestaurants.length}, links sanitized):
+${JSON.stringify(sanitizedRestaurants, null, 2)}
 
-4. Sights Categories (Places Subagent selection):
-${JSON.stringify(researchResults.places.places, null, 2)}
+Attractions (${sanitizedAttractions.length}, links sanitized):
+${JSON.stringify(sanitizedAttractions, null, 2)}
 `;
 
-    if (global.updatePlanningStatus) {
-      global.updatePlanningStatus(sessionId, 'System Coordinator', 'Synthesizing local routes and day-by-day travel map...', 'searching');
-    }
-
-    // DEBUG: Log subagent results summary
     console.log('[DEBUG Pipeline] Subagent Results Summary:');
     console.log(`  - Accommodation options: ${researchResults.accommodation?.options?.length || 0}`);
     console.log(`  - Transit options: ${researchResults.transit?.options?.length || 0}`);
     console.log(`  - Food restaurants: ${researchResults.food?.food?.restaurants?.length || 0}`);
-    console.log(`  - Food specialties: ${researchResults.food?.food?.localSpecialties?.length || 0}`);
-    console.log(`  - Food street food: ${researchResults.food?.food?.streetFood?.length || 0}`);
     console.log(`  - Places categories: ${researchResults.places?.places?.categories?.length || 0}`);
 
-    const rawPackage = await chatJson({
+    if (emitEventFn) {
+      emitEventFn('llm', 'synthesize_call', {
+        model: config.model,
+        promptSections: ['travel_prompt', 'budget_allocation', 'reference_data', 'fusion_normalized_data'],
+        referenceProvider: referenceData?.primaryProvider,
+        fusionInputCounts: {
+          hotels: scoredHotels.length,
+          transit: scoredTransit.length,
+          restaurants: sanitizedRestaurants.length,
+          attractions: sanitizedAttractions.length,
+        },
+      }, sessionId);
+    }
+
+    const REQUIRED_PACKAGE_KEYS = ['plan', 'hotels', 'travel', 'places', 'food', 'budget'];
+
+    const buildCorrectionPrompt = (attempt, missingKeys, badSection) =>
+      `SYSTEM CORRECTION — Attempt ${attempt}: Your previous JSON response was missing or empty for: ${missingKeys.join(', ')}.
+       The "${badSection}" section must be a non-empty array/object with real options derived from the fusion data below.
+       Respond ONLY with valid JSON. Do NOT add markdown fences, comments, or preamble.`;
+
+    let rawPackage = await chatJson({
       system: TRAVEL_SYSTEM_PROMPT,
       messages: [
         {
           role: 'user',
-          content: `${buildTravelPackagePrompt(trip)}${budgetPrompt}${referencePrompt}${subagentResearchPrompt}`,
+          content: `${buildTravelPackagePrompt(trip)}${budgetPrompt}${referencePrompt}${fusionContextPrompt}`,
         },
       ],
       model: config.model,
       baseUrl: config.baseUrl,
       apiKey: config.apiKey,
       think: false,
-      options: {
-        temperature: 1.0,
-        top_p: 0.95,
-        top_k: 64,
-      },
+      options: { temperature: 1.0, top_p: 0.95, top_k: 64 },
       keepAlive: '15m',
     });
 
-    // DEBUG: Log main agent output
+    let parseAttempts = 0;
+    const MAX_JSON_RETRIES = 3;
+
+    while (parseAttempts < MAX_JSON_RETRIES) {
+      parseAttempts++;
+
+      if (!rawPackage || typeof rawPackage !== 'object') {
+        if (emitEventFn) {
+          emitEventFn('llm', 'json_parse_failed', { attempt: parseAttempts, reason: 'response is not an object' }, sessionId);
+        }
+        const correction = buildCorrectionPrompt(parseAttempts, REQUIRED_PACKAGE_KEYS, 'all');
+        rawPackage = await chatJson({
+          system: `${TRAVEL_SYSTEM_PROMPT}\n\n${correction}`,
+          messages: [
+            {
+              role: 'user',
+              content: `${buildTravelPackagePrompt(trip)}${budgetPrompt}${referencePrompt}${fusionContextPrompt}\n\n${correction}`,
+            },
+          ],
+          model: config.model,
+          baseUrl: config.baseUrl,
+          apiKey: config.apiKey,
+          think: false,
+          options: { temperature: 0.3, top_p: 0.9, top_k: 32 },
+          keepAlive: '15m',
+        });
+        continue;
+      }
+
+      const missingKeys = REQUIRED_PACKAGE_KEYS.filter((k) => {
+        const v = rawPackage[k];
+        if (Array.isArray(v)) return v.length === 0;
+        if (v && typeof v === 'object') return Object.keys(v).length === 0;
+        return !v;
+      });
+
+      if (missingKeys.length > 0) {
+        if (emitEventFn) {
+          emitEventFn('llm', 'json_parse_failed', { attempt: parseAttempts, missingKeys, reason: 'required section empty or missing' }, sessionId);
+        }
+
+        const correction = buildCorrectionPrompt(parseAttempts, missingKeys, missingKeys[0]);
+
+        rawPackage = await chatJson({
+          system: `${TRAVEL_SYSTEM_PROMPT}\n\n${correction}`,
+          messages: [
+            {
+              role: 'user',
+              content: `${buildTravelPackagePrompt(trip)}${budgetPrompt}${referencePrompt}${fusionContextPrompt}\n\n${correction}`,
+            },
+          ],
+          model: config.model,
+          baseUrl: config.baseUrl,
+          apiKey: config.apiKey,
+          think: false,
+          options: { temperature: 0.3, top_p: 0.9, top_k: 32 },
+          keepAlive: '15m',
+        });
+        continue;
+      }
+
+      break;
+    }
+
+    if (parseAttempts >= MAX_JSON_RETRIES) {
+      if (emitEventFn) {
+        emitEventFn('llm', 'json_parse_failed', { attempt: parseAttempts, reason: 'max retries exceeded', fallback: 'fusion_data_only' }, sessionId);
+      }
+      console.warn(`[TravelPlanner] LLM JSON parse failed after ${parseAttempts} attempts — falling back to fusion-only package.`);
+    }
+
     console.log('[DEBUG Pipeline] Main Agent Output:');
     console.log(`  - Travel options: ${rawPackage.travel?.options?.length || 0}`);
     console.log(`  - Hotels options: ${rawPackage.hotels?.options?.length || 0}`);
-    console.log(`  - Plan days: ${rawPackage.plan?.length || 0}`);
+    console.log(`  - Plan days: ${rawPackage.plan?.itinerary?.length || (Array.isArray(rawPackage.plan) ? rawPackage.plan.length : 0) || 0}`);
     console.log(`  - Places categories: ${rawPackage.places?.categories?.length || 0}`);
     console.log(`  - Food restaurants: ${rawPackage.food?.restaurants?.length || 0}`);
-    console.log(`  - Food specialties: ${rawPackage.food?.localSpecialties?.length || 0}`);
-    console.log(`  - Food street food: ${rawPackage.food?.streetFood?.length || 0}`);
 
-    const enrichedRawPackage = mergeGooglePlacesIntoPackage(rawPackage, referenceData, researchResults);
+    const enrichedRawPackage = {
+      ...rawPackage,
+      plan: rawPackage.plan,
+      hotels: { options: scoredHotels },
+      travel: { options: scoredTransit },
+      places: { categories: fusion.buildAttractionCategories(sanitizedAttractions, trip) },
+      food: fusion.buildRestaurantSections(sanitizedRestaurants, trip),
+      weather: rawPackage.weather || {},
+      budget: rawPackage.budget || {},
+    };
 
-    // DEBUG: Log merged package
     console.log('[DEBUG Pipeline] After Merge:');
     console.log(`  - Travel options: ${enrichedRawPackage.travel?.options?.length || 0}`);
     console.log(`  - Hotels options: ${enrichedRawPackage.hotels?.options?.length || 0}`);
-    console.log(`  - Plan days: ${enrichedRawPackage.plan?.length || 0}`);
+    console.log(`  - Plan days: ${enrichedRawPackage.plan?.itinerary?.length || 0}`);
     console.log(`  - Places categories: ${enrichedRawPackage.places?.categories?.length || 0}`);
     console.log(`  - Food restaurants: ${enrichedRawPackage.food?.restaurants?.length || 0}`);
 
     const packageData = normalizeTravelPackage(enrichedRawPackage, trip);
 
-    // DEBUG: Log normalized package
     console.log('[DEBUG Pipeline] After Normalization:');
     console.log(`  - Travel options: ${packageData.travel?.options?.length || 0}`);
     console.log(`  - Hotels options: ${packageData.hotels?.options?.length || 0}`);
-    console.log(`  - Plan days: ${packageData.plan?.length || 0}`);
+    console.log(`  - Plan days: ${packageData.plan?.itinerary?.length || 0}`);
     console.log(`  - Places categories: ${packageData.places?.categories?.length || 0}`);
     console.log(`  - Food restaurants: ${packageData.food?.restaurants?.length || 0}`);
-    let routeInsights = {
+
+    const defaultRouteInsights = {
       enabled: false,
-      summary: `Distance insights are unavailable for ${trip.toPlace} right now.`,
+      summary: `Distance insights unavailable for ${trip.toPlace}.`,
       localTransport: { bus: 0, auto: 0, taxi: 0 },
       nearbyRestaurants: [],
       nearbyAttractions: [],
     };
 
+    let routeInsights = defaultRouteInsights;
     try {
       routeInsights = await buildRouteInsights(referenceData, rawPackage, trip);
     } catch (error) {
       console.warn(`[TravelPlanner] Route insight build failed for ${trip.toPlace}: ${error.message}`);
     }
 
-    // Dynamic budget splits reconciliation
     reconcileBudgetSplits(packageData, trip, routeInsights);
 
     packageData.meta = {
@@ -1683,34 +1890,9 @@ ${JSON.stringify(researchResults.places.places, null, 2)}
         primary: referenceData?.primaryProvider || null,
         secondary: referenceData?.secondaryProvider || null,
       },
-      openStreetMap: referenceData?.openStreetMap || {
-        enabled: false,
-        destination: trip.toPlace,
-        displayName: '',
-        name: '',
-        lat: null,
-        lon: null,
-        zoom: 13,
-        // searchUrl, mapUrl, and embedUrl are intentionally blank — map/search URLs are internal research inputs only.
-        searchUrl: '',
-        mapUrl: '',
-        embedUrl: '',
-        summary: '',
-      },
-      googlePlaces: referenceData?.googlePlaces || {
-        enabled: false,
-        destination: trip.toPlace,
-        restaurants: 0,
-        attractions: 0,
-        summary: '',
-      },
-      olaPlaces: referenceData?.olaPlaces || {
-        enabled: false,
-        destination: trip.toPlace,
-        restaurants: 0,
-        attractions: 0,
-        summary: '',
-      },
+      openStreetMap: referenceData?.openStreetMap || { enabled: false, destination: trip.toPlace, displayName: '', name: '', lat: null, lon: null, zoom: 13, searchUrl: '', mapUrl: '', embedUrl: '', summary: '' },
+      googlePlaces: referenceData?.googlePlaces || { enabled: false, destination: trip.toPlace, restaurants: 0, attractions: 0, summary: '' },
+      olaPlaces: referenceData?.olaPlaces || { enabled: false, destination: trip.toPlace, restaurants: 0, attractions: 0, summary: '' },
       routeInsights,
       researchArtifacts: researchResults.artifacts,
       model: config.model,
@@ -1721,15 +1903,26 @@ ${JSON.stringify(researchResults.places.places, null, 2)}
       global.updatePlanningStatus(sessionId, 'System Coordinator', 'Polishing final budget splits and writing dashboard data...', 'complete');
     }
 
-    packageCache.set(cacheKey, {
-      timestamp: Date.now(),
-      data: packageData,
-    });
+    packageCache.set(cacheKey, { timestamp: Date.now(), data: packageData });
+
+    if (emitEventFn) {
+      emitEventFn('response', 'package_ready', {
+        requestId: input.requestId || null,
+        elapsedMs: Date.now() - startedAt,
+        budget: packageData?.budget?.accommodation?.percentage ? packageData.budget : trip.budget,
+        itineraryDays: packageData?.plan?.itinerary?.length ?? (Array.isArray(packageData?.plan) ? packageData.plan.length : 0) ?? 0,
+        hotels: packageData?.hotels?.options?.length || 0,
+        travel: packageData?.travel?.options?.length || 0,
+        food: packageData?.food?.restaurants?.length || 0,
+        places: packageData?.places?.categories?.length || 0,
+        warnings: packageData?.meta?.warnings || [],
+      }, sessionId);
+    }
+
     return packageData;
-  })()
-    .finally(() => {
-      inflightPackages.delete(cacheKey);
-    });
+  })().finally(() => {
+    inflightPackages.delete(cacheKey);
+  });
 
   inflightPackages.set(cacheKey, requestPromise);
   return requestPromise;

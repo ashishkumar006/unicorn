@@ -5,6 +5,7 @@ const cors = require('cors');
 const travelRoutes = require('./routes/travel');
 const agentRoutes = require('./routes/agent');
 const internalRoutes = require('./routes/internal');
+const browserRoutes = require('./routes/browser');
 
 // Optional dependencies with try-catch requires for public launch hardening
 let helmet;
@@ -67,6 +68,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use('/api/travel', travelRoutes);
 app.use('/api/agent', agentRoutes);
 app.use('/api/internal', internalRoutes);
+app.use('/api/browser', browserRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({
@@ -77,6 +79,7 @@ app.get('/api/health', (req, res) => {
       agent: 'available',
       internal: 'available',
       rag: 'available',
+      browser: 'available',
     },
   });
 });

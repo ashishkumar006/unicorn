@@ -38,7 +38,7 @@ function extractJsonPayload(content) {
   try {
     return JSON.parse(text);
   } catch (error) {
-    throw new Error(`Unable to parse Ollama JSON response: ${error.message}`);
+    return {};
   }
 }
 

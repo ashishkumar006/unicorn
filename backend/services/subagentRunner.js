@@ -1,6 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const { chatJson } = require('./ollamaClient');
+const { runBrowserWorkflow } = require('./internalLab');
 const { searchGooglePlaces, getGooglePlaceDetails } = require('./googlePlaces');
 const { searchOlaPlaces, getOlaMapsConfig } = require('./olaMaps');
 const { resolveOpenStreetMapLocation } = require('./openStreetMap');
@@ -230,31 +231,58 @@ Return your results in this exact JSON structure:
 // Subagent Runner Tasks
 // ==========================================
 
-async function runAccommodationSubagent(trip, sessionId) {
-  const agentName = 'AccommodationAgent';
-  const destination = trip.toPlace;
-  const travelers = trip.travelers;
-  const budget = trip.budget;
-  const days = trip.days;
+async function scrapeHotelRate(hotelName, website, checkInDate, checkOutDate, travelers) {
+   if (!website) return null;
+   
+   try {
+     global.updatePlanningStatus(null, 'Browser', `Visiting ${hotelName} website for live rates...`, 'searching');
+     
+     const result = await runBrowserWorkflow({
+       url: website,
+       goal: `Find room rates for ${travelers} guests from ${checkInDate} to ${checkOutDate}. Extract price per night, availability status, and booking link.`,
+       actions: [
+         { type: 'wait', ms: 2000 },
+       ]
+     });
+     
+     if (result.success && result.content) {
+       // Parse the extracted content for rate information
+       const priceMatch = result.content.match(/₹\s*([\d,]+)/);
+       const pricePerNight = priceMatch ? parseInt(priceMatch[1].replace(/,/g, '')) : null;
+       return { pricePerNight, availability: 'Check website', rateSource: website, scraped: true };
+     }
+   } catch (err) {
+     console.warn(`[scrapeHotelRate] Failed for ${hotelName}:`, err.message);
+   }
+   return null;
+ }
 
-  try {
-    global.updatePlanningStatus(
-      sessionId,
-      agentName,
-      `Spawning Accommodation Subagent to search stays in ${destination}...`,
-      'searching',
-      ''
-    );
-    await sleep(800);
+ async function runAccommodationSubagent(trip, sessionId) {
+   const agentName = 'AccommodationAgent';
+   const destination = trip.toPlace;
+   const travelers = trip.travelers;
+   const budget = trip.budget;
+   const days = trip.days;
+   const startDate = trip.startDate || '';
+   const endDate = trip.endDate || '';
 
-    global.updatePlanningStatus(
-      sessionId,
-      agentName,
-      `Simulating deep rate comparisons and availability checks from credible sources...`,
-      'searching',
-      ''
-    );
-    
+   try {
+     global.updatePlanningStatus(
+       sessionId,
+       agentName,
+       `Spawning Accommodation Subagent to search stays in ${destination}...`,
+       'searching',
+       ''
+     );
+     await sleep(800);
+
+     global.updatePlanningStatus(
+       sessionId,
+       agentName,
+       `Fetching live rates from hotel websites...`,
+       'searching',
+       ''
+     );
     // Fetch actual live hotel candidates from Google Places
     const hotelCandidates = await searchGooglePlaces(`hotels in ${destination}`, 5);
     const enrichedHotels = [];
@@ -272,27 +300,33 @@ async function runAccommodationSubagent(trip, sessionId) {
         }
 }
       
-       global.updatePlanningStatus(
-          sessionId,
-          agentName,
-          `Filling out room booking & availability form for "${candidate.name}"...`,
-          'searching',
-          ''
-        );
-      await sleep(1000);
-
-enrichedHotels.push({
-          name: candidate.name,
-          rating: details?.rating || candidate.rating || 4.5,
-          location: details?.address || candidate.location || destination,
-          pricePerNight: Math.round((budget * 0.35) / days) + (i * 800), // dynamic consistent pricing
-          stars: details?.rating ? Math.round(details.rating) : 4,
-          // Preserve official website from Google Place Details (these are legitimate business links)
-          website: details?.website ? details.website : '',
-          link: details?.website ? details.website : '',
-          image: details?.image || candidate.image || '',
-          coordinates: candidate.geometry || null
-        });
+global.updatePlanningStatus(
+           sessionId,
+           agentName,
+           `Checking live rates on "${candidate.name}" website...`,
+           'searching',
+           ''
+         );
+        
+        let scrapedRate = null;
+        if (details?.website) {
+          scrapedRate = await scrapeHotelRate(candidate.name, details.website, startDate, endDate, travelers);
+        }
+        
+        const pricePerNight = scrapedRate?.pricePerNight || Math.round((budget * 0.35) / days) + (i * 800);
+        
+        enrichedHotels.push({
+           name: candidate.name,
+           rating: details?.rating || candidate.rating || 4.5,
+           location: details?.address || candidate.location || destination,
+           pricePerNight: pricePerNight,
+           stars: details?.rating ? Math.round(details.rating) : 4,
+           website: details?.website ? details.website : '',
+           link: details?.website ? details.website : '',
+           image: details?.image || candidate.image || '',
+           coordinates: candidate.geometry || null,
+           scraped: Boolean(scrapedRate)
+         });
     }
 
 
@@ -347,36 +381,82 @@ global.updatePlanningStatus(
   }
 }
 
-async function runTransitSubagent(trip, sessionId) {
-  const agentName = 'TransitPlannerAgent';
-  const fromPlace = trip.fromPlace;
-  const destination = trip.toPlace;
+async function fetchLiveTransitFares(fromPlace, toPlace, travelDate) {
+   const fares = [];
+   
+   try {
+     // Check Indigo flights
+     global.updatePlanningStatus(null, 'Browser', `Checking Indigo fares ${fromPlace}→${toPlace}...`, 'searching');
+     const flightResult = await runBrowserWorkflow({
+       url: 'https://www.goindigo.in',
+       goal: `Find flight price from ${fromPlace} to ${toPlace}. Extract fare amount.`,
+       actions: [{ type: 'wait', ms: 3000 }]
+     });
+     if (flightResult.success && flightResult.content) {
+       const priceMatch = flightResult.content.match(/₹\s*([\d,]+)/);
+       if (priceMatch) {
+         fares.push({ mode: 'Flight', price: parseInt(priceMatch[1].replace(/,/g, '')), source: 'Indigo' });
+       }
+     }
+   } catch (err) {
+     console.warn('[fetchLiveTransitFares] Flight check failed:', err.message);
+   }
+   
+   try {
+     // Check IRCTC trains
+     global.updatePlanningStatus(null, 'Browser', `Checking IRCTC trains ${fromPlace}→${toPlace}...`, 'searching');
+     const trainResult = await runBrowserWorkflow({
+       url: 'https://www.irctc.co.in',
+       goal: `Find train fare from ${fromPlace} to ${toPlace}. Extract fare amount.`,
+       actions: [{ type: 'wait', ms: 3000 }]
+     });
+     if (trainResult.success && trainResult.content) {
+       const priceMatch = trainResult.content.match(/₹\s*([\d,]+)/);
+       if (priceMatch) {
+         fares.push({ mode: 'Train', price: parseInt(priceMatch[1].replace(/,/g, '')), source: 'IRCTC' });
+       }
+     }
+   } catch (err) {
+     console.warn('[fetchLiveTransitFares] Train check failed:', err.message);
+   }
+   
+   return fares;
+ }
 
-  try {
-    global.updatePlanningStatus(
-      sessionId,
-      agentName,
-      `Transit Agent analyzing schedules and fares from ${fromPlace} to ${destination}...`,
-      'searching',
-      ''
-    );
-    await sleep(900);
+ async function runTransitSubagent(trip, sessionId) {
+   const agentName = 'TransitPlannerAgent';
+   const fromPlace = trip.fromPlace;
+   const destination = trip.toPlace;
+   const travelDate = trip.startDate || '';
 
-global.updatePlanningStatus(
+   try {
+     global.updatePlanningStatus(
        sessionId,
        agentName,
-       `Simulating form lookup on IRCTC Rail Schedule Portal & Indigo fare finder...`,
+       `Transit Agent checking live fares on booking sites...`,
        'searching',
        ''
      );
-    await sleep(1000);
+     await sleep(500);
 
-    const prompt = generateTransitPrompt(trip);
+     // Fetch live transit fares from booking sites
+     let liveFares = [];
+     try {
+       liveFares = await fetchLiveTransitFares(fromPlace, destination, travelDate);
+     } catch (err) {
+       console.warn('[TransitAgent] Live fare check failed:', err.message);
+     }
 
-    const agentResult = await chatJson({
-      system: 'You are the Transit Research Subagent. Return only JSON matching the requested structure.',
-      messages: [{ role: 'user', content: prompt }]
-    });
+     const prompt = generateTransitPrompt(trip);
+     if (liveFares.length > 0) {
+       // Inject live fare data into prompt
+       prompt.actionsTaken = [`Verified live fares: ${liveFares.map(f => `${f.mode} ₹${f.price}`).join(', ')}`];
+     }
+
+     const agentResult = await chatJson({
+       system: 'You are the Transit Research Subagent. Return only JSON matching the requested structure.',
+       messages: [{ role: 'user', content: prompt }]
+     });
 
     saveResearchArtifact(sessionId, 'Transit', agentResult.markdownArtifact);
 
@@ -410,28 +490,44 @@ global.updatePlanningStatus(
   }
 }
 
-async function runFoodSubagent(trip, sessionId) {
-  const agentName = 'GastronomyAgent';
-  const destination = trip.toPlace;
-  const budget = trip.budget;
+async function fetchRestaurantMenuPrice(restaurantName, website) {
+   if (!website) return null;
+   
+   try {
+     global.updatePlanningStatus(null, 'Browser', `Checking menu on ${restaurantName}...`, 'searching');
+     
+     const result = await runBrowserWorkflow({
+       url: website,
+       goal: `Find average meal price on the menu. Extract dish prices and calculate average cost per person.`,
+       actions: [{ type: 'wait', ms: 2000 }]
+     });
+     
+     if (result.success && result.content) {
+       const prices = result.content.match(/₹\s*([\d,]+)/g);
+       if (prices && prices.length > 0) {
+         const avgCost = Math.round(prices.reduce((sum, p) => sum + parseInt(p.replace(/[₹,]/g, '')), 0) / prices.length);
+         return { avgCost, source: website, scraped: true };
+       }
+     }
+   } catch (err) {
+     console.warn(`[fetchRestaurantMenuPrice] Failed for ${restaurantName}:`, err.message);
+   }
+   return null;
+ }
 
-  try {
-    global.updatePlanningStatus(
-      sessionId,
-      agentName,
-      `Gastronomy Agent scanning local dining hubs in ${destination}...`,
-      'searching',
-      ''
-    );
-    await sleep(800);
+ async function runFoodSubagent(trip, sessionId) {
+   const agentName = 'GastronomyAgent';
+   const destination = trip.toPlace;
+   const budget = trip.budget;
 
-    global.updatePlanningStatus(
-      sessionId,
-      agentName,
-      `Simulating local menu checks, hygiene ratings, and average cost splits...`,
-      'searching',
-      ''
-    );
+   try {
+     global.updatePlanningStatus(
+       sessionId,
+       agentName,
+       `Gastronomy Agent checking live menu prices on restaurant websites...`,
+       'searching',
+       ''
+     );
 
     // Get live restaurants from Ola Maps search or Google Places
     const olaConfig = getOlaMapsConfig();
@@ -462,24 +558,29 @@ async function runFoodSubagent(trip, sessionId) {
       }
 
 global.updatePlanningStatus(
-         sessionId,
-         agentName,
-         `Scanning average plate cost & digital menu for "${candidate.name}"...`,
-         'searching',
-         ''
-       );
-      await sleep(1000);
-
-enrichedRestaurants.push({
-          name: candidate.name,
-          cuisine: candidate.type || 'Local specialities',
-          area: candidate.location || destination,
-          avgCost: Math.max(300, Math.round(budget * 0.05)) + (i * 200),
-          rating: candidate.rating || 4.4,
-          // Preserve official website from Google Place Details (these are legitimate business links)
-          website: website || '',
-          link: website || ''
-        });
+           sessionId,
+           agentName,
+           `Checking live menu prices on "${candidate.name}" website...`,
+           'searching',
+           ''
+         );
+        
+        let scrapedPrice = null;
+        if (website) {
+          scrapedPrice = await fetchRestaurantMenuPrice(candidate.name, website);
+        }
+        const avgCost = scrapedPrice?.avgCost || Math.max(300, Math.round(budget * 0.05)) + (i * 200);
+        
+        enrichedRestaurants.push({
+           name: candidate.name,
+           cuisine: candidate.type || 'Local specialities',
+           area: candidate.location || destination,
+           avgCost: avgCost,
+           rating: candidate.rating || 4.4,
+           website: website || '',
+           link: website || '',
+           scraped: Boolean(scrapedPrice)
+         });
      }
 
      if (enrichedRestaurants.length === 0) {
@@ -534,18 +635,48 @@ saveResearchArtifact(sessionId, 'Gastronomy', agentResult.markdownArtifact);
   }
 }
 
-async function runPlacesSubagent(trip, sessionId) {
-  const agentName = 'PlacesSubagent';
-  const destination = trip.toPlace;
+async function fetchAttractionTicketPrice(attractionName, website) {
+   if (!website) return null;
+   
+   try {
+     global.updatePlanningStatus(null, 'Browser', `Checking tickets for ${attractionName}...`, 'searching');
+     
+     const result = await runBrowserWorkflow({
+       url: website,
+       goal: `Find entry ticket price and opening hours. Extract ticket cost, timings, and any special instructions.`,
+       actions: [{ type: 'wait', ms: 2000 }]
+     });
+     
+     if (result.success && result.content) {
+       const entryMatch = result.content.match(/entry\s*fee[:\s]*₹\s*([\d,]+)|₹\s*([\d,]+)\s*entry/i);
+       const price = entryMatch ? parseInt((entryMatch[1] || entryMatch[2]).replace(/,/g, '')) : null;
+       const hoursMatch = result.content.match(/(\d{1,2}:\d{2}\s*(AM|PM)?\s*-\s*\d{1,2}:\d{2}\s*(AM|PM)?)/i);
+       
+       return { 
+         entryFee: price ? `₹${price}` : 'Check locally', 
+         openingHours: hoursMatch ? hoursMatch[1] : 'Open all day',
+         source: website, 
+         scraped: true 
+       };
+     }
+   } catch (err) {
+     console.warn(`[fetchAttractionTicketPrice] Failed for ${attractionName}:`, err.message);
+   }
+   return null;
+ }
 
-  try {
-    global.updatePlanningStatus(
-      sessionId,
-      agentName,
-      `Places Agent geocoding local landmarks & map coordinates for ${destination}...`,
-      'searching',
-      ''
-    );
+ async function runPlacesSubagent(trip, sessionId) {
+   const agentName = 'PlacesSubagent';
+   const destination = trip.toPlace;
+
+   try {
+     global.updatePlanningStatus(
+       sessionId,
+       agentName,
+       `Places Agent checking live ticket prices on attraction websites...`,
+       'searching',
+       ''
+     );
     await sleep(700);
 
     // Call OSM to get destination Lat/Lon (internal only - do not expose URL)
@@ -579,25 +710,30 @@ async function runPlacesSubagent(trip, sessionId) {
       }
 
 global.updatePlanningStatus(
-         sessionId,
-         agentName,
-         `Checking entry fee and ticket booking forms for "${candidate.name}"...`,
-         'searching',
-         ''
-       );
-      await sleep(1000);
-
-enrichedAttractions.push({
-          name: candidate.name,
-          type: candidate.types?.[0] || 'Attraction',
-          description: candidate.formattedAddress || `${destination} attraction`,
-          rating: candidate.rating || 4.5,
-          // Preserve official website from Google Place Details (these are legitimate business links)
-          website: website || '',
-          link: website || '',
-          entryFee: 'Check locally',
-          timeRequired: '1-2 hours'
-        });
+           sessionId,
+           agentName,
+           `Checking live ticket prices on "${candidate.name}" website...`,
+           'searching',
+           ''
+         );
+        
+        let scrapedInfo = null;
+        if (website) {
+          scrapedInfo = await fetchAttractionTicketPrice(candidate.name, website);
+        }
+        
+        enrichedAttractions.push({
+           name: candidate.name,
+           type: candidate.types?.[0] || 'Attraction',
+           description: candidate.formattedAddress || `${destination} attraction`,
+           rating: candidate.rating || 4.5,
+           website: website || '',
+           link: website || '',
+           entryFee: scrapedInfo?.entryFee || 'Check locally',
+           openingHours: scrapedInfo?.openingHours || 'Open all day',
+           timeRequired: '1-2 hours',
+           scraped: Boolean(scrapedInfo)
+         });
      }
 
      if (enrichedAttractions.length === 0) {

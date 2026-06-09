@@ -13,6 +13,8 @@ const express = require('express');
 const router = express.Router();
 const EmailAgent = require('../agents/emailAgent');
 const { ragStore } = require('../rag/ragStore');
+const { createRouter } = require('../services/router');
+const { createOrchestrator } = require('../services/orchestrator');
 const db = require('../db/database');
 
 // Store agent instances per user
@@ -20,6 +22,72 @@ const agents = new Map();
 const activeChatRequests = new Set();
 const MAX_MESSAGE_LENGTH = 4000;
 const MAX_USER_ID_LENGTH = 120;
+const routerDecision = createRouter({ enableBrowserEscalation: true });
+const orchestrator = createOrchestrator({
+  tools: [
+    {
+      name: 'accessPlan',
+      description: 'Read the current plan object for a user.',
+      execute: async (args = {}) => {
+        const agent = getAgent(toText(args.userId, 'default'));
+        const plan = agent.getPlanContext();
+        return { success: true, provider: 'agent', plan };
+      },
+    },
+    {
+      name: 'searchPlaces',
+      description: 'Search Google Places or Ola Maps for restaurants, attractions, and places.',
+      execute: async (args = {}) => {
+        const { searchPlaces: searchPlacesTool } = require('../agents/tools/planTools');
+        const agent = getAgent(toText(args.userId, 'default'));
+        return searchPlacesTool.execute({ plan: agent.getPlanContext(), ...args });
+      },
+    },
+    {
+      name: 'searchWeb',
+      description: 'Search the live web for current travel information and news.',
+      execute: async (args = {}) => {
+        const { searchWeb } = require('../services/internalLab');
+        return searchWeb({ query: toText(args.query || args.message, ''), maxResults: Number(args.maxResults) || 5 });
+      },
+    },
+    {
+      name: 'readUrl',
+      description: 'Fetch and summarize a specific URL.',
+      execute: async (args = {}) => {
+        const { readUrlContent } = require('../services/internalLab');
+        return readUrlContent({ url: toText(args.url, ''), prompt: toText(args.prompt, '') });
+      },
+    },
+    {
+      name: 'ragSearch',
+      description: 'Search RAG store for past plans and context.',
+      execute: async (args = {}) => {
+        const userId = toText(args.userId, 'anonymous');
+        const query = toText(args.query || args.message, '');
+        const context = ragStore.buildAgentContext(userId, args.plan || { summary: { toPlace: args.toPlace } });
+        const results = ragStore.searchPlans(userId, query);
+        return { success: true, provider: 'rag', context, results };
+      },
+    },
+    {
+      name: 'browserEscalation',
+      description: 'Fallback to browser automation when APIs fail or live data is needed.',
+      execute: async (args = {}) => {
+        const { runBrowserWorkflow } = require('../services/browserRunner');
+        const url = toText(args.url, '');
+        if (!url) return { success: false, provider: 'browser', error: 'url required for browser escalation' };
+        return runBrowserWorkflow({ url, goal: toText(args.goal, 'extract travel data'), actions: args.actions || [] });
+      },
+    },
+  ],
+});
+
+function toText(value, fallback = '') {
+  if (typeof value === 'string' && value.trim()) return value.trim();
+  if (typeof value === 'number' && Number.isFinite(value)) return String(value);
+  return fallback;
+}
 
 function createRequestId(prefix = 'agent') {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;

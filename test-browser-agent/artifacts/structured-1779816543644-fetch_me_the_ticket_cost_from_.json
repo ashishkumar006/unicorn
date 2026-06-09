@@ -1,0 +1,135 @@
+{
+  "buses": [
+    {
+      "price": 619,
+      "operator": "FlixBus",
+      "departure": "22:05",
+      "arrival": "07:45",
+      "seatsLeft": 21,
+      "rating": 4.2
+    },
+    {
+      "price": 699,
+      "operator": "FlixBus",
+      "departure": "20:30",
+      "arrival": "07:00",
+      "seatsLeft": 18,
+      "rating": 4.2
+    },
+    {
+      "price": 719,
+      "operator": "IntrCity SmartBus",
+      "departure": "22:25",
+      "arrival": "06:45",
+      "seatsLeft": 6,
+      "rating": 3.9
+    },
+    {
+      "price": 459,
+      "operator": "IntrCity SmartBus",
+      "departure": "22:30",
+      "arrival": "07:30",
+      "seatsLeft": 6,
+      "rating": 3.9
+    },
+    {
+      "price": 681,
+      "operator": "zingbus plus",
+      "departure": "20:30",
+      "arrival": "08:10",
+      "seatsLeft": 4,
+      "rating": 4.2
+    },
+    {
+      "price": 539,
+      "operator": "IntrCity SmartBus",
+      "departure": "23:10",
+      "arrival": "07:40",
+      "seatsLeft": 7,
+      "rating": 3.8
+    },
+    {
+      "price": 519,
+      "operator": "IntrCity SmartBus",
+      "departure": "22:50",
+      "arrival": "07:20",
+      "seatsLeft": 4,
+      "rating": null
+    },
+    {
+      "price": 605,
+      "operator": "SRI SUGAM TRAVELS",
+      "departure": "23:15",
+      "arrival": "07:30",
+      "seatsLeft": 7,
+      "rating": 3.8
+    },
+    {
+      "price": 650,
+      "operator": "SREE KVR TRAVELS",
+      "departure": "21:55",
+      "arrival": "06:15",
+      "seatsLeft": 16,
+      "rating": null
+    },
+    {
+      "price": 1080,
+      "operator": "Sri Kumaran Travels",
+      "departure": "22:40",
+      "arrival": "07:30",
+      "seatsLeft": 7,
+      "rating": 4.5
+    },
+    {
+      "price": 798,
+      "operator": "SVKDT Travels",
+      "departure": "22:05",
+      "arrival": "06:15",
+      "seatsLeft": 3,
+      "rating": 3.7
+    },
+    {
+      "price": 550,
+      "operator": "Sri Krishna Travels",
+      "departure": "23:00",
+      "arrival": "06:30",
+      "seatsLeft": 7,
+      "rating": 2.9
+    },
+    {
+      "price": 748,
+      "operator": "VKV Travels",
+      "departure": "23:15",
+      "arrival": "07:50",
+      "seatsLeft": 8,
+      "rating": 3.3
+    },
+    {
+      "price": 760,
+      "operator": "PRM Roadways",
+      "departure": "23:30",
+      "arrival": "07:00",
+      "seatsLeft": 1,
+      "rating": 4.5
+    },
+    {
+      "price": 739,
+      "operator": "Ira Transport",
+      "departure": "22:30",
+      "arrival": "06:40",
+      "seatsLeft": 2,
+      "rating": 3.9
+    },
+    {
+      "price": 670,
+      "operator": "Sri Venkataramana Travels",
+      "departure": "22:30",
+      "arrival": "07:00",
+      "seatsLeft": 1,
+      "rating": 3.3
+    }
+  ],
+  "goal": "fetch me the ticket cost from chennai to vijayawada",
+  "url": "https://www.abhibus.com/bus_search/Chennai/6/Vijayawada/5/26-05-2026/O",
+  "timestamp": "2026-05-26T17:29:52.929Z"
+}

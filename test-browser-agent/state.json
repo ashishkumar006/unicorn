@@ -1,0 +1,876 @@
+{
+  "cookies": [
+    {
+      "name": "_gcl_au",
+      "value": "1.1.577780811.1779800169",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": 1787576169,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "__abrs_iss",
+      "value": "2667c271-803c-3436-bb9b-19595efb594b",
+      "domain": "www.abhibus.com",
+      "path": "/",
+      "expires": 1811422569,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "__abrs_uat",
+      "value": "45f46fd0-5902-11f1-b959-2dcc6682595c",
+      "domain": "www.abhibus.com",
+      "path": "/",
+      "expires": 1811422569,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_fbp",
+      "value": "fb.1.1779800170097.16680793572124000",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": 1787626527,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "WZRK_G",
+      "value": "e67ca03eb91545969a0cf614477dd62d",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": 1811418071,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "IDE",
+      "value": "AHWqTUmE5bAE7L9MGuDp-VMoVeV5J76nUx2OodxunZRKLCEoJKEeCyWHrvMT1Qzg",
+      "domain": ".doubleclick.net",
+      "path": "/",
+      "expires": 1814360599.578449,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.1098462160.1779800169",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": 1814442071.435063,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "MUID",
+      "value": "0B0B622E352967FB24AA754B345666C8",
+      "domain": ".bing.com",
+      "path": "/",
+      "expires": 1813496623.130725,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "MR",
+      "value": "0",
+      "domain": ".bat.bing.com",
+      "path": "/",
+      "expires": 1780405421.67762,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "MR",
+      "value": "0",
+      "domain": ".c.bing.com",
+      "path": "/",
+      "expires": 1780405423.130828,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "SRM_B",
+      "value": "0B0B622E352967FB24AA754B345666C8",
+      "domain": ".c.bing.com",
+      "path": "/",
+      "expires": 1813496623.130846,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "SM",
+      "value": "C",
+      "domain": ".c.clarity.ms",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "MUID",
+      "value": "0B0B622E352967FB24AA754B345666C8",
+      "domain": ".clarity.ms",
+      "path": "/",
+      "expires": 1813496622.304771,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "MR",
+      "value": "0",
+      "domain": ".c.clarity.ms",
+      "path": "/",
+      "expires": 1780405422.304824,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_pxhd",
+      "value": "QijzQxCXHC4wJn8Uqx08RZF-NQTSY1RnAVPDQ6rOt2YsDAeVj/T/wGXOgKwIUZVhlW8QSJRp7n2gfeZDXFYr2w==:SQMTvuDHE8/sEaecXFn4H8g510vRcPB0eK6Zc1suKNkbdOkiFjsauMJ0VeBthDvdJFV-30AnSRYjxrn5Ie-9kCsjdC0zHo2n7Xdy4TGs-kU=",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1811361204.286293,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "traveller_context",
+      "value": "82b9f24f-41d9-4c2e-ad2c-9de24379cd96",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1814385204.286507,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "__Secure-anon_token",
+      "value": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6ImM3ZGZlYjI2LTlmZjUtNDY4OC1iYjc3LWRiNTY2NWUyNjFkZSJ9.eyJhenAiOiIyNWM3MGZmZDAwN2JkOGQzODM3NyIsImh0dHBzOi8vc2t5c2Nhbm5lci5uZXQvbG9naW5UeXBlIjoiYW5vbnltb3VzIiwiaHR0cHM6Ly9za3lzY2FubmVyLm5ldC91dGlkIjoiODJiOWYyNGYtNDFkOS00YzJlLWFkMmMtOWRlMjQzNzljZDk2IiwiaHR0cHM6Ly9za3lzY2FubmVyLm5ldC9jc3JmIjoiZDc2MjU5N2RlZTMxYTA2NGE3YTBjNjcwODZhYzVmOGUiLCJodHRwczovL3NreXNjYW5uZXIubmV0L2p0aSI6ImI3MjllNjUxLTdlZWItNDk1Mi1hZGUyLWYxYmJlNGU1NTQ5YiIsImlhdCI6MTc3OTgyNDk2MSwiZXhwIjoxODQyODk2OTYxLCJhdWQiOiJodHRwczovL2dhdGV3YXkuc2t5c2Nhbm5lci5uZXQvaWRlbnRpdHkiLCJpc3MiOiJodHRwczovL3d3dy5za3lzY2FubmVyLm5ldC9zdHRjL2lkZW50aXR5L2p3a3MvcHJvZC8ifQ.PSrLPTRqnoj5LTMMMdnONdpbgWLCU6jDkUQtTggY8NM2n-KuMjB9IJgImDWYclnpNKExMVv2EICCDtbVy5eZenWYa-ao_1J2b5tcmTCMw3na4Ccr6rP7h8KRlYD-tbxBnHF-vHqxJ9xMqLh__qqT-GicdoLfixeIR0NaQlPR2umQ_615iZYj0-vC9Q6OxP7tziGuYkd1qiKJ6KMXA8ifMRY2Xtit8z_YTesIIakut6ylHOb4Zhx-bpZu8bMJu6QKPEyIOpxA_sPmZPQU2janrLJVv9aBlwVx9QWQgxMfsdUTjKO6-XB8awVNdzIgs1JVu3T9UQlhHZqg-4AqpfVNhA",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1814385204.28656,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "__Secure-anon_csrf_token",
+      "value": "d762597dee31a064a7a0c67086ac5f8e",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1814385204.286616,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "experiment_allocation_id",
+      "value": "0f582bfdc7efa21add6c36898865facb0c4506e7d843b6b9c73e1caab523d86e",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1814385204.286702,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "ssculture",
+      "value": "locale:::en-GB&market:::IN&currency:::INR",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1795377204.286747,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "abgroup",
+      "value": "58263593",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1782244404.286802,
+      "httpOnly": true,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_pxvid",
+      "value": "fd86214d-593b-11f1-a0b2-4beedce9b785",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1811360959.758281,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_gcl_au",
+      "value": "1.1.282215749.1779824960",
+      "domain": ".skyscanner.co.in",
+      "path": "/",
+      "expires": 1787600960,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.602485903.1779824961",
+      "domain": ".skyscanner.co.in",
+      "path": "/",
+      "expires": 1814384960.565523,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_XEEM7L2YCB",
+      "value": "GS2.1.s1779824960$o1$g0$t1779824960$j60$l0$h1160733993",
+      "domain": ".skyscanner.co.in",
+      "path": "/",
+      "expires": 1814384960.583109,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "FPID",
+      "value": "FPID2.3.yyZA7wOe1ShT1OBz8ufrlFRdJjMrn7%2FCfdt1ZRlCia4%3D.1779824961",
+      "domain": ".skyscanner.co.in",
+      "path": "/",
+      "expires": 1814384960.72455,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "FPAU",
+      "value": "1.1.282215749.1779824960",
+      "domain": ".skyscanner.co.in",
+      "path": "/",
+      "expires": 1787600957.695084,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_fbp",
+      "value": "fb.2.1779824963350.1057623753",
+      "domain": ".skyscanner.co.in",
+      "path": "/",
+      "expires": 1787600960.724735,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "QSI_S_ZN_0VDsL2Wl8ZAlxlA",
+      "value": "v:0:0",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1780429761,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "uid",
+      "value": "b6dced98-84e7-4f15-a798-71e14bffc6eb",
+      "domain": ".criteo.com",
+      "path": "/",
+      "expires": 1813520962.158723,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "cto_bundle",
+      "value": "SJ0TMV94ZHlndE5CSjVtQW5Sek0walVKJTJCVlJRTDltS0xtVWJkNzJSJTJCREdyeFlIanhET1U5cWNhS2dWZWdGQkIybEI1SHpZJTJCMmxwemJveDdRYnp4UzN1WHZuWkxEV3lTYUdwbFhKdFczQUVzSmpjJTJCeGdMSHUyJTJGbUhDU045UFFFbG5hUXptamxKUmRSZXNMVHpmd1gxeXpMbENBJTNEJTNE",
+      "domain": ".criteo.com",
+      "path": "/",
+      "expires": 1813520961.26026,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None",
+      "partitionKey": "https://skyscanner.co.in",
+      "_crHasCrossSiteAncestor": true
+    },
+    {
+      "name": "cto_bundle",
+      "value": "XIBlc19oeHJlMFNUYkVuJTJCU09BMTg4ZnNyZjk3b0tHMXJuNThqSlMySlI4Z3BmaSUyRiUyQml2dTZtUE92SlVxVE1OTW53NiUyRllaOThwVHpUY3hzQVpmNnE2WXZCQ0tGeDBoT1E5JTJCWEtEOFNPdEYyTjY4b1F6QWFKTDhkb3haUWolMkJkV1JmOG1jOGw3NkFudjhUZCUyRjdrYld5M2drYnkxdyUzRCUzRA",
+      "domain": ".skyscanner.co.in",
+      "path": "/",
+      "expires": 1813988961,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "jha",
+      "value": "CAISaAiwlNfQBhIINTgyNjM1OTMYtvTX0AYgACoCSU4yBWVuLUdCOABCA0lOUlIHdW5rbm93bloGYmFuYW5hYAFoAHAAeACAAQCIAQCSAQVjby5pbpoBFHd3dy5za3lzY2FubmVyLmNvLmlu",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1795550004.286661,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_px3",
+      "value": "79c945ca71ff9f8f8e90e4bf0e1b58c5e39790e887f38546b6f26fe9ecc985c5:3kk45hNR0Jk+Kc7bl3+YSuGMuJSbPBLWrcHs/qp/+tBsCuRj9EEp/aJOY2sa1EJbWJTT4kCbSKrZFrs6iYiXQA==:1000:pACkczsyLPmDmfI5r5o1uHebVp1jZlTAl6oGtSQR9msE1doy7BlfqlwhOmdsWv7AaM+ZigV1lE/rjJAFpqPDVI4xsbjDL8kW0goYxTIx2Xqsy5af4lA20nw88Rkg/gm+f8IvveShjCRmrvUFkrsGxUb+93QXf2dLAczGV3chpZnzE8kXYqtIPq/568s4Stk6tDkMQz2EWPgGjdPSi9LY2JbidPVIRCmugGrcBB5bAEcvNbDLQ0lU6Eh4Kvq9I90SztVoMY4+EAn2QN5I5JrCjw9NyAn7KETRdEz+1JyREnbvATSz5LNpnmmOc4Py91btiR/hcfYNdVkvnaWvP0KsU2iic4B5aaOrKN2FXE/gjO38LroxpPcdRhtbtGPbg0Aeh37YafxokWVVHzJR+9H6jJmXVBpTOnW2xSTzkOQ42+i7lsMgHvwjv5KVzivdJfJKAstL1ErDA8m4Fhe/hK43xt2h5Vdc7P7ecvfcU0N52ac=",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": 1779998005.881655,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "pxcts",
+      "value": "iWGjMhGCwZiJf3d/NWzjKQGlZVVvAXr-Y5qM1jXqrZQ=:SgtnKI4tkNRj3w/hIDbdoBL7gQVTF-b/xVW7BZ4Y2NgMN9yzcNq6r1bEPCv7spXpWxBFKsFQ0X4JZWsffTovJFs2sPgQccy08u6xr8stMAuDnX5EWWKI59a4P9t-/ViF2Bh4zFjsvj1ilFx9tDKwphx5LafTS2a8Bzz6VvCchQT4ipkZHitgw-NLAFwdpoGs",
+      "domain": "www.skyscanner.co.in",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "CLID",
+      "value": "c132931c8f7b48bea975ea0f8bedee3b.20260526.20270527",
+      "domain": "www.clarity.ms",
+      "path": "/",
+      "expires": 1811386147.711479,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_clck",
+      "value": "eawmf3%5E2%5Eg6e%5E0%5E2337",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": 1811386147,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_uetsid",
+      "value": "51106440590311f1a699db3f3c90e090",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": 1779936926,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_uetvid",
+      "value": "51107c70590311f1a7dc51561171b43b",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": 1813546526,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "AWSALBTG",
+      "value": "yGMGaEfxYZXSLEHKNXVE45YeqHjFX1Hh2+x+nvBKK5U520b2WGIEG6sKRsyOPmDl3MOSesRoCKpkuWsNCn9Y15qs7RcZG5abw5vPjeSU4VFm4WiYdFaEFmPoo5s1XOxu6ZXVwV+/JH6/041/VR7EncEx67RBbRfj7ql6zeAadTNL",
+      "domain": "www.abhibus.com",
+      "path": "/",
+      "expires": 1780459151.12376,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "AWSALBTGCORS",
+      "value": "yGMGaEfxYZXSLEHKNXVE45YeqHjFX1Hh2+x+nvBKK5U520b2WGIEG6sKRsyOPmDl3MOSesRoCKpkuWsNCn9Y15qs7RcZG5abw5vPjeSU4VFm4WiYdFaEFmPoo5s1XOxu6ZXVwV+/JH6/041/VR7EncEx67RBbRfj7ql6zeAadTNL",
+      "domain": "www.abhibus.com",
+      "path": "/",
+      "expires": 1780459151.123881,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_cfuvid",
+      "value": "v56Gx4lSeMm5yIEdIgndXnbG_9dcEfTuLFwS6JilHbA-1779882075.8283963-1.0.1.1-6m.vzZiU_7bZoWEK6AEyteeNlLLNjn4CUeV7ClZNOX0",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    },
+    {
+      "name": "_ga_EZF236QWC0",
+      "value": "GS2.1.s1779881718$o7$g1$t1779882071$j60$l0$h0$d2wH0MqFSroxr9UViMckNjAdIAeFMT1rmbg",
+      "domain": ".abhibus.com",
+      "path": "/",
+      "expires": 1814442071.442743,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_gid",
+      "value": "GA1.2.1921270662.1779883521",
+      "domain": ".rajpark.com",
+      "path": "/",
+      "expires": 1779972400,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "twk_idm_key",
+      "value": "LQE5vACvZLEcZtlMjt1AY",
+      "domain": "www.rajpark.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_7B4817JW7K",
+      "value": "GS2.1.s1779883521$o1$g1$t1779886000$j60$l0$h0",
+      "domain": ".rajpark.com",
+      "path": "/",
+      "expires": 1814446000.25457,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_DMYPKC176S",
+      "value": "GS2.1.s1779883521$o1$g1$t1779886000$j60$l0$h0",
+      "domain": ".rajpark.com",
+      "path": "/",
+      "expires": 1814446000.587924,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.1050578694.1779883521",
+      "domain": ".rajpark.com",
+      "path": "/",
+      "expires": 1814446000.82494,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_9P5C8V9HYM",
+      "value": "GS2.1.s1779883521$o1$g1$t1779886000$j60$l0$h0",
+      "domain": ".rajpark.com",
+      "path": "/",
+      "expires": 1814446000.593259,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_R0C9J3G8YQ",
+      "value": "GS2.1.s1779883521$o1$g1$t1779886000$j60$l0$h0",
+      "domain": ".rajpark.com",
+      "path": "/",
+      "expires": 1814446000.824607,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "TawkConnectionTime",
+      "value": "0",
+      "domain": "www.rajpark.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "twk_uuid_58c7aeeea8edb309fad90c05",
+      "value": "%7B%22uuid%22%3A%221.70jWkU0MXIzsqDA0xIkzxdvqnHrvW0XByisOHy5lbkus4XF8AbiHKBsWDTpzhPjeuzLvn0fyrQxQdTyXB5FlihYTEAJtmvXEESXQkVyAlxgia1zMq0sB%22%2C%22version%22%3A3%2C%22domain%22%3A%22rajpark.com%22%2C%22ts%22%3A1779886001788%7D",
+      "domain": ".rajpark.com",
+      "path": "/",
+      "expires": 1795438001,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "AKA_A2",
+      "value": "A",
+      "domain": ".tajhotels.com",
+      "path": "/",
+      "expires": 1779914157.037471,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "clientID",
+      "value": "fccauhak5yufdygo63zi",
+      "domain": "www.tajhotels.com",
+      "path": "/",
+      "expires": 1811446557,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_gcl_au",
+      "value": "1.1.218807365.1779910558",
+      "domain": ".tajhotels.com",
+      "path": "/",
+      "expires": 1787686558,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "RT",
+      "value": "\"z=1&dm=www.tajhotels.com&si=64bc5bc1-7295-4750-bee9-c06dfdbdac7c&ss=mpogsff5&sl=0&tt=0\"",
+      "domain": ".www.tajhotels.com",
+      "path": "/",
+      "expires": 1780515358,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_fbp",
+      "value": "fb.1.1779910558736.310828180324573798",
+      "domain": ".tajhotels.com",
+      "path": "/",
+      "expires": 1787686558,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_uetsid",
+      "value": "497914705a0311f19cccdf27aa42af59",
+      "domain": ".tajhotels.com",
+      "path": "/",
+      "expires": 1779996958,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_uetvid",
+      "value": "497931b05a0311f1811147823831e2fb",
+      "domain": ".tajhotels.com",
+      "path": "/",
+      "expires": 1813606558,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_clck",
+      "value": "1viznxt%5E2%5Eg6e%5E0%5E2338",
+      "domain": ".tajhotels.com",
+      "path": "/",
+      "expires": 1811446559,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga_S8WJ80ZDYT",
+      "value": "GS2.1.s1779910559$o1$g0$t1779910559$j60$l0$h1634998544",
+      "domain": ".tajhotels.com",
+      "path": "/",
+      "expires": 1814470559.238275,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "_ga",
+      "value": "GA1.1.1249488152.1779910559",
+      "domain": ".tajhotels.com",
+      "path": "/",
+      "expires": 1814470559.239267,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://www.tajhotels.com",
+      "localStorage": [
+        {
+          "name": "lastExternalReferrerTime",
+          "value": "1779910558720"
+        },
+        {
+          "name": "__stsiteid",
+          "value": "ab27cd069b216376ae0d906e01a417c2"
+        },
+        {
+          "name": "_uetvid_exp",
+          "value": "Mon, 21 Jun 2027 19:35:58 GMT"
+        },
+        {
+          "name": "_uetsid_exp",
+          "value": "Thu, 28 May 2026 19:35:58 GMT"
+        },
+        {
+          "name": "currentPageURL",
+          "value": "/en-in"
+        },
+        {
+          "name": "lastExternalReferrer",
+          "value": "empty"
+        },
+        {
+          "name": "_uetvid",
+          "value": "497931b05a0311f1811147823831e2fb"
+        },
+        {
+          "name": "_gcl_ls",
+          "value": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"eopCount\":0,\"creationTimeMs\":1779910558333},\"expires\":1787686558333}}"
+        },
+        {
+          "name": "_uetsid",
+          "value": "497914705a0311f19cccdf27aa42af59"
+        }
+      ]
+    },
+    {
+      "origin": "https://www.rajpark.com",
+      "localStorage": [
+        {
+          "name": "mailmunch_pageview_count",
+          "value": "{\"expiry\":\"Thu, 27 May 2027 12:46:40 GMT\",\"value\":9}"
+        },
+        {
+          "name": "mailmunch_second_pageview",
+          "value": "{\"expiry\":\"Thu, 27 May 2027 12:46:40 GMT\",\"value\":\"true\"}"
+        },
+        {
+          "name": "twk_58c7aeeea8edb309fad90c05",
+          "value": "vsb96.tawk.to"
+        },
+        {
+          "name": "twk_token_58c7aeeea8edb309fad90c05",
+          "value": "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCIsImtpZCI6InZpc2l0b3ItYXBwbGljYXRpb24tc2VydmVyLTIwMjEwMjIifQ.eyJwaWQiOiI1OGM3YWVlZWE4ZWRiMzA5ZmFkOTBjMDUiLCJ2aWQiOiI1OGM3YWVlZWE4ZWRiMzA5ZmFkOTBjMDUtTTFmVmppQ0dmNkNNazg1a0tjMU1oIiwic2lkIjoiNmExNmU3YjY3NzQ0NWEzMDhjNDEwMDlkIiwiaWF0IjoxNzc5ODg2MDA2LCJleHAiOjE3Nzk4ODc4MDYsImp0aSI6IlpsZl9FYkFmc3h0bElQQkI5RnNXOSJ9.aJtM-EZAJh9WN60duj3BMMitXuU3ej1Puex4csgIUy8UpM2cfp4KXmGDH8Zy5VJuovhw__L4Jl71CFqWLoha9A"
+        }
+      ]
+    },
+    {
+      "origin": "https://www.abhibus.com",
+      "localStorage": [
+        {
+          "name": "persist:filterBanners@v2",
+          "value": "{\"ids\":\"[\\\"ASD\\\",\\\"TR\\\",\\\"EEB\\\",\\\"PD\\\",\\\"EFD\\\",\\\"ERH\\\",\\\"EER\\\",\\\"WD\\\",\\\"AGS\\\",\\\"TTD\\\"]\",\"entities\":\"{\\\"ASD\\\":{\\\"name\\\":\\\"ASD\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"ASD\\\",\\\"landingUrl\\\":\\\"\\\",\\\"image\\\":\\\"https://static.abhibus.com/Assured/Assured.png\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/Assured/Assured.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/Assured/Assured.png\\\"},\\\"TR\\\":{\\\"name\\\":\\\"TopRated\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"TR\\\",\\\"landingUrl\\\":\\\"\\\",\\\"image\\\":\\\"https://static.abhibus.com/Highestrated/Highestrated.png\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/Highestrated/Highestrated.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/Highestrated/Highestrated.png\\\"},\\\"EEB\\\":{\\\"name\\\":\\\"EEB\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"EEB\\\",\\\"landingUrl\\\":\\\"\\\",\\\"image\\\":\\\"https://static.abhibus.com/advancebookingoffer/advancebookingoffer.png\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/advancebookingoffer/advancebookingoffer.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/advancebookingoffer/advancebookingoffer.png\\\"},\\\"PD\\\":{\\\"name\\\":\\\"PriceDrop\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"PD\\\",\\\"landingUrl\\\":\\\"\\\",\\\"image\\\":\\\"https://static.abhibus.com/pricedrop/pricedrop.png\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/pricedrop/pricedrop.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/pricedrop/pricedrop.png\\\"},\\\"EFD\\\":{\\\"name\\\":\\\"EFD\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"EFD\\\",\\\"landingUrl\\\":\\\"\\\",\\\"image\\\":\\\"https://static.abhibus.com/flashOffer/flashOffer.png\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/flashOffer/flashOffer.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/flashOffer/flashOffer.png\\\"},\\\"ERH\\\":{\\\"name\\\":\\\"ERH\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"ERH\\\",\\\"landingUrl\\\":\\\"\\\",\\\"image\\\":\\\"https://static.abhibus.com/lastminuteoffer/lastminuteoffer.png\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/lastminuteoffer/lastminuteoffer.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/lastminuteoffer/lastminuteoffer.png\\\"},\\\"EER\\\":{\\\"name\\\":\\\"EER\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"EER\\\",\\\"landingUrl\\\":\\\"\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/Returntripoffer/Returntripoffer.png\\\",\\\"image\\\":\\\"https://static.abhibus.com/Returntripoffer/Returntripoffer.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/Returntripoffer/Returntripoffer.png\\\"},\\\"WD\\\":{\\\"name\\\":\\\"WD\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"WD\\\",\\\"landingUrl\\\":\\\"\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/Women/Women.png\\\",\\\"image\\\":\\\"https://static.abhibus.com/Women/Women.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/Women/Women.png\\\"},\\\"AGS\\\":{\\\"name\\\":\\\"AGS\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"AGS\\\",\\\"landingUrl\\\":\\\"\\\",\\\"image\\\":\\\"https://static.abhibus.com/img/cards/GREATINDIANBUSSALE75.webp\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/img/cards/GREATINDIANBUSSALE75.webp\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/img/cards/GREATINDIANBUSSALE75.webp\\\"},\\\"TTD\\\":{\\\"name\\\":\\\"TTD\\\",\\\"filterFlags\\\":[],\\\"filterType\\\":\\\"0\\\",\\\"bannerFilter\\\":\\\"TTD\\\",\\\"landingUrl\\\":\\\"\\\",\\\"image\\\":\\\"https://static.abhibus.com/img/serp/ttd.png\\\",\\\"bigImage\\\":\\\"https://static.abhibus.com/img/serp/ttd.png\\\",\\\"smallImage\\\":\\\"https://static.abhibus.com/img/serp/ttd.png\\\"}}\",\"ttl\":\"1779804220445\",\"isLoaded\":\"true\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "persist:user",
+          "value": "{\"isUserLoggedIn\":\"false\",\"fetchAccessTokenFlag\":\"false\",\"enableEmailNotification\":\"true\",\"enableMobileAlertNotification\":\"true\",\"lastBookedBoardingName\":\"\\\"\\\"\",\"lastBookedDroppingName\":\"\\\"\\\"\",\"lastLocationDeniedDate\":\"\\\"\\\"\",\"abhibusAccessInfoAsd\":\"\\\"0\\\"\",\"abhibusAccessInfoFc\":\"\\\"0\\\"\",\"abhibusAccessInfoTg\":\"\\\"0\\\"\",\"addonOptionState\":\"null\",\"guestEmail\":\"\\\"\\\"\",\"guestPhone\":\"\\\"\\\"\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "_uetvid_exp",
+          "value": "Mon, 21 Jun 2027 02:55:26 GMT"
+        },
+        {
+          "name": "persist:offers@v2",
+          "value": "{\"offerList\":\"{\\\"ids\\\":[],\\\"entities\\\":{}}\",\"mobileHomeBannars\":\"[]\",\"ttl\":\"1779882618195\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "persist:footer",
+          "value": "{\"payload\":\"{\\\"top_bus_routes\\\":{\\\"listHead\\\":\\\"Top Bus Routes\\\",\\\"listMenu\\\":[{\\\"item_name\\\":\\\"Hyderabad to Bangalore Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/1/Hyderabad-Bangalore\\\"},{\\\"item_name\\\":\\\"Hyderabad to Vijayawada Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/7/Hyderabad-Vijayawada\\\"},{\\\"item_name\\\":\\\"Hyderabad to Mumbai Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/9/Hyderabad-Mumbai\\\"},{\\\"item_name\\\":\\\"Vijayawada to Bangalore Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/77/Vijayawada-Bangalore\\\"},{\\\"item_name\\\":\\\"Vijayawada to Hyderabad Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/79/Vijayawada-Hyderabad\\\"},{\\\"item_name\\\":\\\"Bangalore to Hyderabad Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/10/Bangalore-Hyderabad\\\"},{\\\"item_name\\\":\\\"Bangalore to Chennai Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/2/Bangalore-Chennai\\\"},{\\\"item_name\\\":\\\"Chennai to Bangalore Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/23/Chennai-Bangalore\\\"},{\\\"item_name\\\":\\\"Chennai to Madurai Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/30/Chennai-Madurai\\\"},{\\\"item_name\\\":\\\"Chennai to Coimbatore Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/24/Chennai-Coimbatore\\\"},{\\\"item_name\\\":\\\"Mumbai to Pune Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/47/Mumbai-Pune\\\"},{\\\"item_name\\\":\\\"Mumbai to Hyderabad Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/46/Mumbai-Hyderabad\\\"},{\\\"item_name\\\":\\\"Mumbai to Ahmedabad Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/43/Mumbai-Ahmedabad\\\"},{\\\"item_name\\\":\\\"Indore to Bhopal Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/139/Indore-Bhopal\\\"},{\\\"item_name\\\":\\\"Indore to Ahmedabad Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/141/Indore-Ahmedabad\\\"},{\\\"item_name\\\":\\\"Ahmedabad to Jaipur Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/106/Ahmedabad-Jaipur\\\"},{\\\"item_name\\\":\\\"Ahmedabad to Rajkot Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/103/Ahmedabad-Rajkot\\\"},{\\\"item_name\\\":\\\"Ahmedabad to Indore Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/312/Ahmedabad-Indore\\\"},{\\\"item_name\\\":\\\"Udaipur to Jaipur Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/914/Udaipur-Jaipur\\\"},{\\\"item_name\\\":\\\"Jaipur to Delhi Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/120/Jaipur-Delhi\\\"},{\\\"item_name\\\":\\\"Jaipur to Ahmedabad Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/94/Jaipur-Ahmedabad\\\"},{\\\"item_name\\\":\\\"Delhi to Lucknow Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/107/Delhi-Lucknow\\\"},{\\\"item_name\\\":\\\"Delhi to Gorakhpur Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/6116/Delhi-Gorakhpur\\\"},{\\\"item_name\\\":\\\"Delhi to Shimla Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/415/Delhi-Shimla\\\"},{\\\"item_name\\\":\\\"Delhi to Jaipur Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/buses/39/Delhi-Jaipur\\\"}]},\\\"buses_from_top_cities\\\":{\\\"listHead\\\":\\\"Buses From Top Cities\\\",\\\"listMenu\\\":[{\\\"item_name\\\":\\\"Hyderabad Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/hyderabad-bus-tickets\\\"},{\\\"item_name\\\":\\\"Vijayawada Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/vijayawada-bus-tickets\\\"},{\\\"item_name\\\":\\\"Tirupathi Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/tirupathi-bus-tickets\\\"},{\\\"item_name\\\":\\\"Bangalore Bus Ticket\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/bangalore-bus-tickets\\\"},{\\\"item_name\\\":\\\"Mangalore Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/mangalore-bus-tickets\\\"},{\\\"item_name\\\":\\\"Bellary Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/bellary-bus-tickets\\\"},{\\\"item_name\\\":\\\"Chennai Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/chennai-bus-tickets\\\"},{\\\"item_name\\\":\\\"Madurai Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/madurai-bus-tickets\\\"},{\\\"item_name\\\":\\\"Coimbatore Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/coimbatore-bus-tickets\\\"},{\\\"item_name\\\":\\\"Goa Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/goa-bus-tickets\\\"},{\\\"item_name\\\":\\\"Mumbai Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/mumbai-bus-tickets\\\"},{\\\"item_name\\\":\\\"Pune Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/pune-bus-tickets\\\"},{\\\"item_name\\\":\\\"Indore Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/indore-bus-tickets\\\"},{\\\"item_name\\\":\\\"Bhopal Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/bhopal-bus-tickets\\\"},{\\\"item_name\\\":\\\"Surat Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/surat-bus-tickets\\\"},{\\\"item_name\\\":\\\"Ahmedabad Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/ahmedabad-bus-tickets\\\"},{\\\"item_name\\\":\\\"Rajkot Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/rajkot-bus-tickets\\\"},{\\\"item_name\\\":\\\"Udaipur Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/udaipur-bus-tickets\\\"},{\\\"item_name\\\":\\\"Jodhpur Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/jodhpur-bus-tickets\\\"},{\\\"item_name\\\":\\\"Jaipur Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/jaipur-bus-tickets\\\"},{\\\"item_name\\\":\\\"Gorakhpur Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/gorakhpur-bus-tickets\\\"},{\\\"item_name\\\":\\\"Lucknow Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/lucknow-bus-tickets\\\"},{\\\"item_name\\\":\\\"Chandigarh Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/chandigarh-bus-tickets\\\"},{\\\"item_name\\\":\\\"Manali Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/manali-bus-tickets\\\"},{\\\"item_name\\\":\\\"Shimla Bus Tickets\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus/shimla-bus-tickets\\\"}]},\\\"top_rtc_buses\\\":{\\\"listHead\\\":\\\"Top RTC Buses\\\",\\\"listMenu\\\":[{\\\"item_name\\\":\\\"APSRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/919/APSRTC\\\"},{\\\"item_name\\\":\\\"TGSRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/923/TSRTC\\\"},{\\\"item_name\\\":\\\"GSRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/781/GSRTC\\\"},{\\\"item_name\\\":\\\"Kerala RTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/1486/Kerala-RTC\\\"},{\\\"item_name\\\":\\\"HRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/784/HRTC\\\"},{\\\"item_name\\\":\\\"TNSTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/786/TNSTC\\\"},{\\\"item_name\\\":\\\"RSRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/778/RSRTC\\\"},{\\\"item_name\\\":\\\"OSRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/1320/OSRTC\\\"},{\\\"item_name\\\":\\\"UPSRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/779/UPSRTC\\\"},{\\\"item_name\\\":\\\"BSRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/1567/BSRTC\\\"},{\\\"item_name\\\":\\\"PRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/1487/Pepsu-prtc\\\"},{\\\"item_name\\\":\\\"JKSRTC\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/782/JKSRTC\\\"}]},\\\"top_bus_services\\\":{\\\"listHead\\\":\\\"Top Bus Services\\\",\\\"listMenu\\\":[{\\\"item_name\\\":\\\"Orange Tours and Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/29/Orange-Tours-And-Travels\\\"},{\\\"item_name\\\":\\\"Shrinath Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/97/Shrinath-Travels\\\"},{\\\"item_name\\\":\\\"Kanker Roadways\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/146/Kanker-Roadways\\\"},{\\\"item_name\\\":\\\"YBM Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/1240/YBM-Travels\\\"},{\\\"item_name\\\":\\\"Dashmesh Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/280/Dashmesh-Travels\\\"},{\\\"item_name\\\":\\\"Morning Star Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/36/Morning-Star-Travels\\\"},{\\\"item_name\\\":\\\"Hans Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/35/Hans-Travels\\\"},{\\\"item_name\\\":\\\"VRL Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/20/VRL-Travels\\\"},{\\\"item_name\\\":\\\"Intrcity SmartBus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/1569/intr-city-smart-bus-booking\\\"},{\\\"item_name\\\":\\\"Royal Safari\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/658/Royal-Safari-Travels\\\"},{\\\"item_name\\\":\\\"Sri Krishna Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/77/Sri-Krishna-Travels\\\"},{\\\"item_name\\\":\\\"V Kaveri Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/1539/V-Kaveri-Travels\\\"},{\\\"item_name\\\":\\\"SRS Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/48/SRS-Travels\\\"},{\\\"item_name\\\":\\\"Zing Bus\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/3048/zingbus\\\"},{\\\"item_name\\\":\\\"Samay Shatabdi\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/412/Samay-Travels\\\"},{\\\"item_name\\\":\\\"Gujarat Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/34/Gujarat-Travels\\\"},{\\\"item_name\\\":\\\"Raj Ratan Tours and Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/39/Raj-Ratan-Travels\\\"},{\\\"item_name\\\":\\\"Greenline Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/79/Greenline-Travels\\\"},{\\\"item_name\\\":\\\"M.R Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/243/M-R-Travels\\\"},{\\\"item_name\\\":\\\"Kalpana Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/83/Kalpana-Travels\\\"},{\\\"item_name\\\":\\\"Patel Tours and Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/170/Patel-Tours-Travels\\\"},{\\\"item_name\\\":\\\"Dolphin Travels House\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/217/Dolphin-Travel-House\\\"},{\\\"item_name\\\":\\\"Swamy Ayyappa Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/1365/Swamy-Ayyappa-Travels\\\"},{\\\"item_name\\\":\\\"Jakhar Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/254/Jakhar-Travels\\\"},{\\\"item_name\\\":\\\"Mahalaxmi Travels\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/operator/579/Maha-Laxmi-Travels\\\"}]},\\\"quick_links\\\":{\\\"listHead\\\":\\\"Quick Links\\\",\\\"listMenu\\\":[{\\\"item_name\\\":\\\"Bus Ticket Booking \\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus-ticket-booking\\\"},{\\\"item_name\\\":\\\"Bus Booking Offers \\\",\\\"item_url\\\":\\\"https://www.abhibus.com/bus-ticket-offers\\\"},{\\\"item_name\\\":\\\"Check Bus Ticket Status\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/myticket\\\"},{\\\"item_name\\\":\\\"Live Bus Tracking\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/live-bus-tracking\\\"},{\\\"item_name\\\":\\\"Cancel Booking \\\",\\\"item_url\\\":\\\"https://www.abhibus.com/cancellation\\\"},{\\\"item_name\\\":\\\"Refer A Friend\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/refer-a-friend\\\"},{\\\"item_name\\\":\\\"News\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/in-the-news\\\"},{\\\"item_name\\\":\\\"Abhi Assured\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/abhi-assured\\\"},{\\\"item_name\\\":\\\"AbhiBus Travel Blog\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/blog/\\\"},{\\\"item_name\\\":\\\"bus ixigo booking\\\",\\\"item_url\\\":\\\"https://bus.ixigo.com/\\\"},{\\\"item_name\\\":\\\"Sitemap\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/sitemap.html\\\"},{\\\"item_name\\\":\\\"SRTC Directory\\\",\\\"item_url\\\":\\\"https://www.abhibus.com/srtc-directory/\\\"}]}}\",\"ttl\":\"1779887020194\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "WZRK_WEB_PUSH_CONFIG_RECEIVED",
+          "value": "true"
+        },
+        {
+          "name": "_gcl_ls",
+          "value": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"eopCount\":0,\"creationTimeMs\":1779800169052},\"expires\":1787576169052},\"gtg_load_status\":{\"status\":2,\"expires\":1779886569491},\"last_convs\":{\"value\":[],\"expires\":1787626298963}}"
+        },
+        {
+          "name": "persist:quickFilters@v2",
+          "value": "{\"ids\":\"[9,10,15,16,5,6,7,8]\",\"entities\":\"{\\\"5\\\":{\\\"filterID\\\":5,\\\"filterName\\\":\\\"Cheapest First\\\",\\\"filterName1\\\":\\\"Cheapest First\\\",\\\"filterStatus\\\":false,\\\"seqNo\\\":7},\\\"6\\\":{\\\"filterID\\\":6,\\\"filterName\\\":\\\"Daytime\\\",\\\"filterName1\\\":\\\"Daytime\\\",\\\"filterStatus\\\":false,\\\"seqNo\\\":8},\\\"7\\\":{\\\"filterID\\\":7,\\\"filterName\\\":\\\"Night time\\\",\\\"filterName1\\\":\\\"Night time\\\",\\\"filterStatus\\\":false,\\\"seqNo\\\":9},\\\"8\\\":{\\\"filterID\\\":8,\\\"filterName\\\":\\\"Below ₹{lowerCutOff}\\\",\\\"filterName1\\\":\\\"Below ₹{lowerCutOff}\\\",\\\"filterStatus\\\":false,\\\"seqNo\\\":10},\\\"9\\\":{\\\"filterID\\\":9,\\\"filterName\\\":\\\"₹{lowerCutOff} - ₹{upperCutOff}\\\",\\\"filterName1\\\":\\\"₹{lowerCutOff} - ₹{upperCutOff}\\\",\\\"filterStatus\\\":false,\\\"offerText\\\":\\\"\\\",\\\"bannerFilter\\\":\\\"\\\",\\\"enable\\\":\\\"0\\\"},\\\"10\\\":{\\\"filterID\\\":10,\\\"filterName\\\":\\\"Above ₹{upperCutOff}\\\",\\\"filterName1\\\":\\\"Above ₹{upperCutOff}\\\",\\\"filterStatus\\\":false,\\\"offerText\\\":\\\"\\\",\\\"bannerFilter\\\":\\\"\\\",\\\"enable\\\":\\\"0\\\"},\\\"15\\\":{\\\"filterID\\\":15,\\\"filterName\\\":\\\"Offers\\\",\\\"filterName1\\\":\\\"Offers\\\",\\\"filterStatus\\\":false,\\\"offerText\\\":\\\"\\\",\\\"offerBubbleTime\\\":0,\\\"bannerFilter\\\":\\\"PD\\\",\\\"enable\\\":\\\"1\\\",\\\"seqNo\\\":3},\\\"16\\\":{\\\"filterID\\\":16,\\\"filterName\\\":\\\"New Buses\\\",\\\"filterName1\\\":\\\"New Buses\\\",\\\"filterStatus\\\":false,\\\"offerText\\\":\\\"New & Clean\\\",\\\"offerBubbleTime\\\":30,\\\"bannerFilter\\\":\\\"NB\\\",\\\"enable\\\":\\\"1\\\",\\\"seqNo\\\":4}}\",\"ttl\":\"1779804220444\",\"isLoaded\":\"true\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "WZRK_CAMP_G",
+          "value": "%7B%22e67ca03eb91545969a0cf614477dd62d%22%3A%7B%22woc%22%3A%7B%7D%2C%22wndoc%22%3A%7B%7D%2C%22wi%22%3A%7B%7D%2C%22wp%22%3A%7B%7D%2C%22wsc%22%3A0%2C%22wndsc%22%3A0%7D%7D"
+        },
+        {
+          "name": "persist:recentRoutes@v3",
+          "value": "{\"ids\":\"[\\\"6-5\\\"]\",\"entities\":\"{\\\"6-5\\\":{\\\"from\\\":{\\\"id\\\":6,\\\"label\\\":\\\"Chennai\\\",\\\"subtext\\\":null,\\\"city\\\":\\\"Chennai\\\",\\\"displayText\\\":\\\"Chennai\\\",\\\"displaySubText\\\":\\\"Tamil Nadu\\\",\\\"aliasType\\\":\\\"City\\\",\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\",\\\"stnRfn\\\":1,\\\"pointName\\\":null,\\\"pointAlias\\\":null,\\\"pointAliasType\\\":null,\\\"pointLat\\\":null,\\\"pointLng\\\":null,\\\"pointRank\\\":null,\\\"pointGooglePlaceId\\\":null,\\\"pointStnRfn\\\":null,\\\"pointsCount\\\":15},\\\"to\\\":{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\",\\\"city\\\":\\\"Vijayawada\\\",\\\"aliasType\\\":\\\"City\\\"},\\\"routeId\\\":\\\"6-5\\\",\\\"journeyDate\\\":\\\"2026-05-26\\\",\\\"insertedAt\\\":1779800620773}}\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "WZRK_EV",
+          "value": "%7B%22bus_home%22%3A%5B19%2C1779800169%2C1779882071%5D%2C%22Page_visited%22%3A%5B19%2C1779800169%2C1779882071%5D%2C%22search_places_selection%22%3A%5B4%2C1779800604%2C1779800619%5D%2C%22bus_home_source%22%3A%5B2%2C1779800604%2C1779800616%5D%2C%22bus_home_destination%22%3A%5B2%2C1779800607%2C1779800619%5D%2C%22srp_response%22%3A%5B1%2C1779800620%2C1779800620%5D%2C%22srp_landing%22%3A%5B1%2C1779800620%2C1779800620%5D%7D"
+        },
+        {
+          "name": "persist:busTypes@v2",
+          "value": "{\"ids\":\"[1,4,3,2]\",\"entities\":\"{\\\"1\\\":{\\\"filterID\\\":1,\\\"filterName\\\":\\\"AC\\\",\\\"filterStatus\\\":false,\\\"filterName1\\\":\\\"AC\\\",\\\"seqNo\\\":1},\\\"2\\\":{\\\"filterID\\\":2,\\\"filterName\\\":\\\"NON-AC\\\",\\\"filterStatus\\\":false,\\\"filterName1\\\":\\\"Non AC\\\",\\\"seqNo\\\":6},\\\"3\\\":{\\\"filterID\\\":3,\\\"filterName\\\":\\\"SEATER\\\",\\\"filterStatus\\\":false,\\\"filterName1\\\":\\\"Seater\\\",\\\"seqNo\\\":5},\\\"4\\\":{\\\"filterID\\\":4,\\\"filterName\\\":\\\"SLEEPER\\\",\\\"filterStatus\\\":false,\\\"filterName1\\\":\\\"Sleeper\\\",\\\"seqNo\\\":2}}\",\"ttl\":\"1779804220445\",\"isLoaded\":\"true\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "persist:businfo",
+          "value": "{\"operators\":\"[]\",\"busInfoList\":\"[]\",\"ttl\":\"1779886568721\",\"_persist\":\"{\\\"version\\\":2,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "persist:journey@v3",
+          "value": "{\"fromCity\":\"{\\\"id\\\":6,\\\"label\\\":\\\"Chennai\\\",\\\"subtext\\\":null,\\\"city\\\":\\\"Chennai\\\",\\\"displayText\\\":\\\"Chennai\\\",\\\"displaySubText\\\":\\\"Tamil Nadu\\\",\\\"aliasType\\\":\\\"City\\\",\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\",\\\"stnRfn\\\":1,\\\"pointName\\\":null,\\\"pointAlias\\\":null,\\\"pointAliasType\\\":null,\\\"pointLat\\\":null,\\\"pointLng\\\":null,\\\"pointRank\\\":null,\\\"pointGooglePlaceId\\\":null,\\\"pointStnRfn\\\":null,\\\"pointsCount\\\":15}\",\"toCity\":\"{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\",\\\"city\\\":\\\"Vijayawada\\\",\\\"aliasType\\\":\\\"City\\\"}\",\"popularStations\":\"{\\\"0\\\":[{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Goa\\\",\\\"id\\\":102,\\\"stateName\\\":\\\"Goa\\\",\\\"stateCode\\\":\\\"GA\\\",\\\"pinCode\\\":\\\"403001\\\"},{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Nellore\\\",\\\"id\\\":11,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Jaipur\\\",\\\"id\\\":241,\\\"stateName\\\":\\\"\\\",\\\"stateCode\\\":\\\"Jaipur\\\",\\\"pinCode\\\":\\\"\\\"},{\\\"label\\\":\\\"Mangalore\\\",\\\"id\\\":884,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Visakhapatnam\\\",\\\"id\\\":58,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Delhi\\\",\\\"id\\\":344,\\\"stateName\\\":\\\"Delhi\\\",\\\"stateCode\\\":\\\"DL\\\",\\\"pinCode\\\":\\\"110001\\\"},{\\\"label\\\":\\\"Indore\\\",\\\"id\\\":100,\\\"stateName\\\":\\\"Madhya Pradesh\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Kolkata\\\",\\\"id\\\":163,\\\"stateName\\\":\\\"West Bengal\\\",\\\"stateCode\\\":\\\"WB\\\",\\\"pinCode\\\":\\\"700001\\\"}],\\\"3\\\":[{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Visakhapatnam\\\",\\\"id\\\":58,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Pune\\\",\\\"id\\\":51,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Guntur\\\",\\\"id\\\":15,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Tirupati\\\",\\\"id\\\":12,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Nellore\\\",\\\"id\\\":11,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Kadapa\\\",\\\"id\\\":13,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Rajahmundry\\\",\\\"id\\\":22,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Pondicherry\\\",\\\"id\\\":951,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Kurnool\\\",\\\"id\\\":57,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"}],\\\"4\\\":[{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Pune\\\",\\\"id\\\":51,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Shirdi\\\",\\\"id\\\":49,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Calicut\\\",\\\"id\\\":912,\\\"stateName\\\":\\\"Kerala\\\",\\\"stateCode\\\":\\\"KL\\\",\\\"pinCode\\\":\\\"605036\\\"},{\\\"label\\\":\\\"Aurangabad\\\",\\\"id\\\":101,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Mangalore\\\",\\\"id\\\":884,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Ratnagiri\\\",\\\"id\\\":1976,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Belgaum\\\",\\\"id\\\":695,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Goa\\\",\\\"id\\\":102,\\\"stateName\\\":\\\"Goa\\\",\\\"stateCode\\\":\\\"GA\\\",\\\"pinCode\\\":\\\"403001\\\"},{\\\"label\\\":\\\"Indore\\\",\\\"id\\\":100,\\\"stateName\\\":\\\"Madhya Pradesh\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Ahmedabad\\\",\\\"id\\\":242,\\\"stateName\\\":\\\"Gujarat\\\",\\\"stateCode\\\":\\\"GJ\\\",\\\"pinCode\\\":\\\"382002\\\"}],\\\"5\\\":[{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Visakhapatnam\\\",\\\"id\\\":58,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Tirupathi\\\",\\\"id\\\":12,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Kurnool\\\",\\\"id\\\":57,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Anantapur\\\",\\\"id\\\":112,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Kadapa\\\",\\\"id\\\":13,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Nellore\\\",\\\"id\\\":11,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Kakinada\\\",\\\"id\\\":21,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Rajahmundry\\\",\\\"id\\\":22,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Srikakulam\\\",\\\"id\\\":50,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"}],\\\"6\\\":[{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Tirupati\\\",\\\"id\\\":12,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Coimbatore\\\",\\\"id\\\":794,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Madurai\\\",\\\"id\\\":1016,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Guntur\\\",\\\"id\\\":15,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Ananthapuram(TN)\\\",\\\"id\\\":10110,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Salem\\\",\\\"id\\\":868,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Pondicherry\\\",\\\"id\\\":951,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Trichy\\\",\\\"id\\\":795,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Visakhapatnam\\\",\\\"id\\\":58,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"}],\\\"7\\\":[{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Tirupati\\\",\\\"id\\\":12,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Kadapa\\\",\\\"id\\\":13,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Nellore\\\",\\\"id\\\":11,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Kurnool\\\",\\\"id\\\":57,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Mangalore\\\",\\\"id\\\":884,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Guntur\\\",\\\"id\\\":15,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Coimbatore\\\",\\\"id\\\":794,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Pondicherry\\\",\\\"id\\\":951,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Calicut\\\",\\\"id\\\":912,\\\"stateName\\\":\\\"Kerala\\\",\\\"stateCode\\\":\\\"KL\\\",\\\"pinCode\\\":\\\"605036\\\"}],\\\"12\\\":[{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Coimbatore\\\",\\\"id\\\":794,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Kurnool\\\",\\\"id\\\":57,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Guntur\\\",\\\"id\\\":15,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Rajahmundry\\\",\\\"id\\\":22,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Ongole\\\",\\\"id\\\":26,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Visakhapatnam\\\",\\\"id\\\":58,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Mysore\\\",\\\"id\\\":926,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Nellore\\\",\\\"id\\\":11,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"}],\\\"49\\\":[{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Pune\\\",\\\"id\\\":51,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Mumbai\\\",\\\"id\\\":4,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Ahmedabad\\\",\\\"id\\\":242,\\\"stateName\\\":\\\"Gujarat\\\",\\\"stateCode\\\":\\\"GJ\\\",\\\"pinCode\\\":\\\"382002\\\"},{\\\"label\\\":\\\"Baroda\\\",\\\"id\\\":672,\\\"stateName\\\":\\\"Gujarat\\\",\\\"stateCode\\\":\\\"GJ\\\",\\\"pinCode\\\":\\\"382002\\\"},{\\\"label\\\":\\\"Nashik\\\",\\\"id\\\":243,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Nagpur\\\",\\\"id\\\":152,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Hospet\\\",\\\"id\\\":1061,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Indore\\\",\\\"id\\\":100,\\\"stateName\\\":\\\"Madhya Pradesh\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Goa\\\",\\\"id\\\":102,\\\"stateName\\\":\\\"Goa\\\",\\\"stateCode\\\":\\\"GA\\\",\\\"pinCode\\\":\\\"403001\\\"},{\\\"label\\\":\\\"Surat\\\",\\\"id\\\":671,\\\"stateName\\\":\\\"Gujarat\\\",\\\"stateCode\\\":\\\"GJ\\\",\\\"pinCode\\\":\\\"382002\\\"}],\\\"51\\\":[{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Nashik\\\",\\\"id\\\":243,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Solapur\\\",\\\"id\\\":106,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Belgaum\\\",\\\"id\\\":695,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Mumbai\\\",\\\"id\\\":4,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Nagpur\\\",\\\"id\\\":152,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Indore\\\",\\\"id\\\":100,\\\"stateName\\\":\\\"Madhya Pradesh\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Shirdi\\\",\\\"id\\\":49,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Goa\\\",\\\"id\\\":102,\\\"stateName\\\":\\\"Goa\\\",\\\"stateCode\\\":\\\"GA\\\",\\\"pinCode\\\":\\\"403001\\\"},{\\\"label\\\":\\\"Aurangabad\\\",\\\"id\\\":101,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"}],\\\"58\\\":[{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Vijayawada\\\",\\\"id\\\":5,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Kakinada\\\",\\\"id\\\":21,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Guntur\\\",\\\"id\\\":15,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Amalapuram\\\",\\\"id\\\":20,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Rajahmundry\\\",\\\"id\\\":22,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Bhadrachalam\\\",\\\"id\\\":445,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Ongole\\\",\\\"id\\\":26,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Tirupathi\\\",\\\"id\\\":12,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Nellore\\\",\\\"id\\\":11,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"}],\\\"100\\\":[{\\\"label\\\":\\\"Bhopal\\\",\\\"id\\\":1434,\\\"stateName\\\":\\\"Madhya Pradesh\\\",\\\"stateCode\\\":\\\"MP\\\",\\\"pinCode\\\":\\\"462001\\\"},{\\\"label\\\":\\\"Pune\\\",\\\"id\\\":51,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Mumbai\\\",\\\"id\\\":4,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Gwalior\\\",\\\"id\\\":240,\\\"stateName\\\":\\\"Madhya Pradesh\\\",\\\"stateCode\\\":\\\"MP\\\",\\\"pinCode\\\":\\\"462001\\\"},{\\\"label\\\":\\\"Ahmedabad\\\",\\\"id\\\":242,\\\"stateName\\\":\\\"Gujarat\\\",\\\"stateCode\\\":\\\"GJ\\\",\\\"pinCode\\\":\\\"382002\\\"},{\\\"label\\\":\\\"Delhi\\\",\\\"id\\\":344,\\\"stateName\\\":\\\"Delhi\\\",\\\"stateCode\\\":\\\"DL\\\",\\\"pinCode\\\":\\\"110001\\\"},{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Kota(Rajastan)\\\",\\\"id\\\":257,\\\"stateName\\\":\\\"Rajasthan\\\",\\\"stateCode\\\":\\\"RJ\\\",\\\"pinCode\\\":\\\"302001\\\"},{\\\"label\\\":\\\"Aurangabad\\\",\\\"id\\\":101,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Nagpur\\\",\\\"id\\\":152,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Jaipur\\\",\\\"id\\\":241,\\\"stateName\\\":\\\"\\\",\\\"stateCode\\\":\\\"Jaipur\\\",\\\"pinCode\\\":\\\"\\\"},{\\\"label\\\":\\\"Guna\\\",\\\"id\\\":252,\\\"stateName\\\":\\\"Madhya Pradesh\\\",\\\"stateCode\\\":\\\"MP\\\",\\\"pinCode\\\":\\\"462001\\\"}],\\\"102\\\":[{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Pune\\\",\\\"id\\\":51,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Hubli\\\",\\\"id\\\":898,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Mumbai\\\",\\\"id\\\":4,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Kolhapur\\\",\\\"id\\\":673,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Belgaum\\\",\\\"id\\\":695,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Bellary\\\",\\\"id\\\":1057,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Mysore\\\",\\\"id\\\":926,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Raichur\\\",\\\"id\\\":1171,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Shirdi\\\",\\\"id\\\":49,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"}],\\\"163\\\":[{\\\"label\\\":\\\"Hazaribagh\\\",\\\"id\\\":4634,\\\"stateName\\\":\\\"Jharkhand\\\",\\\"stateCode\\\":\\\"JH\\\",\\\"pinCode\\\":\\\"834001\\\"},{\\\"label\\\":\\\"Bhubaneswar\\\",\\\"id\\\":215,\\\"stateName\\\":\\\"Orissa\\\",\\\"stateCode\\\":\\\"OR\\\",\\\"pinCode\\\":\\\"750017\\\"},{\\\"label\\\":\\\"Cuttack\\\",\\\"id\\\":214,\\\"stateName\\\":\\\"Orissa\\\",\\\"stateCode\\\":\\\"OR\\\",\\\"pinCode\\\":\\\"750017\\\"},{\\\"label\\\":\\\"Puri\\\",\\\"id\\\":216,\\\"stateName\\\":\\\"Orissa\\\",\\\"stateCode\\\":\\\"OR\\\",\\\"pinCode\\\":\\\"750017\\\"},{\\\"label\\\":\\\"Ramgarh\\\",\\\"id\\\":175,\\\"stateName\\\":\\\"Jharkhand\\\",\\\"stateCode\\\":\\\"JH\\\",\\\"pinCode\\\":\\\"834001\\\"},{\\\"label\\\":\\\"Ranchi\\\",\\\"id\\\":176,\\\"stateName\\\":\\\"West Bengal\\\",\\\"stateCode\\\":\\\"WB\\\",\\\"pinCode\\\":\\\"700001\\\"},{\\\"label\\\":\\\"Asansol\\\",\\\"id\\\":164,\\\"stateName\\\":\\\"West Bengal\\\",\\\"stateCode\\\":\\\"WB\\\",\\\"pinCode\\\":\\\"700001\\\"},{\\\"label\\\":\\\"Durgapur\\\",\\\"id\\\":165,\\\"stateName\\\":\\\"West Bengal\\\",\\\"stateCode\\\":\\\"WB\\\",\\\"pinCode\\\":\\\"700001\\\"}],\\\"241\\\":[{\\\"label\\\":\\\"Delhi\\\",\\\"id\\\":344,\\\"stateName\\\":\\\"Delhi\\\",\\\"stateCode\\\":\\\"DL\\\",\\\"pinCode\\\":\\\"110001\\\"},{\\\"label\\\":\\\"Bikaner\\\",\\\"id\\\":1447,\\\"stateName\\\":\\\"Madhya Pradesh\\\",\\\"stateCode\\\":\\\"MP\\\",\\\"pinCode\\\":\\\"462001\\\"},{\\\"label\\\":\\\"Udaipur\\\",\\\"id\\\":1135,\\\"stateName\\\":\\\"Rajasthan\\\",\\\"stateCode\\\":\\\"RJ\\\",\\\"pinCode\\\":\\\"302001\\\"},{\\\"label\\\":\\\"Ahmedabad\\\",\\\"id\\\":242,\\\"stateName\\\":\\\"Gujarat\\\",\\\"stateCode\\\":\\\"GJ\\\",\\\"pinCode\\\":\\\"382002\\\"},{\\\"label\\\":\\\"Jodhpur\\\",\\\"id\\\":1636,\\\"stateName\\\":\\\"Rajasthan\\\",\\\"stateCode\\\":\\\"RJ\\\",\\\"pinCode\\\":\\\"302001\\\"},{\\\"label\\\":\\\"Agra\\\",\\\"id\\\":239,\\\"stateName\\\":\\\"Uttar Pradesh\\\",\\\"stateCode\\\":\\\"UP\\\",\\\"pinCode\\\":\\\"226001\\\"},{\\\"label\\\":\\\"Kota(Rajastan)\\\",\\\"id\\\":257,\\\"stateName\\\":\\\"Rajasthan\\\",\\\"stateCode\\\":\\\"RJ\\\",\\\"pinCode\\\":\\\"302001\\\"},{\\\"label\\\":\\\"Gurgaon\\\",\\\"id\\\":364,\\\"stateName\\\":\\\"Haryana\\\",\\\"stateCode\\\":\\\"HR\\\",\\\"pinCode\\\":\\\"133301\\\"},{\\\"label\\\":\\\"Lucknow\\\",\\\"id\\\":339,\\\"stateName\\\":\\\"Uttar Pradesh\\\",\\\"stateCode\\\":\\\"UP\\\",\\\"pinCode\\\":\\\"226001\\\"},{\\\"label\\\":\\\"Kanpur\\\",\\\"id\\\":324,\\\"stateName\\\":\\\"Uttar Pradesh\\\",\\\"stateCode\\\":\\\"UP\\\",\\\"pinCode\\\":\\\"226001\\\"},{\\\"label\\\":\\\"Gorakhpur\\\",\\\"id\\\":368,\\\"stateName\\\":\\\"Uttar Pradesh\\\",\\\"stateCode\\\":\\\"UP\\\",\\\"pinCode\\\":\\\"226001\\\"},{\\\"label\\\":\\\"Haridwar\\\",\\\"id\\\":397,\\\"stateName\\\":\\\"\\\",\\\"stateCode\\\":\\\"UT\\\",\\\"pinCode\\\":\\\"\\\"}],\\\"344\\\":[{\\\"label\\\":\\\"Manali\\\",\\\"id\\\":1777,\\\"stateName\\\":\\\"Punjab\\\",\\\"stateCode\\\":\\\"PB\\\",\\\"pinCode\\\":\\\"133301\\\"},{\\\"label\\\":\\\"Lucknow\\\",\\\"id\\\":339,\\\"stateName\\\":\\\"Uttar Pradesh\\\",\\\"stateCode\\\":\\\"UP\\\",\\\"pinCode\\\":\\\"226001\\\"},{\\\"label\\\":\\\"Shimla\\\",\\\"id\\\":2025,\\\"stateName\\\":\\\"Himachal Pradesh\\\",\\\"stateCode\\\":\\\"HP\\\",\\\"pinCode\\\":\\\"171001\\\"},{\\\"label\\\":\\\"Bareilly\\\",\\\"id\\\":435,\\\"stateName\\\":\\\"Uttar Pradesh\\\",\\\"stateCode\\\":\\\"UP\\\",\\\"pinCode\\\":\\\"226001\\\"},{\\\"label\\\":\\\"Haridwar\\\",\\\"id\\\":397,\\\"stateName\\\":\\\"\\\",\\\"stateCode\\\":\\\"UT\\\",\\\"pinCode\\\":\\\"\\\"},{\\\"label\\\":\\\"Kanpur\\\",\\\"id\\\":324,\\\"stateName\\\":\\\"Uttar Pradesh\\\",\\\"stateCode\\\":\\\"UP\\\",\\\"pinCode\\\":\\\"226001\\\"},{\\\"label\\\":\\\"Patiala\\\",\\\"id\\\":5240,\\\"stateName\\\":\\\"Punjab\\\",\\\"stateCode\\\":\\\"PB\\\",\\\"pinCode\\\":\\\"133301\\\"},{\\\"label\\\":\\\"Jaipur\\\",\\\"id\\\":241,\\\"stateName\\\":\\\"\\\",\\\"stateCode\\\":\\\"Jaipur\\\",\\\"pinCode\\\":\\\"\\\"},{\\\"label\\\":\\\"Ludhiana\\\",\\\"id\\\":1760,\\\"stateName\\\":\\\"Punjab\\\",\\\"stateCode\\\":\\\"PB\\\",\\\"pinCode\\\":\\\"133301\\\"},{\\\"label\\\":\\\"Chandigarh\\\",\\\"id\\\":1461,\\\"stateName\\\":\\\"\\\",\\\"stateCode\\\":\\\"CH\\\",\\\"pinCode\\\":\\\"\\\"},{\\\"label\\\":\\\"Nainital\\\",\\\"id\\\":1855,\\\"stateName\\\":\\\"\\\",\\\"stateCode\\\":\\\"UT\\\",\\\"pinCode\\\":\\\"\\\"},{\\\"label\\\":\\\"Amritsar\\\",\\\"id\\\":1365,\\\"stateName\\\":\\\"Punjab\\\",\\\"stateCode\\\":\\\"PB\\\",\\\"pinCode\\\":\\\"133301\\\"}],\\\"884\\\":[{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Mysore\\\",\\\"id\\\":926,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Hubli\\\",\\\"id\\\":898,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Shimoga\\\",\\\"id\\\":2026,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Pune\\\",\\\"id\\\":51,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Ernakulam\\\",\\\"id\\\":530,\\\"stateName\\\":\\\"Kerala\\\",\\\"stateCode\\\":\\\"KL\\\",\\\"pinCode\\\":\\\"605036\\\"},{\\\"label\\\":\\\"Tirupathi\\\",\\\"id\\\":12,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Mumbai\\\",\\\"id\\\":4,\\\"stateName\\\":\\\"Maharashtra\\\",\\\"stateCode\\\":\\\"MH\\\",\\\"pinCode\\\":\\\"400001\\\"},{\\\"label\\\":\\\"Belgaum\\\",\\\"id\\\":695,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Gulbarga\\\",\\\"id\\\":1167,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"}],\\\"1016\\\":[{\\\"label\\\":\\\"Bangalore\\\",\\\"id\\\":7,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Chennai\\\",\\\"id\\\":6,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Mysore\\\",\\\"id\\\":926,\\\"stateName\\\":\\\"Karnataka\\\",\\\"stateCode\\\":\\\"KA\\\",\\\"pinCode\\\":\\\"530068\\\"},{\\\"label\\\":\\\"Coimbatore\\\",\\\"id\\\":794,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Hyderabad\\\",\\\"id\\\":3,\\\"stateName\\\":\\\"Telangana\\\",\\\"stateCode\\\":\\\"TG\\\",\\\"pinCode\\\":\\\"500001\\\"},{\\\"label\\\":\\\"Pondicherry\\\",\\\"id\\\":951,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Tirupathi\\\",\\\"id\\\":12,\\\"stateName\\\":\\\"Andhra Pradesh\\\",\\\"stateCode\\\":\\\"AP\\\",\\\"pinCode\\\":\\\"522020\\\"},{\\\"label\\\":\\\"Ernakulam\\\",\\\"id\\\":530,\\\"stateName\\\":\\\"Kerala\\\",\\\"stateCode\\\":\\\"KL\\\",\\\"pinCode\\\":\\\"605036\\\"},{\\\"label\\\":\\\"Trichy\\\",\\\"id\\\":795,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Trivandrum\\\",\\\"id\\\":2136,\\\"stateName\\\":\\\"Kerala\\\",\\\"stateCode\\\":\\\"KL\\\",\\\"pinCode\\\":\\\"605036\\\"},{\\\"label\\\":\\\"Salem\\\",\\\"id\\\":868,\\\"stateName\\\":\\\"Tamil Nadu\\\",\\\"stateCode\\\":\\\"TN\\\",\\\"pinCode\\\":\\\"600001\\\"},{\\\"label\\\":\\\"Calicut\\\",\\\"id\\\":912,\\\"stateName\\\":\\\"Kerala\\\",\\\"stateCode\\\":\\\"KL\\\",\\\"pinCode\\\":\\\"605036\\\"}]}\",\"journeyDate\":\"\\\"2026-05-27\\\"\",\"onwardJourneyDate\":\"\\\"\\\"\",\"stations\":\"{}\",\"ttl\":\"1779886568715\",\"searchUrl\":\"\\\"bus_search/Chennai/6/Vijayawada/5/26-05-2026/O\\\"\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "WZRK_ACCOUNT_ID",
+          "value": "%22R95-8KW-K75Z%22"
+        },
+        {
+          "name": "_uetvid",
+          "value": "51107c70590311f1a7dc51561171b43b"
+        },
+        {
+          "name": "lastExternalReferrer",
+          "value": "empty"
+        },
+        {
+          "name": "WZRK_G",
+          "value": "%22e67ca03eb91545969a0cf614477dd62d%22"
+        },
+        {
+          "name": "WZRK_PUSH_CONFIG",
+          "value": "%7B%22showBox%22%3Atrue%2C%22showBellIcon%22%3Afalse%2C%22boxType%22%3A%22old%22%7D"
+        },
+        {
+          "name": "adjust-sdk.p",
+          "value": "{}"
+        },
+        {
+          "name": "WZRK_L",
+          "value": "%7B%221%22%3A%7B%22q%22%3A%22https%3A%2F%2Feu1.clevertap-prod.com%2Fa%3Ft%3D96%26type%3Dpage%26d%3DN4IglgJiBcIEoE4CsBaAHAaQOoowdiQC0QAaEAcxhAFMA2PAYwEMAGAZmoCMEBGJAFiQJaCVgwBmtHv3548ECLQBMUMgAdK0NmQYaqACwAuhtQGdoAegsB3WwDomnfWE4BXU3YYB7ALYXSIFiEcBgA%252BgDCAIIAsgAKMKDWPmowLGTWYMmpZIYANgwwANoAuulgeQXQJQC%252BZEziCSC5LlTWXCimEADWKABuPHa0gwFqAE5ehl7euQbGZiDV1UAA%253D%253D%26rn%3D1%26i%3D1779882071%26sn%3D0%22%7D%2C%222%22%3A%7B%22q%22%3A%22https%3A%2F%2Feu1.clevertap-prod.com%2Fa%3Ft%3D96%26type%3Dpush%26d%3DN4IgLgngDgpiBcIYDcYDswgDROWAcgIYC2ciARgK4DOA%252BgBYD2p2uYAIoWIQqIwE4BLAOaC0CEAAlmMAAqFhcHFAUxayQTADuMACYSIMaq0F1%252B5WoQDGYQagkAzQgBtqSkIV27GaWlH4wDjABaFZq%252FowOgs5kIMKURpg4ps6Mwoq6YhJojKzUjJT8YRIAwvToaISCrLqJYlyCPhIAaoIAVoQQhFqePDhUdPmFxYhlFVWsA7RDRWqC%252BvAAbP00tLXUtpW2TYitHV09un0gU%252BubDT608wgArCt0tSr8YIVqR2CxAEwADJ%252BLALTfG7%252FT4Adkmq1MARe%252FHEiByELMBQ%252BpXKaEqgn%252Be063V6iNo%252FGRb0YbVR40x2IOvRBvwBQJB4JwMzCVwWyxAZ3q21813gdw5MCeMLeXC%252BtMBwLBrCsMVQz0IUFZEhgi1BVkI3wAzDByABOACMNwALDddYtdRqrA5FvqjUbQaCvItPvocDAAB6KwjUaivXS0NDaWg0YISABCrA9iqCXFoijAA2cpkwiGQ%252Bsjnqu7pEjD8nVIGAkAEEM4q3PwNCz1fxdMZEJ9S9N%252BIrkUnQ%252FDcm7M9Rm9MBGBaDoRPQPgsQBGu4rKORgtMYFxi6woM4uA4BMQJIRyP8dORqIIPv9A1pEWIjHWTjRWHL9zsQEaAHT6h%252BLViUTJjk0OI2LBy6b7%252FKavz%252FPq%252BoOPq%252Fx6qaIK6FYViLIsAAcnymjcVggAAvskY4AEq6sCiEANIAOr%252FIRoI3AAWqwwjKqq6pajqBrGqa5qWtatr2o6ujOq6IBQLR8CajgxGUThhG0CURYALKyLwIBaMQUAIN8OBaIISkqTgYDOOh8AANoALpqQeukIEZGEYUAAA%253D%253D%26rn%3D2%26i%3D1779882071%26sn%3D0%22%7D%2C%223%22%3A%7B%22q%22%3A%22https%3A%2F%2Feu1.clevertap-prod.com%2Fa%3Ft%3D96%26type%3Dpush%26d%3DN4IgLgngDgpiBcIYDcYDswgDROWAcgIYC2ciACoQOYwD6yAlgM4NgwAm2uYAIoWIQShmAGwD2VGuwZoEINGK4BjEShgAnAVFoNOiGADYA7EsIAGAMwwARgE4AjAFYALI9sHb5pQDMD9585GRuzsBgBMnDgwAB7ahExMAK7qHLRoMADutIlMGnIAQlwx2t4w%252FLQ0YNY5IsyYiMj2RbE60QxUYrRQhBCkGHIAgs3aueqMSnSm6uxMcmHDtEzq2mKJYLV5iAoLSyNimrQZMO0AFmx6IIVRLYnWGotl9SBDOFAi%252FN77xHKE1gC0R2sLDYf3SGS41RY6QSckhXFQ6hYYlkiGcADp7GiDFxEtILq5vM4DN52GY%252Fm4zGE%252FvZ7N57H87G4%252FhElEoDAYABxhNyOJQgAC%252BOF0cgASrZHH8OQBpADqfylRkcAC0uFQ5IYTOYrHYnK53J4zD4%252FAEgiFwpEQFA1fALDgZUqRVLaABhAYAWXIQhAGWIUAQZhwGQYvv9OHWfPgAG0ALqB1giCMx%252Fn8oAA%253D%253D%26rn%3D3%26i%3D1779882071%26sn%3D1%22%7D%7D"
+        },
+        {
+          "name": "persist:faqs",
+          "value": "{\"upcoming\":\"{\\\"questions\\\":[]}\",\"cancelled\":\"{\\\"questions\\\":[]}\",\"past\":\"{\\\"questions\\\":[]}\",\"precancel\":\"{\\\"questions\\\":[]}\",\"PaymentFailure\":\"[]\",\"PaymentSuccessfulAndBookingAwaiting\":\"[]\",\"PaymentSuccessfulBookingFailed\":\"[]\",\"ttl\":\"1779886568716\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "persist:amenities@v2",
+          "value": "{\"ids\":\"[\\\"24\\\",\\\"18\\\",\\\"19\\\",\\\"21\\\",\\\"22\\\",\\\"23\\\",\\\"4\\\",\\\"6\\\",\\\"2\\\",\\\"17\\\",\\\"1\\\",\\\"7\\\",\\\"5\\\",\\\"8\\\",\\\"14\\\",\\\"16\\\",\\\"3\\\",\\\"9\\\",\\\"10\\\",\\\"11\\\",\\\"12\\\",\\\"13\\\",\\\"15\\\",\\\"20\\\"]\",\"entities\":\"{\\\"1\\\":{\\\"aminity_id\\\":\\\"1\\\",\\\"title\\\":\\\"Water Bottle\\\",\\\"seqNo\\\":11,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Water_Bottle.png\\\",\\\"load_from_server\\\":0},\\\"2\\\":{\\\"aminity_id\\\":\\\"2\\\",\\\"title\\\":\\\"Blanket\\\",\\\"seqNo\\\":9,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Blanket.png\\\",\\\"load_from_server\\\":0},\\\"3\\\":{\\\"aminity_id\\\":\\\"3\\\",\\\"title\\\":\\\"TV\\\",\\\"seqNo\\\":17,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Tv.png\\\",\\\"load_from_server\\\":0},\\\"4\\\":{\\\"aminity_id\\\":\\\"4\\\",\\\"title\\\":\\\"AC\\\",\\\"seqNo\\\":7,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Ac.png\\\",\\\"load_from_server\\\":0},\\\"5\\\":{\\\"aminity_id\\\":\\\"5\\\",\\\"title\\\":\\\"Snacks\\\",\\\"seqNo\\\":13,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Snacks.png\\\",\\\"load_from_server\\\":0},\\\"6\\\":{\\\"aminity_id\\\":\\\"6\\\",\\\"title\\\":\\\"Charging Point\\\",\\\"seqNo\\\":8,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Charging_Point.png\\\",\\\"load_from_server\\\":0},\\\"7\\\":{\\\"aminity_id\\\":\\\"7\\\",\\\"title\\\":\\\"CCTV\\\",\\\"seqNo\\\":12,\\\"image\\\":\\\"https://static.abhibus.com/img/app/CCTV.png\\\",\\\"load_from_server\\\":0},\\\"8\\\":{\\\"aminity_id\\\":\\\"8\\\",\\\"title\\\":\\\"Emergency Exit\\\",\\\"seqNo\\\":14,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Emergency_Exit.png\\\"},\\\"9\\\":{\\\"aminity_id\\\":\\\"9\\\",\\\"title\\\":\\\"Individual TV\\\",\\\"seqNo\\\":18,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Individual_TV.png\\\",\\\"load_from_server\\\":0},\\\"10\\\":{\\\"aminity_id\\\":\\\"10\\\",\\\"title\\\":\\\"Hammer\\\",\\\"seqNo\\\":19,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Hammer.png\\\",\\\"load_from_server\\\":0},\\\"11\\\":{\\\"aminity_id\\\":\\\"11\\\",\\\"title\\\":\\\"Facial Tissues\\\",\\\"seqNo\\\":20,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Facial_Tissues.png\\\",\\\"load_from_server\\\":0},\\\"12\\\":{\\\"aminity_id\\\":\\\"12\\\",\\\"title\\\":\\\"Pillows\\\",\\\"seqNo\\\":21,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Pillows.png\\\",\\\"load_from_server\\\":0},\\\"13\\\":{\\\"aminity_id\\\":\\\"13\\\",\\\"title\\\":\\\"Fire Extinguisher\\\",\\\"seqNo\\\":22,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Fire_Extinguisher.png\\\",\\\"load_from_server\\\":0},\\\"14\\\":{\\\"aminity_id\\\":\\\"14\\\",\\\"title\\\":\\\"Reading Light\\\",\\\"seqNo\\\":15,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Reading_Light.png\\\",\\\"load_from_server\\\":0},\\\"15\\\":{\\\"aminity_id\\\":\\\"15\\\",\\\"title\\\":\\\"GPS Tracking\\\",\\\"seqNo\\\":23,\\\"image\\\":\\\"https://static.abhibus.com/img/app/GPS_Tracking.png\\\",\\\"load_from_server\\\":0},\\\"16\\\":{\\\"aminity_id\\\":\\\"16\\\",\\\"title\\\":\\\"First Aid Box\\\",\\\"seqNo\\\":16,\\\"image\\\":\\\"https://static.abhibus.com/img/app/First_Aid_Box.png\\\",\\\"load_from_server\\\":0},\\\"17\\\":{\\\"aminity_id\\\":\\\"17\\\",\\\"title\\\":\\\"Wifi\\\",\\\"seqNo\\\":10,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Wifi.png\\\",\\\"load_from_server\\\":0},\\\"18\\\":{\\\"aminity_id\\\":\\\"18\\\",\\\"title\\\":\\\"Hand Sanitizer\\\",\\\"seqNo\\\":2,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Hand_Sanitizer.png\\\",\\\"load_from_server\\\":0},\\\"19\\\":{\\\"aminity_id\\\":\\\"19\\\",\\\"title\\\":\\\"Temperature checks\\\",\\\"seqNo\\\":3,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Temperature_Checks.png\\\",\\\"load_from_server\\\":0},\\\"20\\\":{\\\"aminity_id\\\":\\\"20\\\",\\\"title\\\":\\\"Social Distancing\\\",\\\"seqNo\\\":24,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Social_Distancing.png\\\",\\\"load_from_server\\\":0},\\\"21\\\":{\\\"aminity_id\\\":\\\"21\\\",\\\"title\\\":\\\"Trained Staff\\\",\\\"seqNo\\\":4,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Trained_Staff.png\\\",\\\"load_from_server\\\":0},\\\"22\\\":{\\\"aminity_id\\\":\\\"22\\\",\\\"title\\\":\\\"Fumigation\\\",\\\"seqNo\\\":5,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Fumigation.png\\\",\\\"load_from_server\\\":0},\\\"23\\\":{\\\"aminity_id\\\":\\\"23\\\",\\\"title\\\":\\\"Staff\\\",\\\"seqNo\\\":6,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Staff.png\\\",\\\"load_from_server\\\":0},\\\"24\\\":{\\\"aminity_id\\\":\\\"24\\\",\\\"title\\\":\\\"Toilet\\\",\\\"seqNo\\\":1,\\\"image\\\":\\\"https://static.abhibus.com/img/app/Toilet.png\\\",\\\"load_from_server\\\":1}}\",\"ttl\":\"1779804220445\",\"isLoaded\":\"true\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "WZRK_APPLICATION_SERVER_KEY_RECIEVED",
+          "value": "true"
+        },
+        {
+          "name": "WZRK_TV_CONTROLS",
+          "value": "false"
+        },
+        {
+          "name": "_uetsid",
+          "value": "51106440590311f1a699db3f3c90e090"
+        },
+        {
+          "name": "WZRK_ARP",
+          "value": "%7B%22j_n%22%3A%22Zw%3D%3D%22%2C%22i_n%22%3A%22ZGNqeAEJBgZh%22%2C%22d_ts%22%3A0%2C%22dh%22%3A0%2C%22v%22%3A2%2C%22j_s%22%3A%22%7B%7D%22%2C%22id%22%3A%22R95-8KW-K75Z%22%2C%22r_ts%22%3A1779800172%7D"
+        },
+        {
+          "name": "WZRK_META",
+          "value": "%7B%22ps%22%3A1779823620%2C%22cs%22%3A1779850012%2C%22sc%22%3A8%7D"
+        },
+        {
+          "name": "lastExternalReferrerTime",
+          "value": "1779850527124"
+        },
+        {
+          "name": "WZRK_BLOCK",
+          "value": "false"
+        },
+        {
+          "name": "persist:groupedOperators@v2",
+          "value": "{\"ids\":\"[\\\"543\\\",\\\"126941\\\",\\\"644\\\",\\\"111313\\\",\\\"117703\\\",\\\"117374\\\",\\\"115483\\\",\\\"119853\\\",\\\"121306\\\",\\\"123345\\\",\\\"123430\\\",\\\"123709\\\",\\\"125403\\\",\\\"125551\\\",\\\"125122\\\",\\\"122140\\\",\\\"123119\\\",\\\"123583\\\"]\",\"entities\":\"{\\\"543\\\":{\\\"api\\\":\\\"87\\\",\\\"filterID\\\":\\\"543\\\",\\\"filterName\\\":\\\"KTCL\\\",\\\"fullName\\\":\\\"Kadamba Transport Corporation Limited\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"serviceLogo\\\":\\\"https://static.abhibus.com/Logos/KTCLlogo.webp\\\",\\\"banners\\\":[],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[]},\\\"644\\\":{\\\"seqNo\\\":2,\\\"api\\\":\\\"154\\\",\\\"filterID\\\":\\\"644\\\",\\\"filterName\\\":\\\"APSRTC\\\",\\\"fullName\\\":\\\"Andhra Pradesh State Road Transport Corporation\\\",\\\"serviceLogo\\\":\\\"https://static.abhibus.com/content-pages/op-logos/apsrtc.png\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"bgColor\\\":\\\"#ffd6d6\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"isCombined\\\":\\\"1\\\",\\\"enableRating\\\":\\\"1\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"blockOffers\\\":[{\\\"discountTitle\\\":\\\"Senior Citizen Discount\\\",\\\"discountLogoType\\\":\\\"1\\\",\\\"discountTnC\\\":\\\"Senior Citizen Discount\\\\nSenior Citizen Discount\\\",\\\"discountPosition\\\":\\\"1\\\"}],\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/busgallery/offerbanners/Oct2023/06/1696592874/APSRTC.png\\\"}],\\\"offersList\\\":[\\\"<b>25% off</b> for Senior Citizens\\\",\\\"<b>50% off</b> for Child Passengers\\\",\\\"Save upto <b>₹300</b> on APSRTC bookings. Code: <b>APSRTC</b>\\\"],\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"ratingsCount\\\":\\\" \\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\"},\\\"111313\\\":{\\\"api\\\":\\\"459\\\",\\\"filterID\\\":\\\"111313\\\",\\\"filterName\\\":\\\"GSRTC\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":3,\\\"fullName\\\":\\\"Gujarat State Road Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/img/GSRTC.png\\\",\\\"banners\\\":[],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"<b>50% Off</b> for children\\\",\\\"Save upto <b>₹300</b> on GSRTC bookings. Code: <b>GSRTC</b>\\\"]},\\\"115483\\\":{\\\"api\\\":\\\"87\\\",\\\"filterID\\\":\\\"115483\\\",\\\"filterName\\\":\\\"BSRTC\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"05:00 Onwards\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":13,\\\"fullName\\\":\\\"Bihar State Road Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/Logos/BSRTC.webp\\\",\\\"banners\\\":[],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[]},\\\"117374\\\":{\\\"api\\\":\\\"16\\\",\\\"filterID\\\":\\\"117374\\\",\\\"filterName\\\":\\\"RSRTC\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":12,\\\"fullName\\\":\\\"Rajasthan State Road Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[{\\\"discountTitle\\\":\\\"50% discount Female travellers\\\",\\\"discountLogoType\\\":\\\"4\\\",\\\"discountTnC\\\":\\\"50% discount Female travellers\\\",\\\"discountPosition\\\":\\\"1\\\"}],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/content-pages/op-logos/RSRTC.png\\\",\\\"banners\\\":[{\\\"seqNo\\\":\\\"3\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Jul2025/14/1752494777/IMG_4644.png\\\"},{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/busgallery/offerbanners/Oct2023/06/1696571528/rstc.png\\\"}],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹100</b> on RSRTC bookings. Code: <b>RJ100</b>\\\",\\\"<b>50% Off</b> for Female Travellers\\\",\\\"<b>50% Off</b> for Senior Citizens\\\",\\\"<b>50% off</b> for Child Passengers\\\"]},\\\"117703\\\":{\\\"api\\\":\\\"588\\\",\\\"filterID\\\":\\\"117703\\\",\\\"filterName\\\":\\\"HRTC\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"1\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":10,\\\"fullName\\\":\\\"Himachal Road Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/img/operator/hrtc-logo.png\\\",\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Jul2025/24/1753340653/HRTC.png\\\"}],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹500</b> on HRTC bookings. Code: <b>HRTC</b>\\\"]},\\\"119853\\\":{\\\"api\\\":\\\"807\\\",\\\"filterID\\\":\\\"119853\\\",\\\"filterName\\\":\\\"WBTC(West Bengal Transport Corporation)\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":14,\\\"fullName\\\":\\\"\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/RTC/WBTC.webp\\\",\\\"banners\\\":[],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[]},\\\"121306\\\":{\\\"api\\\":\\\"2679\\\",\\\"filterID\\\":\\\"121306\\\",\\\"filterName\\\":\\\"UPSRTC\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":17,\\\"fullName\\\":\\\"\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/busimages/img/upsrtc-new.png\\\",\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Jul2025/24/1753340609/UPSRTC.png\\\"}],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹500</b> on UPSRTC bookings. Code: <b>UPSRTC</b>\\\",\\\"<b>50% off</b> for Child Passengers\\\"]},\\\"122140\\\":{\\\"api\\\":\\\"3529\\\",\\\"filterID\\\":\\\"122140\\\",\\\"filterName\\\":\\\"JKSRTC Buses\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":24,\\\"fullName\\\":\\\"Jammu and Kashmir Road Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/content-pages/op-logos/JKSRTC.png\\\",\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Nov2025/03/1762162763/JKSRTC.png\\\"}],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹300</b> on JKSRTC bookings. Code: <b>JKSRTC</b>\\\"]},\\\"123119\\\":{\\\"api\\\":\\\"3730\\\",\\\"filterID\\\":\\\"123119\\\",\\\"filterName\\\":\\\"SNT\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":25,\\\"fullName\\\":\\\"Sikkim Nationalised Transport\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com//web/media/operators/Sikkim%20Transport.png\\\",\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Nov2025/03/1762162743/SNT.png\\\"}],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹300</b> on SNT bookings. Code: <b>SNT300</b>\\\"]},\\\"123345\\\":{\\\"api\\\":\\\"3905\\\",\\\"filterID\\\":\\\"123345\\\",\\\"filterName\\\":\\\"KSRTC Kerala\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":18,\\\"fullName\\\":\\\"Kerala State Road Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/content-pages/op-logos/Kerala-RTC.png\\\",\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Jul2025/24/1753340691/KSRTC.png\\\"}],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹300</b> on KSRTC bookings. Code: <b>KSRTC</b>\\\"]},\\\"123430\\\":{\\\"api\\\":\\\"3988\\\",\\\"filterID\\\":\\\"123430\\\",\\\"filterName\\\":\\\"PEPSU\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":19,\\\"fullName\\\":\\\"\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/web/media/operators/prtc.png\\\",\\\"banners\\\":[],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[]},\\\"123583\\\":{\\\"api\\\":\\\"4053\\\",\\\"filterID\\\":\\\"123583\\\",\\\"filterName\\\":\\\"MTC\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":27,\\\"fullName\\\":\\\"Meghalaya Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/Logos/MTClogo.webp\\\",\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Nov2025/03/1762162718/MTC.png\\\"}],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹300</b> on MTC bookings. Code: <b>MTC300</b>\\\"]},\\\"123709\\\":{\\\"seqNo\\\":20,\\\"api\\\":\\\"4160\\\",\\\"filterID\\\":\\\"123709\\\",\\\"filterName\\\":\\\"TGSRTC\\\",\\\"fullName\\\":\\\"Telangana State Road Transport Corporation\\\",\\\"serviceLogo\\\":\\\"https://static.abhibus.com/img/TSRTC_LOGO.png\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"enableRating\\\":\\\"1\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"blockOffers\\\":[],\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Jul2025/24/1753340530/TGSRTC.png\\\"}],\\\"offersList\\\":[\\\"Save upto <b>₹300</b> on TGSRTC bookings. Code: <b>TGSRTC</b>\\\",\\\"<b>50% off</b> for Child Passengers\\\"],\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"ratingsCount\\\":\\\" \\\",\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\"},\\\"125122\\\":{\\\"api\\\":\\\"4641\\\",\\\"filterID\\\":\\\"125122\\\",\\\"filterName\\\":\\\"OSRTC\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":23,\\\"fullName\\\":\\\"Odisha State Road Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/img/osrtc_new.png\\\",\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Oct2025/15/1760511879/osrtc-10.png\\\"}],\\\"noOfRatingsTextNew\\\":\\\"(2,325 Ratings)\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Get <b>20% Off</b> on OSRTC booking. Code: <b>OSRTC</b>\\\",\\\"<b>50% Off</b> for Female Travellers\\\"]},\\\"125403\\\":{\\\"api\\\":\\\"4760\\\",\\\"seqNo\\\":21,\\\"filterID\\\":\\\"125403\\\",\\\"filterName\\\":\\\"UTC\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"isCombined\\\":\\\"0\\\",\\\"fullName\\\":\\\"Uttarakhand Transport Corporation\\\",\\\"blockOffers\\\":[],\\\"banners\\\":[{\\\"seqNo\\\":\\\"1\\\",\\\"imageUrl\\\":\\\"https://static.abhibus.com/offerbanners/Oct2025/23/1761217905/UCT-10.webp\\\"}],\\\"showOtherOperators\\\":\\\"0\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹300</b> on UTC bookings. Code: <b>UTC300</b>\\\"],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/web/media/operators/UTC.png\\\"},\\\"125551\\\":{\\\"api\\\":\\\"4816\\\",\\\"filterID\\\":\\\"125551\\\",\\\"filterName\\\":\\\"SBSTC\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":22,\\\"fullName\\\":\\\"South Bengal State Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com//web/media/operators/SBSTC.png\\\",\\\"banners\\\":[],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"Save upto <b>₹300</b> on SBSTC bookings. Code: <b>SBSTC10</b>\\\"]},\\\"126941\\\":{\\\"api\\\":\\\"5444\\\",\\\"filterID\\\":\\\"126941\\\",\\\"filterName\\\":\\\"KSRTC Karnataka\\\",\\\"isExpandable\\\":\\\"0\\\",\\\"boardingListMapId\\\":null,\\\"droppingListMapId\\\":null,\\\"rating\\\":0,\\\"noOfRatings\\\":\\\"\\\",\\\"noOfRatingsText\\\":\\\"\\\",\\\"startTimeTwfFormat\\\":\\\"\\\",\\\"noOfRatingsTextStr\\\":\\\"\\\",\\\"bgColor\\\":\\\"#F9C1C1\\\",\\\"imgBgColor\\\":\\\"#ff6049\\\",\\\"textColor\\\":\\\"#323232\\\",\\\"priceOnwardsText\\\":\\\"\\\",\\\"isTrackAvail\\\":\\\"0\\\",\\\"isCombined\\\":\\\"0\\\",\\\"seqNo\\\":1,\\\"fullName\\\":\\\"Karnataka State Road Transport Corporation\\\",\\\"ratingsCount\\\":\\\"\\\",\\\"blockOffers\\\":[],\\\"serviceLogo\\\":\\\"https://static.abhibus.com/img/KSRTC_Logo.png\\\",\\\"banners\\\":[],\\\"noOfRatingsTextNew\\\":\\\"\\\",\\\"ratingsCountNew\\\":\\\"\\\",\\\"showOtherOperators\\\":\\\"0\\\",\\\"noOfBuses\\\":0,\\\"noOfSeats\\\":0,\\\"busMeta\\\":\\\"\\\",\\\"busPhotos\\\":\\\"\\\",\\\"enableRating\\\":\\\"1\\\",\\\"offersList\\\":[\\\"<b>50% off</b> for Child Passengers\\\",\\\"<b>25% Off</b> for Senior Citizen\\\",\\\"<b> 5% Off</b> for Group Booking for 4 or more seats\\\",\\\"<b>10% Off</b> Return Trip discount\\\"]}}\",\"ttl\":\"1779804220445\",\"isLoaded\":\"true\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "_uetsid_exp",
+          "value": "Thu, 28 May 2026 02:55:26 GMT"
+        },
+        {
+          "name": "persist:serpMeta@v2",
+          "value": "{\"data\":\"{\\\"edgeDeals\\\":{\\\"header\\\":\\\"Special discounts for {operator Name}\\\",\\\"subHeader\\\":\\\"Highest discount is auto applied\\\",\\\"imgUrl\\\":\\\"https://static.abhibus.com/app/offer-deal.png\\\"},\\\"enableRating\\\":\\\"1\\\",\\\"safetyEnable\\\":\\\"0\\\",\\\"socialDistance\\\":\\\"0\\\",\\\"seatColors\\\":{\\\"highlyAvailable\\\":{\\\"seatBgColor\\\":\\\"#00C07B\\\",\\\"seatBgColorNew\\\":\\\"#EFFAF4\\\",\\\"seatTextColor\\\":\\\"#238C46\\\"},\\\"available\\\":{\\\"seatBgColor\\\":\\\"#f9bd16\\\",\\\"seatBgColorNew\\\":\\\"#FCF4E1\\\",\\\"seatTextColor\\\":\\\"#FC790D\\\"},\\\"lowAvailable\\\":{\\\"seatBgColor\\\":\\\"#F95C4B\\\",\\\"seatBgColorNew\\\":\\\"#FBEFEF\\\",\\\"seatTextColor\\\":\\\"#DC3532\\\"}},\\\"discountMsgTextColor\\\":\\\"#5AB3CE\\\",\\\"discountImageUrl\\\":\\\"https://static.abhibus.com/app/offer-deal.png\\\",\\\"edgeDiscountInfo\\\":{\\\"savedTxt\\\":\\\"Woohoo! You Saved {discount} on this journey\\\",\\\"thanksInfo\\\":{\\\"title\\\":\\\"Thanks for choosing \\\",\\\"subtilte\\\":\\\"we look forward to serving you again\\\",\\\"savedtxt\\\":\\\"Saved on this journey\\\"},\\\"discountMsg\\\":\\\"Save min {minDiscount} with {offerTitle}\\\",\\\"discountText\\\":\\\"You saved {discount} on this journey with {offerTitle}\\\"},\\\"busMeta\\\":{\\\"showIcon\\\":\\\"1\\\",\\\"containerColor\\\":\\\"#ECF5FD\\\",\\\"contentColor\\\":\\\"#107CE0\\\"},\\\"sponsoredListingAvailable\\\":\\\"\\\",\\\"sponsoredCardPositions\\\":\\\"\\\",\\\"sponsoredOperator\\\":\\\"\\\",\\\"safeTBusPartnerTitle\\\":\\\"Safe-T\\\",\\\"specialBanners\\\":[{\\\"id\\\":3388,\\\"title\\\":\\\"26  SERP Banner\\\",\\\"startDate\\\":\\\"2025-06-30\\\",\\\"endDate\\\":\\\"2026-06-30\\\",\\\"details\\\":{\\\"id\\\":\\\"\\\",\\\"end_date\\\":\\\"2026-12-15\\\",\\\"img_link\\\":\\\"\\\",\\\"platform\\\":\\\"\\\",\\\"position\\\":\\\"26\\\",\\\"offerType\\\":\\\"26\\\",\\\"img_banner\\\":\\\"https://static.abhibus.com/offerbanners/Jun2025/30/1751289034/FINAL ASSURED@3x.png\\\",\\\"start_date\\\":\\\"2025-12-15\\\",\\\"banner_title\\\":\\\"26  SERP Banner\\\",\\\"offer_status\\\":\\\"1\\\",\\\"is_login_required\\\":\\\"0\\\"},\\\"priority\\\":null,\\\"status\\\":1,\\\"type\\\":26},{\\\"id\\\":3389,\\\"title\\\":\\\"17  SERP Banner\\\",\\\"startDate\\\":\\\"2025-06-30\\\",\\\"endDate\\\":\\\"2026-06-30\\\",\\\"details\\\":{\\\"id\\\":\\\"\\\",\\\"end_date\\\":\\\"2026-06-30\\\",\\\"img_link\\\":\\\"\\\",\\\"platform\\\":\\\"\\\",\\\"position\\\":\\\"17\\\",\\\"offerType\\\":\\\"26\\\",\\\"img_banner\\\":\\\"https://static.abhibus.com/offerbanners/Jun2025/30/1751289082/FINAL FC@3x.png\\\",\\\"start_date\\\":\\\"2025-06-30\\\",\\\"banner_title\\\":\\\"17  SERP Banner\\\",\\\"offer_status\\\":\\\"1\\\",\\\"is_login_required\\\":\\\"0\\\"},\\\"priority\\\":null,\\\"status\\\":1,\\\"type\\\":26},{\\\"id\\\":3390,\\\"title\\\":\\\"23  SERP Banner\\\",\\\"startDate\\\":\\\"2025-06-30\\\",\\\"endDate\\\":\\\"2026-06-30\\\",\\\"details\\\":{\\\"id\\\":\\\"\\\",\\\"end_date\\\":\\\"2026-06-30\\\",\\\"img_link\\\":\\\"\\\",\\\"platform\\\":\\\"\\\",\\\"position\\\":\\\"23\\\",\\\"offerType\\\":\\\"26\\\",\\\"img_banner\\\":\\\"https://static.abhibus.com/offerbanners/Jun2025/30/1751289057/FINAL ASSURED@3x.png\\\",\\\"start_date\\\":\\\"2025-06-30\\\",\\\"banner_title\\\":\\\"23  SERP Banner\\\",\\\"offer_status\\\":\\\"1\\\",\\\"is_login_required\\\":\\\"0\\\"},\\\"priority\\\":null,\\\"status\\\":1,\\\"type\\\":26}],\\\"extraInlineSpecialBanners\\\":{\\\"busSafety\\\":{\\\"position\\\":2,\\\"imageUrl\\\":\\\"https://static.abhibus.com/bus_safety/bus_safety.png\\\",\\\"landingUrl\\\":\\\"\\\"},\\\"busPhotos\\\":{\\\"position\\\":9,\\\"with360ImageUrl\\\":\\\"https://static.abhibus.com/img/BUSPHOTOSNEW.png\\\",\\\"photosOnlyImageUrl\\\":\\\"https://static.abhibus.com/img/photos_only.png\\\",\\\"landingUrl\\\":\\\"\\\"}},\\\"amenityGroupIds\\\":{\\\"1\\\":[\\\"18\\\",\\\"19\\\",\\\"22\\\",\\\"21\\\",\\\"23\\\",\\\"24\\\"],\\\"2\\\":[\\\"1\\\",\\\"2\\\",\\\"4\\\",\\\"6\\\",\\\"7\\\",\\\"17\\\"],\\\"3\\\":[\\\"3\\\",\\\"5\\\",\\\"8\\\",\\\"9\\\",\\\"10\\\",\\\"11\\\",\\\"12\\\",\\\"13\\\",\\\"14\\\",\\\"15\\\",\\\"16\\\",\\\"20\\\"]},\\\"assuredOperatorsInfo\\\":{\\\"assuredImgInfo\\\":\\\"https://static.abhibus.com/img/assured_partner/assured_more_info_v2.png\\\",\\\"imgUrls\\\":[\\\"https://static.abhibus.com/img/assured_partner/buscancelled.png\\\",\\\"https://static.abhibus.com/img/assured_partner/delayedpickup.png\\\",\\\"https://static.abhibus.com/img/assured_partner/busservice.png\\\",\\\"https://static.abhibus.com/img/assured_partner/wanttocancel.png\\\"]},\\\"pgDiscountMsg1\\\":\\\"Extra {women_discount} off for Women.Total Savings  {discount}\\\",\\\"pgDiscountMsg2\\\":\\\"Woohoo! You saved {women_discount} with Women Exclusive Deal!\\\",\\\"edgePriority\\\":\\\"cofund\\\",\\\"tagColors\\\":{\\\"WomenOffer\\\":{\\\"textColor\\\":\\\"#F55895\\\",\\\"containerColor\\\":\\\"#FFEFF7\\\"},\\\"SingleSeats\\\":{\\\"textColor\\\":\\\"#5E616E\\\",\\\"containerColor\\\":\\\"#F4F5F5\\\"},\\\"SingleBerths\\\":{\\\"textColor\\\":\\\"#5E616E\\\",\\\"containerColor\\\":\\\"#F4F5F5\\\"},\\\"WomenSeats\\\":{\\\"textColor\\\":\\\"#5E616E\\\",\\\"containerColor\\\":\\\"#F4F5F5\\\"},\\\"cofund\\\":{\\\"textColor\\\":\\\"#E56700\\\",\\\"containerColor\\\":\\\"#FFEBDB\\\"},\\\"featuredOffersGuest\\\":{\\\"textColor\\\":\\\"#6E18B9\\\",\\\"containerColor\\\":\\\"#F9F2FF\\\",\\\"containerColor1\\\":\\\"#00F9F2FF\\\"},\\\"featuredOffers\\\":{\\\"textColor\\\":\\\"#6E18B9\\\",\\\"containerColor\\\":\\\"#F9F2FF\\\",\\\"containerColor1\\\":\\\"#00F9F2FF\\\"},\\\"appliedOffers\\\":{\\\"textColor\\\":\\\"#E56700\\\",\\\"containerColor\\\":\\\"#FFEBDB\\\"}},\\\"isRecentFilterEnable\\\":\\\"1\\\",\\\"recentFilterDismissTime\\\":\\\"300\\\",\\\"recentFiltersDataRemove\\\":\\\"30\\\",\\\"popularRepeatPosition\\\":[\\\"12\\\",\\\"20\\\"],\\\"rtconf\\\":[{\\\"rt\\\":\\\"3.4\\\",\\\"cl\\\":\\\"#238C46\\\"},{\\\"rt\\\":\\\"2.4\\\",\\\"cl\\\":\\\"#FDB64C\\\"},{\\\"rt\\\":\\\"0\\\",\\\"cl\\\":\\\"#E35D5B\\\"}],\\\"ratedTags\\\":[\\\"Helpful Staff\\\",\\\"Clean & Hygienic\\\"],\\\"instreamRouteBanners\\\":{\\\"topRatedRange\\\":\\\"3.5\\\",\\\"topRatedRangePercent\\\":\\\"100\\\",\\\"topRatedMaxCount\\\":\\\"20\\\",\\\"mostTrustRange\\\":\\\"4.2\\\",\\\"mostTrustRangeePercent\\\":\\\"100\\\"},\\\"disabledApis\\\":[],\\\"assuredInStreamBanner\\\":{\\\"lottieUrl\\\":\\\"https://static.abhibus.com/final_abhiassured/final_abhiassured.json\\\",\\\"lottieNew\\\":\\\"https://static.abhibus.com/assured_instream_dot/assured_instream_dot.lottie\\\",\\\"image\\\":\\\"\\\",\\\"position\\\":\\\"8,15\\\",\\\"type\\\":\\\"assured\\\",\\\"displayCount\\\":\\\"16\\\",\\\"progresColor\\\":\\\"#17181C4D\\\",\\\"progresFillColor\\\":\\\"#FFFFFF\\\"},\\\"regularInStreamBanner\\\":{\\\"lottieUrl\\\":\\\"https://static.abhibus.com/assured_inst_wof/assured_inst_wof.json\\\",\\\"image\\\":\\\"\\\",\\\"position\\\":\\\"5,8,15\\\",\\\"type\\\":\\\"assured\\\",\\\"displayCount\\\":\\\"16\\\",\\\"progresColor\\\":\\\"#17181C4D\\\",\\\"progresFillColor\\\":\\\"#FFFFFF\\\"},\\\"topRatedInstreamBanner\\\":{\\\"routes\\\":[\\\"3-100\\\"],\\\"lottieUrl\\\":\\\"https://static.abhibus.com/finalnew_toprated/finalnew_toprated.json\\\",\\\"lottieNew\\\":\\\"https://static.abhibus.com/toprated_instream_dot/toprated_instream_dot.lottie\\\",\\\"image\\\":\\\"\\\",\\\"position\\\":\\\"8,15\\\",\\\"type\\\":\\\"topRated\\\",\\\"displayCount\\\":\\\"8\\\",\\\"progresColor\\\":\\\"#17181C4D\\\",\\\"progresFillColor\\\":\\\"#FFFFFF\\\"},\\\"topRatedRoutes\\\":[\\\"3-100\\\"],\\\"offersInstreamBanner\\\":{\\\"routes\\\":[\\\"3-1434\\\",\\\"100-257\\\"],\\\"lottieUrl\\\":\\\"https://static.abhibus.com/offers_phase4/offers_phase4.json\\\",\\\"lottieNew\\\":\\\"https://static.abhibus.com/offers_instream_dot/offers_instream_dot.lottie\\\",\\\"image\\\":\\\"\\\",\\\"position\\\":\\\"2,5\\\",\\\"type\\\":\\\"offers\\\",\\\"displayCount\\\":\\\"16\\\",\\\"progresColor\\\":\\\"#17181C4D\\\",\\\"progresFillColor\\\":\\\"#FFFFFF\\\"},\\\"offersRoutes\\\":[\\\"3-1434\\\",\\\"100-257\\\"],\\\"edgeConfig\\\":{\\\"1\\\":{\\\"title\\\":\\\"Flash Offer\\\",\\\"header\\\":\\\"Flash Offer\\\",\\\"subHeader\\\":\\\"%s off per seat!\\\",\\\"offerTypeText\\\":\\\"Instant savings! Get min \\\",\\\"dealTitle\\\":\\\"PRICE DROP\\\",\\\"titleText\\\":\\\"Flash Offer : %s off per seat!\\\",\\\"offerType\\\":\\\"flash_deal\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"loginRequired\\\":\\\"0\\\",\\\"isNewUser\\\":0},\\\"2\\\":{\\\"title\\\":\\\"Early Bird Offer\\\",\\\"header\\\":\\\"Advance Booking Offer\\\",\\\"offerTypeText\\\":\\\"Book in advance & get min \\\",\\\"dealTitle\\\":\\\"PRICE DROP\\\",\\\"titleText\\\":\\\"Advance Booking: %s off per seat!\\\",\\\"offerType\\\":\\\"early_bird\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"loginRequired\\\":\\\"0\\\",\\\"isNewUser\\\":0},\\\"3\\\":{\\\"title\\\":\\\"Last Minute Offer\\\",\\\"header\\\":\\\"Last Minute Offer\\\",\\\"offerTypeText\\\":\\\"Get discount of \\\",\\\"dealTitle\\\":\\\"PRICE DROP\\\",\\\"titleText\\\":\\\"Last minute Offer: %s off per seat!\\\",\\\"offerType\\\":\\\"last_minute\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"loginRequired\\\":\\\"0\\\",\\\"isNewUser\\\":0},\\\"4\\\":{\\\"title\\\":\\\"Return Trip Offer\\\",\\\"header\\\":\\\"Return Trip Offer\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\" Get %s off auto-applied on Return trip!\\\",\\\"appliedTitleText\\\":\\\"Return Trip Offer : %s off per seat!\\\",\\\"subHeader\\\":\\\"%s per Seat!\\\",\\\"offerType\\\":\\\"return_journey\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"seqNo\\\":\\\"1\\\",\\\"loginRequired\\\":\\\"1\\\",\\\"isNewUser\\\":0},\\\"5\\\":{\\\"title\\\":\\\"New User Offer\\\",\\\"header\\\":\\\"New User Offer\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\"Welcome Offer: %s off per seat!\\\",\\\"offerType\\\":\\\"new_user\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"freeTicketTitle\\\":\\\"Free Ticket unlocked! Save\\\",\\\"loginRequired\\\":\\\"1\\\",\\\"isNewUser\\\":1},\\\"6\\\":{\\\"title\\\":\\\"Free Ticket Offer\\\",\\\"header\\\":\\\"Free Ticket Offer\\\",\\\"freeTicketTitle\\\":\\\"Free Ticket unlocked! Save\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"PRICE DROP\\\",\\\"titleText\\\":\\\"Guaranteed Free Ticket after\\\",\\\"subHeader\\\":\\\"%s per Seat!\\\",\\\"offerType\\\":\\\"trip_reward\\\",\\\"offerTag\\\":\\\"Free Ticket\\\",\\\"seqNo\\\":\\\"2\\\",\\\"loginRequired\\\":\\\"1\\\",\\\"isNewUser\\\":0},\\\"7\\\":{\\\"title\\\":\\\"Women Exclusive Offer\\\",\\\"header\\\":\\\"Women Exclusive Offer\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\"%s off for Women\\\",\\\"offerType\\\":\\\"women_deal\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"metaInfoTitle\\\":\\\"1 Women Seats\\\",\\\"metaInfoType\\\":\\\"WomenOffer\\\",\\\"isNewUser\\\":0},\\\"8\\\":{\\\"title\\\":\\\"Group Deal Offer\\\",\\\"header\\\":\\\"Group Deal Offer\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\"%s off auto applied for {count} or more seats\\\",\\\"offerType\\\":\\\"group_deal\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"loginRequired\\\":\\\"0\\\",\\\"seqNo\\\":\\\"3\\\",\\\"isNewUser\\\":0},\\\"9\\\":{\\\"title\\\":\\\"Great Indian Bus Sale!\\\",\\\"header\\\":\\\"Great Indian Bus Sale!\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"PRICE DROP\\\",\\\"titleText\\\":\\\"Great Indian Bus Sale: %s off per seat!\\\",\\\"offerType\\\":\\\"great_indian_bus_sale\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"isNewUser\\\":0},\\\"101\\\":{\\\"title\\\":\\\"Coupon Exclusive Offer\\\",\\\"header\\\":\\\"Coupon Exclusive Offer\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\"{hasEdgeOffer? \\\\\\\"Extra\\\\\\\" : \\\\\\\"Upto\\\\\\\"} {discountAmt} off. Code: {coupon}\\\",\\\"offerType\\\":\\\"cofund\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"loginRequired\\\":\\\"0\\\",\\\"isNewUser\\\":0},\\\"102\\\":{\\\"title\\\":\\\"AbhiCash Discount\\\",\\\"header\\\":\\\"AbhiCash Discount\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\"Extra %s off with AbhiCash\\\",\\\"offerType\\\":\\\"abhicash\\\",\\\"offerTag\\\":\\\"AbhiCash\\\",\\\"loginRequired\\\":\\\"1\\\",\\\"isNewUser\\\":0},\\\"103\\\":{\\\"title\\\":\\\"Promotional Offer\\\",\\\"offerType\\\":\\\"promotional\\\",\\\"header\\\":\\\"Promotional Offer\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\"Extra %s off with Promotional Offer: TRYBUS\\\",\\\"loginRequired\\\":\\\"1\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"isNewUser\\\":1},\\\"104\\\":{\\\"title\\\":\\\"Special Offer\\\",\\\"header\\\":\\\"Special Offer\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\"Use code MST100 and get up to 100 OFF\\\",\\\"offerType\\\":\\\"special\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"loginRequired\\\":\\\"1\\\"},\\\"105\\\":{\\\"title\\\":\\\"Promotional Offer\\\",\\\"offerType\\\":\\\"promotional\\\",\\\"header\\\":\\\"Promotional Offer\\\",\\\"offerTypeText\\\":\\\"\\\",\\\"dealTitle\\\":\\\"\\\",\\\"titleText\\\":\\\"Extra %s off. Code : TATKAL\\\",\\\"loginRequired\\\":\\\"1\\\",\\\"offerTag\\\":\\\"%s off\\\",\\\"isNewUser\\\":0}},\\\"edgeRewardOfferInfo\\\":{\\\"availOfferTitle\\\":\\\"Avail your Free Ticket Offer\\\",\\\"discountTxt\\\":\\\"Get Upto Rs {busRewardMaxDiscount} off on Free Ticket Offer\\\",\\\"discountSubTitle\\\":\\\"<span style='color: #212121; font-family: ixi_Regular; font-size: 16px; font-weight: 400; text-align: center;'>Choose any service from </span><span style='color: #dc635b; font-family: ixi_Regular; font-size: 16px; font-weight: 600; text-align: center;'>{busRewardOperators.values}</span><span style='color: #212121; font-family: ixi_Regular; font-size: 16px; font-weight: 400; text-align: center;'> & {busRewardOperators.size > 1 ? 'get upto' : 'get'} </span><span style='color: #dc635b; font-family: ixi_Regular; font-size: 16px; font-weight: 600; text-align: center;'>Rs. {busRewardMaxDiscount} off</span>\\\"},\\\"edgeReturnOfferInfo\\\":{\\\"availOfferTitle\\\":\\\"Avail your Return Trip Offer\\\",\\\"discountTxt\\\":\\\"Get Upto Rs {busReturnMaxDiscount} off on Return Journey\\\",\\\"discountSubTitle\\\":\\\"<span style='color: #212121; font-family: ixi_Regular; font-size: 16px; font-weight: 400; text-align: center;'>Choose any service from </span><span style='color: #dc635b; font-family: ixi_Regular; font-size: 16px; font-weight: 600; text-align: center;'>{busReturnOperators.values}</span><span style='color: #212121; font-family: ixi_Regular; font-size: 16px; font-weight: 400; text-align: center;'> & {busReturnOperators.size > 1 ? 'get upto' : 'get'} </span><span style='color: #dc635b; font-family: ixi_Regular; font-size: 16px; font-weight: 600; text-align: center;'>₹{busReturnMaxDiscount} off</span>\\\"},\\\"freeTicketOffer\\\":{\\\"titleOperatorName\\\":\\\"Find [operator name] buses & proceed to book\\\",\\\"titleOfferDetail\\\":\\\"Unlock eligibility for Free Ticket after booking\\\",\\\"titleRemainigCount\\\":\\\"Complete [Remaining Trip Count] trip(s) with [Operator name]\\\",\\\"titleAmountWorth\\\":\\\"Enjoy your Free ticket! worth up to [amount worth]\\\",\\\"freeTicketUnlockedTxt\\\":\\\"Congrats! Free Ticket has been unlocked\\\"},\\\"offerNoteTemplates\\\":{\\\"applied\\\":\\\"Valid for trips after {offerJourneyDate}\\\\nAll {offerTrips} trips must be completed within 180 days from first trip!\\\",\\\"notApplied\\\":\\\"Offer is valid for bookings made after {offerJourneyDate}\\\\nComplete all {offerTrips} bookings within 6 months of first booking to claim offer!\\\"},\\\"travelPolicy\\\":[{\\\"id\\\":1,\\\"icon\\\":null,\\\"title\\\":\\\"Do I need to buy a ticket for my child?\\\",\\\"subTitle\\\":\\\"Children below five years of age can travel for free along with adults. If a separate seat is required for the child, customer must book ticket for the child. Please note that sharing a berth with passengers from a different booking on a double berth is not permitted.\\\"},{\\\"id\\\":2,\\\"icon\\\":null,\\\"title\\\":\\\"Will I be charged for excess luggage?\\\",\\\"subTitle\\\":\\\"Yes , excess luggage is chargeable. You are allowed to carry 2 pieces of luggage, 15 Kgs each. Allowing luggages packed in carton boxes is at the discretion of the bus partner.\\\"},{\\\"id\\\":3,\\\"icon\\\":null,\\\"title\\\":\\\"Can I travel with my Pet?\\\",\\\"subTitle\\\":\\\"Travelling with your pets in the bus is not permitted.\\\"},{\\\"id\\\":4,\\\"icon\\\":null,\\\"title\\\":\\\"Is there any Alcohol/liquor policy?\\\",\\\"subTitle\\\":\\\"Yes. Alcohol/liquor consumption and Carrying it inside the bus is prohibited. Bus partners reserves the right to deboard any passenger with inappropriate behaviour or does not comply with the policy. Refunds will not be processed in such cases.\\\"},{\\\"id\\\":5,\\\"icon\\\":null,\\\"title\\\":\\\"Will the bus wait if the boarding time has passed?\\\",\\\"subTitle\\\":\\\"Bus partner do not wait for the passengers beyond the departure time. There is no refund policy if the passenger missed the bus for arriving late at the boarding point.\\\"},{\\\"id\\\":6,\\\"icon\\\":null,\\\"title\\\":\\\"Onboard Washroom Policy – Subject to availability on the bus.\\\",\\\"subTitle\\\":\\\"Onboard Bus Restroom with Urinal-Only Facility\\\"}],\\\"assuredPartnerInfo\\\":[{\\\"imgUrl\\\":\\\"https://static.abhibus.com/img/assured_partner/icon_bus_cancelled.png\\\",\\\"title\\\":\\\"150% Refund if bus cancelled\\\",\\\"desc\\\":\\\"Get extra 50% refund in case your bus doesn't arrive!\\\"},{\\\"imgUrl\\\":\\\"https://static.abhibus.com/img/assured_partner/icon_bus_delayed.png\\\",\\\"title\\\":\\\"100% Refund if Bus delayed\\\",\\\"desc\\\":\\\"We dont like you waiting.If the bus is late, you get 100% Back.\\\"},{\\\"imgUrl\\\":\\\"https://static.abhibus.com/img/assured_partner/icon_staff_misbehaves.png\\\",\\\"title\\\":\\\"100% Refund if staff misbehaves\\\",\\\"desc\\\":\\\"Our Assured bus partners train their staff to treat Abhibus travellers special. Incase of any misbehaviour you get 100% Refund.\\\"},{\\\"imgUrl\\\":\\\"https://static.abhibus.com/img/assured_partner/icon_quality_mismatch.png\\\",\\\"title\\\":\\\"100% Refund if bus Quality mismatches\\\",\\\"desc\\\":\\\"You were promised A/C bus and Non AC bus arrived, such mismatch will be compensated with 100% Refund.\\\\n *All benefits subject to applicable T&C\\\"}],\\\"noRatingMessage\\\":\\\"User ratings & reviews are not available for this particular service\\\",\\\"promotionalConfig\\\":{\\\"code\\\":\\\"TRYBUS\\\",\\\"text\\\":\\\"25% off upto ₹250 on first booking\\\",\\\"newUserOnly\\\":1},\\\"womenSafetyCheck\\\":{\\\"minWomenPreferredPercentage\\\":10,\\\"minWomenRatingThreshold\\\":2.4,\\\"sections\\\":[{\\\"title\\\":\\\"Bus & route Safety\\\",\\\"items\\\":[\\\"Women Verified pick up & drop\\\"]},{\\\"title\\\":\\\"Round the clock monitoring\\\",\\\"items\\\":[\\\"24/7 SOS\\\",\\\"Live Tracking\\\"]},{\\\"title\\\":\\\"Travel with confidence\\\",\\\"items\\\":[\\\"Women Zone seats\\\",\\\"Free 8L Insurance\\\"]}]},\\\"promotionalTatkalConfig\\\":{\\\"code\\\":\\\"TATKAL\\\",\\\"text\\\":\\\"TATKAL SALE: 30% Off till 12 PM\\\"}}\",\"ttl\":\"1779804220445\",\"isLoaded\":\"true\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "persist:config@v1",
+          "value": "{\"ttl\":\"1779853608221\",\"helpCenter\":\"\\\"false\\\"\",\"isHomeBanner\":\"\\\"false\\\"\",\"enablePSDK\":\"\\\"false\\\"\",\"showAssuredFcBS\":\"\\\"0\\\"\",\"api_key\":\"{\\\"exp_assured_new_user\\\":\\\"B\\\",\\\"exp_feat_getbuslist\\\":\\\"v1\\\",\\\"exp_ixigo_payment\\\":\\\"A\\\",\\\"exp_service_cards\\\":\\\"2\\\",\\\"exp_srp_outlier\\\":\\\"no\\\",\\\"exp_srp_sort_weighted\\\":\\\"B\\\",\\\"exp_srp_sort_weighted_1\\\":\\\"\\\",\\\"exp_uber_seat\\\":\\\"A\\\"}\",\"_persist\":\"{\\\"version\\\":1,\\\"rehydrated\\\":true}\"}"
+        },
+        {
+          "name": "WZRK_CAMP",
+          "value": "%7B%22woc%22%3A%7B%7D%2C%22wndoc%22%3A%7B%7D%2C%22wi%22%3A%7B%7D%2C%22wp%22%3A%7B%7D%2C%22wsc%22%3A0%2C%22wndsc%22%3A0%7D"
+        }
+      ]
+    },
+    {
+      "origin": "https://www.skyscanner.co.in",
+      "localStorage": [
+        {
+          "name": "NRBA_SESSION",
+          "value": "{\"value\":\"69e5bd2d2ac65637\",\"inactiveAt\":1779827005059,\"expiresAt\":1779839359581,\"updatedAt\":1779825205093,\"sessionReplayMode\":0,\"sessionReplaySentFirstChunk\":false,\"sessionTraceMode\":0,\"traceHarvestStarted\":false,\"loggingMode\":0,\"serverTimeDiff\":-2710,\"custom\":{},\"numOfResets\":0}"
+        },
+        {
+          "name": "eventstracking",
+          "value": "{\"sequence_num\":15}"
+        },
+        {
+          "name": "cto_bundle",
+          "value": "XIBlc19oeHJlMFNUYkVuJTJCU09BMTg4ZnNyZjk3b0tHMXJuNThqSlMySlI4Z3BmaSUyRiUyQml2dTZtUE92SlVxVE1OTW53NiUyRllaOThwVHpUY3hzQVpmNnE2WXZCQ0tGeDBoT1E5JTJCWEtEOFNPdEYyTjY4b1F6QWFKTDhkb3haUWolMkJkV1JmOG1jOGw3NkFudjhUZCUyRjdrYld5M2drYnkxdyUzRCUzRA"
+        },
+        {
+          "name": "PXrf8vapwA_px_hvd",
+          "value": "dd8a4d351cd3df0a9dad6b5cef7d3204"
+        },
+        {
+          "name": "_gcl_ls",
+          "value": "{\"schema\":\"gcl\",\"version\":1,\"gcl_ctr\":{\"value\":{\"value\":0,\"timeouts\":0,\"errors\":0,\"eopCount\":0,\"creationTimeMs\":1779824960060},\"expires\":1787600960060},\"gtg_load_status\":{\"status\":2,\"expires\":1779911360741}}"
+        },
+        {
+          "name": "PXrf8vapwA_px_af",
+          "value": "1"
+        },
+        {
+          "name": "SID",
+          "value": "{\"login_auto_prompt\":{\"has_been_shown\":true}}"
+        },
+        {
+          "name": "__initTest__",
+          "value": "__initValue"
+        },
+        {
+          "name": "PXrf8vapwA_px-ff",
+          "value": "eyJjYyI6eyJ0dGwiOjE3Nzk4MjUzMDksInZhbCI6IlUyRnRaVk5wZEdVOVRHRjRPdz09In0sImJzY28iOnsidHRsIjoxNzc5ODI1MzA5LCJ2YWwiOiIxIn0sInJmIjp7InR0bCI6MTc3OTgyNTMwOSwidmFsIjoiMSJ9LCJmcCI6eyJ0dGwiOjE3Nzk4MjUzMDksInZhbCI6IjEifX0="
+        }
+      ]
+    }
+  ]
+}

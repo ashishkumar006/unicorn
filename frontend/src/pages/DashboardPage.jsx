@@ -189,9 +189,9 @@ export default function DashboardPage({
   const travelersCount = parseInt(tripData?.travelers) || 2;
   const travelersText = travelersCount === 1 ? '1 Person' : `${travelersCount} People`;
   const tripDays = plan.totalDays || itinerary.length || 7;
-  const selectedTravel = tabData.Travel?.options?.[selectedTravelIdx] || null;
-  const selectedHotel = tabData.Hotels?.options?.[selectedHotelIdx] || null;
-  const selectedFood = tabData.Food?.restaurants?.[selectedFoodIdx] || null;
+  const selectedTravel = tripData.plan?.travel?.options?.[selectedTravelIdx] || tripData.travel?.options?.[selectedTravelIdx] || tabData.Travel?.options?.[selectedTravelIdx] || null;
+  const selectedHotel = tripData.plan?.hotels?.options?.[selectedHotelIdx] || tripData.hotels?.options?.[selectedHotelIdx] || tabData.Hotels?.options?.[selectedHotelIdx] || null;
+  const selectedFood = tripData.plan?.food?.restaurants?.[selectedFoodIdx] || tripData.food?.restaurants?.[selectedFoodIdx] || tabData.Food?.restaurants?.[selectedFoodIdx] || null;
 
   const getBudgetValue = (key, fallbackPct) => {
     if (key === 'accommodation') {
@@ -323,7 +323,8 @@ export default function DashboardPage({
           startDate,
           endDate,
           travelers: travelersCount,
-          provider: 'auto'
+          provider: 'auto',
+          sessionId: tripData?.sessionId || null
         })
       });
 
@@ -344,13 +345,15 @@ export default function DashboardPage({
     <div className="page-wrapper dashboard page-shell">
       {/* Top Navbar */}
       <div className="dash-nav">
-        <button className="back-link" onClick={onBackToHome}>
-          <ArrowLeft size={16} />
-          Back to planner
-        </button>
-        <div className="brand-header nav-brand">
-          <Sparkles className="brand-icon" size={20} />
-          <span className="brand-name">Wanderlust</span>
+        <div className="dash-nav-inner">
+          <button className="back-link" onClick={onBackToHome}>
+            <ArrowLeft size={16} />
+            Back to planner
+          </button>
+          <div className="brand-header nav-brand">
+            <Sparkles className="brand-icon" size={20} />
+            <span className="brand-name">Wanderlust</span>
+          </div>
         </div>
       </div>
 
@@ -404,7 +407,7 @@ export default function DashboardPage({
         
         <div className="budget-flex">
           <div className="chart-container">
-            <ResponsiveContainer width={240} height={240}>
+            <ResponsiveContainer>
               <PieChart>
                 <Pie
                   data={budgetData}

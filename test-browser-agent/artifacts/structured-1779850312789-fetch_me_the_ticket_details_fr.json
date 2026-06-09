@@ -1,0 +1,335 @@
+{
+  "buses": [
+    {
+      "price": 1329,
+      "operator": "Lion Travels",
+      "departure": "17:15",
+      "arrival": "00:50",
+      "seatsLeft": 28,
+      "rating": 3.8
+    },
+    {
+      "price": 729,
+      "operator": "IntrCity SmartBus",
+      "departure": "22:50",
+      "arrival": "07:20",
+      "seatsLeft": 24,
+      "rating": 4
+    },
+    {
+      "price": 777,
+      "operator": "FlixBus",
+      "departure": "22:05",
+      "arrival": "07:45",
+      "seatsLeft": 39,
+      "rating": 4.2
+    },
+    {
+      "price": 919,
+      "operator": "IntrCity SmartBus",
+      "departure": "22:25",
+      "arrival": "06:45",
+      "seatsLeft": 25,
+      "rating": 3.9
+    },
+    {
+      "price": 769,
+      "operator": "IntrCity SmartBus",
+      "departure": "21:45",
+      "arrival": "07:00",
+      "seatsLeft": 21,
+      "rating": 3.8
+    },
+    {
+      "price": 1060,
+      "operator": "PRM Roadways",
+      "departure": "23:30",
+      "arrival": "07:00",
+      "seatsLeft": 19,
+      "rating": 4.5
+    },
+    {
+      "price": 700,
+      "operator": "SRI SUGAM TRAVELS",
+      "departure": "23:15",
+      "arrival": "07:30",
+      "seatsLeft": 22,
+      "rating": 3.8
+    },
+    {
+      "price": 1149,
+      "operator": "Ira Transport",
+      "departure": "22:30",
+      "arrival": "06:40",
+      "seatsLeft": 20,
+      "rating": 3.9
+    },
+    {
+      "price": 1150,
+      "operator": "Sri Krishna Travels",
+      "departure": "20:30",
+      "arrival": "04:30",
+      "seatsLeft": 8,
+      "rating": 4.4
+    },
+    {
+      "price": 719,
+      "operator": "IntrCity SmartBus",
+      "departure": "23:10",
+      "arrival": "07:40",
+      "seatsLeft": 31,
+      "rating": 3.8
+    },
+    {
+      "price": 729,
+      "operator": "IntrCity SmartBus",
+      "departure": "22:30",
+      "arrival": "07:30",
+      "seatsLeft": 25,
+      "rating": 3.9
+    },
+    {
+      "price": 802,
+      "operator": "NueGo",
+      "departure": "21:30",
+      "arrival": "07:40",
+      "seatsLeft": 17,
+      "rating": 3.8
+    },
+    {
+      "price": 795,
+      "operator": "NueGo",
+      "departure": "19:00",
+      "arrival": "05:10",
+      "seatsLeft": 19,
+      "rating": 3.7
+    },
+    {
+      "price": 1215,
+      "operator": "FlixBus",
+      "departure": "20:30",
+      "arrival": "07:00",
+      "seatsLeft": 26,
+      "rating": 4.2
+    },
+    {
+      "price": 1350,
+      "operator": "LG Bus",
+      "departure": "21:40",
+      "arrival": "04:40",
+      "seatsLeft": 14,
+      "rating": 4.4
+    },
+    {
+      "price": 1550,
+      "operator": "YBM Travels",
+      "departure": "21:00",
+      "arrival": "04:45",
+      "seatsLeft": 17,
+      "rating": 4
+    },
+    {
+      "price": 1349,
+      "operator": "Medikonda Travels",
+      "departure": "23:30",
+      "arrival": "08:10",
+      "seatsLeft": 19,
+      "rating": 4.1
+    },
+    {
+      "price": 1395,
+      "operator": "PRM Roadways",
+      "departure": "20:45",
+      "arrival": "04:55",
+      "seatsLeft": 23,
+      "rating": 4.5
+    },
+    {
+      "price": 1055,
+      "operator": "SREE KVR TRAVELS",
+      "departure": "21:55",
+      "arrival": "06:15",
+      "seatsLeft": 19,
+      "rating": 4.1
+    },
+    {
+      "price": 832,
+      "operator": "zingbus plus",
+      "departure": "20:30",
+      "arrival": "08:10",
+      "seatsLeft": 21,
+      "rating": 4.2
+    },
+    {
+      "price": 663,
+      "operator": "FlixBus",
+      "departure": "17:35",
+      "arrival": "01:55",
+      "seatsLeft": 18,
+      "rating": 3.9
+    },
+    {
+      "price": 481,
+      "operator": "Shyamoli Paribahan Pvt. Ltd.",
+      "departure": "16:00",
+      "arrival": "00:30",
+      "seatsLeft": 11,
+      "rating": 3.8
+    },
+    {
+      "price": 1740,
+      "operator": "Sri Kumaran Travels",
+      "departure": "22:40",
+      "arrival": "07:30",
+      "seatsLeft": 20,
+      "rating": 4.5
+    },
+    {
+      "price": 1700,
+      "operator": "YBM Travels",
+      "departure": "18:00",
+      "arrival": "01:50",
+      "seatsLeft": 21,
+      "rating": 3.8
+    },
+    {
+      "price": 850,
+      "operator": "Sri Tulasi Travels",
+      "departure": "18:00",
+      "arrival": "02:45",
+      "seatsLeft": 16,
+      "rating": 3.7
+    },
+    {
+      "price": 663,
+      "operator": "NATIONAL TRAVELS (CHN)",
+      "departure": "18:30",
+      "arrival": "03:00",
+      "seatsLeft": 32,
+      "rating": 3.5
+    },
+    {
+      "price": 1049,
+      "operator": "Sri Tulasi Travels",
+      "departure": "14:30",
+      "arrival": "23:55",
+      "seatsLeft": 28,
+      "rating": 3.2
+    },
+    {
+      "price": 1540,
+      "operator": "Pramukh Travels",
+      "departure": "18:00",
+      "arrival": "02:15",
+      "seatsLeft": 17,
+      "rating": 4.4
+    },
+    {
+      "price": 950,
+      "operator": "Thirumalaivasan Travels",
+      "departure": "17:00",
+      "arrival": "01:50",
+      "seatsLeft": 26,
+      "rating": 3.6
+    },
+    {
+      "price": 950,
+      "operator": "KKaveri Travels",
+      "departure": "17:00",
+      "arrival": "23:59",
+      "seatsLeft": 24,
+      "rating": null
+    },
+    {
+      "price": 1606,
+      "operator": "SVKDT Travels",
+      "departure": "22:05",
+      "arrival": "06:15",
+      "seatsLeft": 5,
+      "rating": 3.7
+    },
+    {
+      "price": 802,
+      "operator": "NueGo",
+      "departure": "23:30",
+      "arrival": "09:40",
+      "seatsLeft": 19,
+      "rating": 3.6
+    },
+    {
+      "price": 910,
+      "operator": "Sri Krishna Travels",
+      "departure": "23:00",
+      "arrival": "06:30",
+      "seatsLeft": 24,
+      "rating": 2.9
+    },
+    {
+      "price": 1150,
+      "operator": "MRM Travels",
+      "departure": "18:45",
+      "arrival": "03:55",
+      "seatsLeft": 29,
+      "rating": 3.1
+    },
+    {
+      "price": 1841,
+      "operator": "VKV Travels",
+      "departure": "22:55",
+      "arrival": "07:10",
+      "seatsLeft": 14,
+      "rating": 3.3
+    },
+    {
+      "price": 940,
+      "operator": "Sri Venkataramana Travels",
+      "departure": "22:30",
+      "arrival": "07:00",
+      "seatsLeft": 10,
+      "rating": 3.3
+    },
+    {
+      "price": 1250,
+      "operator": "Devi KKaveri Travels",
+      "departure": "17:00",
+      "arrival": "23:59",
+      "seatsLeft": 26,
+      "rating": 1.9
+    },
+    {
+      "price": 1049,
+      "operator": "Anushka Travels",
+      "departure": "13:45",
+      "arrival": "23:14",
+      "seatsLeft": 35,
+      "rating": null
+    },
+    {
+      "price": 2031,
+      "operator": "VKV Travels",
+      "departure": "16:25",
+      "arrival": "00:20",
+      "seatsLeft": 20,
+      "rating": 3.6
+    },
+    {
+      "price": 2450,
+      "operator": "KTC Tours & Travels",
+      "departure": "21:45",
+      "arrival": "05:15",
+      "seatsLeft": 11,
+      "rating": 3.1
+    },
+    {
+      "price": 3750,
+      "operator": "Vihari Bus",
+      "departure": "16:30",
+      "arrival": "23:59",
+      "seatsLeft": 1,
+      "rating": 3.9
+    }
+  ],
+  "goal": "fetch me the ticket details from chennai to vijayawada on 27th may 2026",
+  "url": "https://www.abhibus.com/bus_search/Chennai/6/Vijayawada/5/27-05-2026/O",
+  "timestamp": "2026-05-27T02:54:53.285Z"
+}

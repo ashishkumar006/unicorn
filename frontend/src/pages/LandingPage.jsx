@@ -150,11 +150,10 @@ export default function LandingPage({ onPlanTrip }) {
         transition={{ delay: 0.3, duration: 0.8 }}
       >
         <motion.div 
-          className="brand-header landing-brand-header" 
-          style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', maxWidth: '1240px', margin: '0 auto 2rem auto' }}
+          className="landing-header"
           variants={itemVariants}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="landing-brand">
             <motion.div
               initial={{ rotate: -10, scale: 0.8 }}
               animate={{ rotate: 0, scale: 1 }}
@@ -164,7 +163,6 @@ export default function LandingPage({ onPlanTrip }) {
             </motion.div>
             <motion.span 
               className="brand-name" 
-              style={{ fontFamily: 'var(--font-serif)', fontStyle: 'italic', fontWeight: 700 }}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.6 }}
