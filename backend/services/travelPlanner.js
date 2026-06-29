@@ -1067,27 +1067,31 @@ function normalizeTravel(rawTravel, trip) {
   const sourceTravel = rawTravel && typeof rawTravel === 'object' ? rawTravel : {};
   const rawOptions = Array.isArray(sourceTravel.options) ? sourceTravel.options : [];
 
-  const options = (rawOptions || []).map((option, index) => ({
-    name: toText(option.name, `Travel option ${index + 1}`),
-    type: toText(option.type, 'Transport'),
-    mode: toText(option.mode, toText(option.type, 'Transport')),
-    duration: toText(option.duration, 'Flexible'),
-    price: toNumber(option.price, 0),
-    rating: clampRating(option.rating, 4.5),
-    departure: toText(option.departure, trip.fromPlace),
-    arrival: toText(option.arrival, trip.toPlace),
-    departureTime: toText(option.departureTime, 'Flexible'),
-    arrivalTime: toText(option.arrivalTime, 'Flexible'),
-    highlights: toStringArray(option.highlights, []),
-    details: toText(option.details || option.description, 'Travel option'),
-    description: toText(option.description || option.details, 'Travel option'),
-    bookingRequired: Boolean(option.bookingRequired),
-    link: buildWorkingMapLink(
-      option.link || option.url,
-      `${toText(option.name, `Travel option ${index + 1}`)} ${trip.fromPlace} ${trip.toPlace}`,
-      trip.toPlace
-    ),
-  }));
+  const options = (rawOptions || []).map((option, index) => {
+    const mode = toText(option.mode, toText(option.type, 'Transport'));
+    const fallbackName = mode ? `${mode} option ${index + 1}` : `Travel option ${index + 1}`;
+    return {
+      name: toText(option.name, fallbackName),
+      type: toText(option.type, mode),
+      mode,
+      duration: toText(option.duration, 'Flexible'),
+      price: toNumber(option.price, 0),
+      rating: clampRating(option.rating, 4.5),
+      departure: toText(option.departure, trip.fromPlace),
+      arrival: toText(option.arrival, trip.toPlace),
+      departureTime: toText(option.departureTime, 'Flexible'),
+      arrivalTime: toText(option.arrivalTime, 'Flexible'),
+      highlights: toStringArray(option.highlights, []),
+      details: toText(option.details || option.description, 'Travel option'),
+      description: toText(option.description || option.details, 'Travel option'),
+      bookingRequired: Boolean(option.bookingRequired),
+      link: buildWorkingMapLink(
+        option.link || option.url,
+        `${toText(option.name, fallbackName)} ${trip.fromPlace} ${trip.toPlace}`,
+        trip.toPlace
+      ),
+    };
+  });
 
   return {
     description: toText(sourceTravel.description, `${trip.fromPlace} to ${trip.toPlace} travel options`),
@@ -1101,24 +1105,29 @@ function normalizeHotels(rawHotels, trip) {
   const sourceHotels = rawHotels && typeof rawHotels === 'object' ? rawHotels : {};
   const rawOptions = Array.isArray(sourceHotels.options) ? sourceHotels.options : Array.isArray(sourceHotels.topHotels) ? sourceHotels.topHotels : [];
 
-  const options = (rawOptions || []).map((hotel, index) => ({
-    name: toText(hotel.name, `Stay option ${index + 1}`),
-    rating: clampRating(hotel.rating, 4.5),
-    location: toText(hotel.location, trip.toPlace),
-    amenities: toStringArray(hotel.amenities, []),
-    highlights: toStringArray(hotel.highlights, []),
-    pricePerNight: toNumber(hotel.pricePerNight || hotel.price, 0),
-    stars: toInteger(hotel.stars, 4),
-    roomTypes: Array.isArray(hotel.roomTypes) ? hotel.roomTypes : [],
-    facilities: toStringArray(hotel.facilities, []),
-    checkIn: toText(hotel.checkIn, '2:00 PM'),
-    checkOut: toText(hotel.checkOut, '11:00 AM'),
-    link: buildWorkingMapLink(
-      hotel.link || hotel.website || hotel.url,
-      `${toText(hotel.name, `Stay option ${index + 1}`)} ${toText(hotel.location, trip.toPlace)} hotel`,
-      trip.toPlace
-    ),
-  }));
+  const options = (rawOptions || []).map((hotel, index) => {
+    const name = toText(hotel.name, `Stay option ${index + 1}`);
+    return {
+      name,
+      rating: clampRating(hotel.rating, 4.5),
+      location: toText(hotel.location, trip.toPlace),
+      amenities: toStringArray(hotel.amenities, []),
+      highlights: toStringArray(hotel.highlights, []),
+      pricePerNight: toNumber(hotel.pricePerNight || hotel.price, 0),
+      stars: toInteger(hotel.stars, 4),
+      roomTypes: Array.isArray(hotel.roomTypes) ? hotel.roomTypes : [],
+      facilities: toStringArray(hotel.facilities, []),
+      checkIn: toText(hotel.checkIn, '2:00 PM'),
+      checkOut: toText(hotel.checkOut, '11:00 AM'),
+      image: toText(hotel.image || hotel.photoUrl || hotel.photoReference || '', ''),
+      photoUrl: toText(hotel.photoUrl || hotel.image || hotel.photoReference || '', ''),
+      link: buildWorkingMapLink(
+        hotel.link || hotel.website || hotel.url,
+        `${name} ${toText(hotel.location, trip.toPlace)} hotel`,
+        trip.toPlace
+      ),
+    };
+  });
 
   return {
     options,
@@ -1133,22 +1142,27 @@ function normalizePlaces(rawPlaces, trip) {
 
   const categories = (rawCategories || []).map((category, categoryIndex) => ({
     name: toText(category.name, 'Attractions'),
-    places: (Array.isArray(category.places) ? category.places : []).map((place, placeIndex) => ({
-      name: toText(place.name, `Place ${placeIndex + 1}`),
-      type: toText(place.type || place.category, 'Attraction'),
-      description: toText(place.description, 'Recommended stop'),
-      timeRequired: toText(place.timeRequired, '2-3 hours'),
-      entryFee: toText(place.entryFee, 'Free'),
-      rating: clampRating(place.rating, 4.5),
-      distance: toText(place.distance, `Near ${trip.toPlace}`),
-      openingHours: toText(place.openingHours, 'Open all day'),
-      bestFor: toStringArray(place.bestFor, ['Sightseeing']),
-      link: buildWorkingMapLink(
-        place.link || place.googleMapsUrl || place.website || place.url,
-        `${toText(place.name, `Place ${placeIndex + 1}`)} ${trip.toPlace} attraction`,
-        trip.toPlace
-      ),
-    })),
+    places: (Array.isArray(category.places) ? category.places : []).map((place, placeIndex) => {
+      const name = toText(place.name, `Place ${placeIndex + 1}`);
+      return {
+        name,
+        type: toText(place.type || place.category, 'Attraction'),
+        description: toText(place.description, 'Recommended stop'),
+        timeRequired: toText(place.timeRequired, '2-3 hours'),
+        entryFee: toText(place.entryFee, 'Free'),
+        rating: clampRating(place.rating, 4.5),
+        distance: toText(place.distance, `Near ${trip.toPlace}`),
+        openingHours: toText(place.openingHours, 'Open all day'),
+        bestFor: toStringArray(place.bestFor, ['Sightseeing']),
+        image: toText(place.image || place.photoUrl || place.photoReference || '', ''),
+        photoUrl: toText(place.photoUrl || place.image || place.photoReference || '', ''),
+        link: buildWorkingMapLink(
+          place.link || place.googleMapsUrl || place.website || place.url,
+          `${name} ${trip.toPlace} attraction`,
+          trip.toPlace
+        ),
+      };
+    }),
   }));
 
   return {

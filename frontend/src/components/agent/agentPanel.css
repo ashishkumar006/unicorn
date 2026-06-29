@@ -5,9 +5,9 @@
   top: 0;
   bottom: 0;
   width: 400px;
-  background: white;
-  border-left: 1px solid #e2e8f0;
-  box-shadow: -4px 0 20px rgba(0, 0, 0, 0.08);
+  background: var(--bg-card);
+  border-left: 1px solid var(--border-glass);
+  box-shadow: var(--shadow-md);
   display: flex !important;
   flex-direction: column !important;
   z-index: 1000;
@@ -16,9 +16,9 @@
 }
 
 .agent-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--secondary-teal), var(--secondary-teal-light));
   padding: 16px;
-  color: white;
+  color: var(--text-white);
   display: flex;
   align-items: center;
   justify-content: space-between;

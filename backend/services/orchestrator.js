@@ -11,7 +11,7 @@
  * Pure orchestrator logic — no direct DB writes, no route handlers.
  */
 
-const { chatJson, resolveCloudConfig } = require('./ollamaClient');
+const { chatJson, chatJsonKiloCode, resolveCloudConfig, resolveKiloCodeConfig, isKiloCodeConfigured } = require('./ollamaClient');
 const { createRouter } = require('./router');
 const { evaluateIntentDetected, buildAiEvaluationResult } = require('./aiEvaluation');
 let _emitEvt;
@@ -69,107 +69,87 @@ function summarizeResult(result = {}, maxChars = 800) {
   return result.error ? `error: ${result.error}` : 'no structured result';
 }
 
-function buildSynthesisPrompt(request, toolPlan, toolResults, tools = []) {
-  const requestText = JSON.stringify(request, null, 2);
-  const planText = JSON.stringify(toolPlan, null, 2);
-  const resultText = JSON.stringify(toolResults, null, 2);
-  const toolText = buildToolCatalog(tools);
+function buildPerceptionSystemPrompt() {
+  return `You are a travel request analyst. Your ONLY job is to understand what the user wants and break it into clear, plain-language milestone tasks.
 
-  return `You are synthesizing the final travel response.
+You have NO knowledge of backend systems, data sources, or how information is gathered. You simply analyze the user's request.
 
-Travel request:
-${requestText}
+Given a user's travel request, extract:
+1. Core entities: origin, destination, dates, duration, group size, budget
+2. Constraints: dog_friendly, no_flights, vegetarian, luxury, etc.
+3. A sequential list of milestone tasks in plain language (e.g., "Find transport from Mumbai to Goa", "Find luxury resorts with spa in Goa")
 
-Selected tool plan:
-${planText}
-
-Tool results:
-${resultText}
-
-Available tools:
-${toolText}
-
-Return a final JSON object with these keys:
-- summary
-- itinerary
-- travel
-- hotels
-- places
-- food
-- weather
-- budget
-- caveats
-- followUpQuestions
+Respond with JSON:
+{
+  "intent": "short label",
+  "entities": {
+    "origin": "...",
+    "destination": "...",
+    "dates": "...",
+    "duration": "...",
+    "groupSize": ...,
+    "budget": ...
+  },
+  "constraints": ["dog_friendly", "no_flights", ...],
+  "steps": [
+    "plain language step 1",
+    "plain language step 2"
+  ],
+  "assumptions": [],
+  "missingInfo": [],
+  "nextQuestion": null
+}
 
 Rules:
-- Use the tool results as the source of truth.
-- Do not invent live availability or pricing when the tools do not provide it.
+- Use ONLY plain language in steps. No technical terms.
+- Do NOT mention systems, sources, providers, or how data is retrieved.
+- Steps should be actionable milestones, not technical commands.
+- Return JSON only.`;
+}
+
+function buildSynthesisSystemPrompt() {
+  return `You are a travel assistant synthesizing a final response from research results.
+
+You have NO knowledge of how data was gathered. You simply read the provided results and produce a coherent, useful travel package.
+
+Respond with JSON:
+{
+  "summary": "...",
+  "itinerary": [...],
+  "travel": {...},
+  "hotels": {...},
+  "places": {...},
+  "food": {...},
+  "weather": {...},
+  "budget": {...},
+  "caveats": [...],
+  "followUpQuestions": []
+}
+
+Rules:
+- Use ONLY the provided results as source of truth.
+- Do not invent live availability or pricing not present in the results.
 - Keep the structure stable and useful for a dashboard UI.
 - Return JSON only.`;
 }
 
-function buildSelectionPrompt(request, tools = []) {
-  const requestText = JSON.stringify(request, null, 2);
-
-  return `Travel request:
-${requestText}
-
-Available tools:
-${buildToolCatalog(tools)}
-
-Return a JSON object with these keys:
-- intent: a short label for the user goal
-- needsTools: boolean
-- toolCalls: an array of tool call objects in the form { "toolName": string, "arguments": object, "reason": string }
-- assumptions: an array of short strings
-- missingInfo: an array of short strings
-- nextQuestion: null or a short follow-up question
-
-Rules:
-- Return JSON only.
-- Prefer the smallest tool set that can answer the request.
-- If no tool is needed, set needsTools to false and toolCalls to [] .
-- Use qualified tool names when the catalog includes them.
-- Keep arguments practical and specific.`;
+function buildPerceptionPrompt(request) {
+  const text = JSON.stringify(request, null, 2);
+  return `User travel request:\n${text}\n\nExtract entities, constraints, and milestone steps. Return JSON only.`;
 }
 
-function buildAgentSystemPrompt() {
-  return `You are the travel operations assistant for a production trip-planning product.
-
-Your job is to help a user build a realistic trip by using live tools whenever they are available.
-
-SERVICES AVAILABLE (use these as your source of truth):
-- API tools: Google Places (restaurants, attractions), Ola Maps (routes, places), OpenStreetMap (geocoding), live web search, URL reader, transit APIs (flights, trains, buses)
-- RAG / Memory: past travel plans, user preferences, conversation history
-- Browser automation: headless browser for sites that block APIs or need live dynamic data
-- Budget analysis: cost breakdown, per-person spend, optimization tips
-
-REASONING RULES:
-1. Think step by step. First identify what data is missing or stale, then choose the minimum set of tools needed.
-2. Prefer API tools over browser tools. Only escalate to browser when APIs return null, timeout, or low confidence.
-3. Use RAG/memory first when the user references past trips or preferences.
-4. Do not invent live fares, room inventory, seat availability, weather, or booking confirmations.
-5. If a tool is missing or returns partial data, mark affected fields as "estimated" and say so clearly.
-6. Keep responses concise, operational, and structured.
-
-OUTPUT CONTRACT:
-- Return JSON only when the caller asks for structured output.
-- Otherwise return a helpful plain-text response.
-- When tool results are available, cite them implicitly by using the returned facts.
-
-LINK AND ADDRESS DISCIPLINE (non-negotiable):
-- OSM, Google Maps, Ola Maps, and generic map-search URLs are internal research inputs only. Never include them in your response.
-- Hotel links must be the official hotel website or a direct booking URL.
-- Restaurant links must be the establishment's official page, Zomato, Swiggy, or a reputable listing URL.
-- Attraction links must be the official attraction page, TripAdvisor, or a reputable listing URL.
-- If no verified official or third-party listing link is available, leave the link field as an empty string — never use a generic map URL as a placeholder.`;
+function buildSynthesisPrompt(request, results) {
+  const requestText = JSON.stringify(request, null, 2);
+  const resultText = JSON.stringify(results, null, 2);
+  return `Original request:\n${requestText}\n\nResearch results:\n${resultText}\n\nSynthesize into a final travel package JSON. Return JSON only.`;
 }
 
 class Orchestrator {
   constructor(options = {}) {
-    this.model = options.model || resolveCloudConfig().model;
-    this.baseUrl = options.baseUrl || resolveCloudConfig().baseUrl;
-    this.apiKey = options.apiKey || resolveCloudConfig().apiKey;
+    this.kiloCode = options.kiloCode !== undefined ? options.kiloCode : isKiloCodeConfigured();
+    this.model = options.model || (this.kiloCode ? resolveKiloCodeConfig().model : resolveCloudConfig().model);
+    this.baseUrl = options.baseUrl || (this.kiloCode ? resolveKiloCodeConfig().baseUrl : resolveCloudConfig().baseUrl);
+    this.apiKey = options.apiKey || (this.kiloCode ? resolveKiloCodeConfig().apiKey : resolveCloudConfig().apiKey);
     this.keepAlive = options.keepAlive || '15m';
     this.tools = Array.isArray(options.tools) ? options.tools : [];
     this.defaultTimeoutMs = Number.isFinite(options.timeoutMs) ? options.timeoutMs : 600000;
@@ -183,30 +163,83 @@ class Orchestrator {
   async generate(request) {
     await this.refreshTools();
 
-    const routerDecision = this.router.decide(request);
-    const enrichedRequest = { ...request, routerDecision };
-    const sessionId = enrichedRequest.userId || enrichedRequest.sessionId || enrichedRequest.sessionId || 'default';
+    const sessionId = request.sessionId || request.userId || 'default';
+
+    console.log('[Orchestrator] generate() started', {
+      sessionId,
+      requestId: request.requestId || null,
+      message: (request.message || '').slice(0, 120),
+    });
+
+    const perception = await this.proposePerceptionPlan(request);
+
+    console.log('[Orchestrator] perception completed', {
+      sessionId,
+      intent: perception?.intent || null,
+      entities: perception?.entities || {},
+      constraints: perception?.constraints || [],
+      steps: perception?.steps || [],
+      missingInfo: perception?.missingInfo || [],
+      nextQuestion: perception?.nextQuestion || null,
+    });
+
+    if (global.updatePlanningStatus) {
+      global.updatePlanningStatus(sessionId, 'System Coordinator', 'Understanding your trip request...', 'complete');
+      global.updatePlanningStatus(sessionId, 'Router', 'Planning retrieval strategy...', 'searching');
+    }
 
     try {
       const { emitEvent } = require('./monitorBridge');
-      emitEvent('orchestrator', 'generate_started', {
-        trip: enrichedRequest,
-        decision: { domain: routerDecision.domain, mode: routerDecision.executionMode },
+      emitEvent('orchestrator', 'perception_completed', {
+        intent: perception?.intent || null,
+        entities: perception?.entities || {},
+        constraints: perception?.constraints || [],
+        steps: perception?.steps || [],
+        missingInfo: perception?.missingInfo || [],
+        nextQuestion: perception?.nextQuestion || null,
       }, sessionId);
     } catch {}
 
-    const toolPlan = await this.proposeToolPlan(enrichedRequest);
+    const routerDecision = this.router.mapStepsToActions(perception, request);
+
+    console.log('[Router] mapStepsToActions completed', {
+      sessionId,
+      domain: routerDecision.domain,
+      complexity: routerDecision.complexity,
+      executionMode: routerDecision.executionMode,
+      providerPriority: routerDecision.providerPriority,
+      browserEscalation: routerDecision.browserEscalation,
+      actions: (routerDecision.actions || []).map(a => a.tool),
+      fallbackChain: routerDecision.fallbackChain?.map(f => f.source || f.provider) || [],
+    });
+
+    if (global.updatePlanningStatus) {
+      const actionNames = (routerDecision.actions || []).map(a => a.tool).filter(Boolean).join(', ');
+      global.updatePlanningStatus(sessionId, 'Router', `Chose retrieval path: ${actionNames || 'planning'}`, 'complete');
+    }
+
     try {
       const { emitEvent } = require('./monitorBridge');
-      emitEvent('orchestrator', 'tool_plan_proposed', {
-        toolCalls: toolPlan?.toolCalls?.map(t => t.toolName || t.name) || [],
-        assumptions: toolPlan?.assumptions || [],
-        missingInfo: toolPlan?.missingInfo || [],
-        nextQuestion: toolPlan?.nextQuestion || null,
+      emitEvent('router', 'decision', {
+        domain: routerDecision.domain,
+        complexity: routerDecision.complexity,
+        executionMode: routerDecision.executionMode,
+        providerPriority: routerDecision.providerPriority,
+        browserEscalation: routerDecision.browserEscalation,
+        fallbackChain: routerDecision.fallbackChain,
+        dataRequirements: routerDecision.dataRequirements,
+        actions: routerDecision.actions || [],
       }, sessionId);
     } catch {}
 
-    const toolResults = await this.executeToolPlan(toolPlan, enrichedRequest);
+    const toolResults = await this.executeActionPlan(routerDecision, request);
+
+    console.log('[Orchestrator] tools executed', {
+      sessionId,
+      count: toolResults.length,
+      results: toolResults.map(r => ({ tool: r.toolName, success: !r.result?.error })),
+    });
+
     try {
       const { emitEvent } = require('./monitorBridge');
       emitEvent('orchestrator', 'tools_executed', {
@@ -215,7 +248,19 @@ class Orchestrator {
       }, sessionId);
     } catch {}
 
-    const response = await this.synthesizeResponse(enrichedRequest, toolPlan, toolResults);
+    if (global.updatePlanningStatus) {
+      const successTools = toolResults.filter(r => !r.result?.error).map(r => r.toolName).join(', ');
+      global.updatePlanningStatus(sessionId, 'Orchestrator', `Synthesizing travel data through pipeline`, 'complete');
+    }
+
+    const response = await this.synthesizeResponse(request, perception, toolResults);
+
+    console.log('[Orchestrator] response synthesized', {
+      sessionId,
+      keys: Object.keys(response || {}),
+      summary: (response?.summary || '').slice(0, 200),
+    });
+
     try {
       const { emitEvent } = require('./monitorBridge');
       emitEvent('orchestrator', 'response_synthesized', {
@@ -224,70 +269,113 @@ class Orchestrator {
       }, sessionId);
     } catch {}
 
+    if (global.updatePlanningStatus) {
+      global.updatePlanningStatus(sessionId, 'System Coordinator', 'Assembling final itinerary package...', 'complete');
+    }
+
+    console.log('[Orchestrator] generate() completed', {
+      sessionId,
+      requestId: request.requestId || null,
+      success: true,
+    });
+
     return {
-      request: enrichedRequest,
+      request,
+      perception,
       routerDecision,
-      toolPlan,
       toolResults,
       response,
       tools: this.tools,
     };
   }
 
-  async proposeToolPlan(request) {
+  async proposePerceptionPlan(request) {
+    if (this.kiloCode) {
+      return chatJsonKiloCode({
+        system: buildPerceptionSystemPrompt(),
+        messages: [{ role: 'user', content: buildPerceptionPrompt(request) }],
+        model: this.model,
+        baseUrl: this.baseUrl,
+        apiKey: this.apiKey,
+        options: { temperature: 0.7, top_p: 0.9 },
+        timeoutMs: this.defaultTimeoutMs,
+      });
+    }
+
     return chatJson({
-      system: buildAgentSystemPrompt(),
-      messages: [{ role: 'user', content: buildSelectionPrompt(request, this.tools) }],
+      system: buildPerceptionSystemPrompt(),
+      messages: [{ role: 'user', content: buildPerceptionPrompt(request) }],
       model: this.model,
       baseUrl: this.baseUrl,
       apiKey: this.apiKey,
       think: false,
-      options: { temperature: 1.0, top_p: 0.95, top_k: 64 },
+      options: { temperature: 0.7, top_p: 0.9, top_k: 40 },
       keepAlive: this.keepAlive,
       timeoutMs: this.defaultTimeoutMs,
     });
   }
 
-  async executeToolPlan(toolPlan, request) {
-    const toolCalls = Array.isArray(toolPlan?.toolCalls) ? toolPlan.toolCalls : [];
-    const results = [];
+  async executeActionPlan(routerDecision, request) {
+    const actions = Array.isArray(routerDecision?.actions) ? routerDecision.actions : [];
+    const results = await Promise.all(
+      actions.map(async (action) => {
+        const toolName = toText(action.tool || action.toolName || '', '');
+        const args = action.arguments || action.args || {};
 
-    for (const toolCall of toolCalls) {
-      const toolName = toText(toolCall.toolName || toolCall.name || toolCall.qualifiedName, '');
-      const args = toolCall.arguments || toolCall.args || {};
+        if (!toolName) {
+          return null;
+        }
 
-      if (!toolName) {
-        continue;
-      }
+        const toolResult = await this.invokeTool(toolName, { ...args, request, action });
 
-      const toolResult = await this.invokeTool(toolName, { ...args, request, toolPlan });
+        return {
+          toolName,
+          arguments: args,
+          result: toolResult,
+        };
+      })
+    );
 
-      results.push({
-        toolName,
-        arguments: args,
-        result: toolResult,
+    return results.filter(Boolean);
+  }
+
+  async synthesizeResponse(request, perception, toolResults) {
+    if (this.kiloCode) {
+      return chatJsonKiloCode({
+        system: buildSynthesisSystemPrompt(),
+        messages: [
+          {
+            role: 'user',
+            content: buildSynthesisPrompt(request, {
+              perception,
+              toolResults,
+            }),
+          },
+        ],
+        model: this.model,
+        baseUrl: this.baseUrl,
+        apiKey: this.apiKey,
+        options: { temperature: 0.7, top_p: 0.9 },
+        timeoutMs: this.defaultTimeoutMs,
       });
     }
 
-    return results;
-  }
-
-  async synthesizeResponse(request, toolPlan, toolResults) {
-    const tools = this.tools.map(({ handler, ...tool }) => tool);
-
     return chatJson({
-      system: buildAgentSystemPrompt(),
+      system: buildSynthesisSystemPrompt(),
       messages: [
         {
           role: 'user',
-          content: buildSynthesisPrompt(request, toolPlan, toolResults, tools),
+          content: buildSynthesisPrompt(request, {
+            perception,
+            toolResults,
+          }),
         },
       ],
       model: this.model,
       baseUrl: this.baseUrl,
       apiKey: this.apiKey,
       think: false,
-      options: { temperature: 1.0, top_p: 0.95, top_k: 64 },
+      options: { temperature: 0.7, top_p: 0.9, top_k: 40 },
       keepAlive: this.keepAlive,
       timeoutMs: this.defaultTimeoutMs,
     });
@@ -327,5 +415,8 @@ function createOrchestrator(options = {}) {
 module.exports = {
   Orchestrator,
   createOrchestrator,
-  buildAgentSystemPrompt,
+  buildPerceptionSystemPrompt,
+  buildPerceptionPrompt,
+  buildSynthesisSystemPrompt,
+  buildSynthesisPrompt,
 };

@@ -376,248 +376,229 @@ const AgentPage = () => {
 
   return (
     <div className="agent-page-with-sidebar">
-      <ConversationSidebar 
-        userId={userId} 
+      <ConversationSidebar
+        userId={userId}
         onSelectConversation={handleSelectConversation}
         currentConversationId={currentConversationId}
         sources={latestSources}
       />
       <div className="agent-page">
-      {/* Header */}
-      <div className="agent-page-header">
-        <div className="agent-page-header-content">
-          <div className="agent-page-title">
-            <h1>
-              <Bot size={24} className="agent-page-header-icon" />
-              Travel Planning Assistant
-            </h1>
-            <p className="agent-page-subtitle">
-              {currentPlan?.destination} • {currentPlan?.groupSize} people
-            </p>
-          </div>
-          <button 
-            className="agent-page-back-btn"
-            onClick={handleGoBack}
-            title="Go back to home"
-            aria-label="Go back to home"
-          >
-            <ArrowLeft size={16} className="header-back-icon" />
-            Back
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="agent-page-container">
-        {/* Dynamic Sources read list (Perplexity-style citation cards) */}
-        {liveSources.length > 0 && (
-          <div className="agent-page-sources-area">
-            <div className="sources-header">
-              <Compass size={13} className="sources-compass" />
-              Sources searched and read ({liveSources.length})
+        {/* Header */}
+        <div className="agent-page-header">
+          <div className="agent-page-header-content">
+            <div className="agent-page-title">
+              <h1>
+                <Bot size={24} className="agent-page-header-icon" />
+                Travel Planning Assistant
+              </h1>
+              <p className="agent-page-subtitle">
+                {currentPlan?.toPlace || currentPlan?.destination} • {(currentPlan?.travelers || currentPlan?.groupSize || 1)} people
+              </p>
             </div>
-            <div className="sources-horizontal-scroll">
-              {liveSources.map((src, idx) => {
-                let domain = 'google.com';
-                try {
-                  if (src.url || src.link) {
-                    domain = new URL(src.url || src.link).hostname.replace('www.', '');
-                  }
-                } catch (e) {
-                  domain = src.url || src.link || 'google.com';
-                }
-                return (
-                  <a 
-                    key={idx} 
-                    href={src.url || src.link || '#'} 
-                    target="_blank" 
-                    rel="noreferrer" 
-                    className="source-card-item"
-                  >
-                    <span className="source-card-badge">
-                      {idx + 1}
-                    </span>
-                    <div className="source-card-details">
-                      <span className="source-card-title">
-                        {src.title || src.name || 'Travel Source'}
-                      </span>
-                      <span className="source-card-domain">
-                        {domain}
-                      </span>
-                    </div>
-                  </a>
-                );
-              })}
-            </div>
-          </div>
-        )}
-        {/* Messages Area */}
-        <div className="agent-page-messages">
-          {messages.length === 0 && (
-            <div className="agent-page-empty">
-              <div className="agent-page-empty-icon">
-                <Compass size={48} className="agent-page-empty-compass" />
-              </div>
-              <p>Start planning! Ask me anything about your trip.</p>
-            </div>
-          )}
-
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={`agent-page-message agent-page-message-${message.type}`}
-            >
-              {message.type === 'user' && (
-                <div className="agent-page-message-user-content">
-                  {message.text}
-                </div>
-              )}
-
-              {message.type === 'agent' && (
-                <div className="agent-page-message-agent-content">
-                  {message.isStreaming && !message.text ? (
-                    <div className="agent-page-thinking-indicator-wrapper">
-                      <div className="agent-page-thinking-comet"></div>
-                      <span className="agent-page-thinking-label">Thinking...</span>
-                    </div>
-                  ) : null}
-                  
-                  {message.text ? (
-                    <div className="agent-page-message-text markdown-content">
-                      <ReactMarkdown components={markdownComponents}>{message.text}</ReactMarkdown>
-                    </div>
-                  ) : null}
-
-                  {message.toolsUsed && message.toolsUsed.length > 0 && (
-                    <div className="agent-page-tools-used">
-                      <div className="agent-page-tools-header">
-                        Tools used:
-                      </div>
-                      <div className="agent-page-tools-list">
-                        {message.toolsUsed.map((tool, idx) => (
-                          <span key={idx} className="agent-page-tool-badge">
-                            {typeof tool === 'string' ? tool : tool.tool}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {message.action && (
-                    <div className="agent-page-action-info">
-                      Action: <code>{message.action}</code>
-                      {message.confidence && (
-                        <span className="agent-page-confidence">
-                          {message.confidence}% confidence
-                        </span>
-                      )}
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {message.type === 'error' && (
-                <div className="agent-page-message-error-content">
-                  {message.text}
-                </div>
-              )}
-
-              <div className="agent-page-message-time">
-                {message.timestamp?.toLocaleTimeString()}
-              </div>
-            </div>
-          ))}
-
-          {messages.length === 1 && (
-            <div className="agent-page-welcome-prompts fade-in">
-              <p className="prompts-kicker">SUGGESTED ACTIONS</p>
-              <div className="prompts-grid">
-                <button type="button" className="prompt-card-btn" onClick={() => handleQuickAction('analyze')}>
-                  <div className="prompt-card-icon"><IndianRupee size={16} /></div>
-                  <div className="prompt-card-info">
-                    <h4>Analyze cost split</h4>
-                    <p>Show me the complete breakdown including per-person splits</p>
-                  </div>
-                </button>
-                <button type="button" className="prompt-card-btn" onClick={() => handleQuickAction('alternatives')}>
-                  <div className="prompt-card-icon"><RefreshCw size={16} /></div>
-                  <div className="prompt-card-info">
-                    <h4>Suggest alternatives</h4>
-                    <p>Compare lodging and routes for better value or timing</p>
-                  </div>
-                </button>
-                <button type="button" className="prompt-card-btn" onClick={() => handleQuickAction('email')}>
-                  <div className="prompt-card-icon"><Mail size={16} /></div>
-                  <div className="prompt-card-info">
-                    <h4>Draft email summary</h4>
-                    <p>Generate a professional summary for my travel group</p>
-                  </div>
-                </button>
-                <button type="button" className="prompt-card-btn" onClick={() => handleQuickAction('summary')}>
-                  <div className="prompt-card-icon"><ClipboardList size={16} /></div>
-                  <div className="prompt-card-info">
-                    <h4>Review plan highlights</h4>
-                    <p>Check route dates, best seasons, and key attractions</p>
-                  </div>
-                </button>
-              </div>
-            </div>
-          )}
-
-          {isLoading && liveThoughts.length > 0 && (
-            <div className="agent-page-live-thoughts-box">
-              <div className="live-thoughts-header">
-                <Loader2 size={12} className="spinner live-thoughts-header-spinner" />
-                Tool Activity
-              </div>
-              <div className="live-thoughts-list">
-                {liveThoughts.map((thought, idx) => (
-                  <div key={idx} className={`live-thought-item ${thought.status}`}>
-                    <span className="live-thought-status-icon">
-                      {thought.status === 'complete' ? (
-                        <span className="live-thought-status-check">✓</span>
-                      ) : (
-                        <Loader2 size={12} className="spinner live-thought-status-spinner" />
-                      )}
-                    </span>
-                    <span className="live-thought-text">
-                      {thought.text}
-                      {thought.elapsedMs ? ` (${thought.elapsedMs}ms)` : ''}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input Area */}
-        <div className="agent-page-input-area">
-          {error && (
-            <div className="agent-page-error-banner">
-              <span>
-                <AlertCircle size={16} className="error-alert-icon" />
-                {error}
-              </span>
-              <button type="button" onClick={() => setError(null)} aria-label="Dismiss error">×</button>
-              {lastMessageText && (
-                <button type="button" onClick={() => setInput(lastMessageText)}>
-                  Retry
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Quick Actions */}
-          <div className="agent-page-quick-actions">
             <button
-              type="button"
-              className="agent-page-quick-action-btn"
-              onClick={() => handleQuickAction('analyze')}
-              disabled={isLoading || agentLoading || isSending}
-              title="Analyze trip costs"
+              className="agent-page-back-btn"
+              onClick={handleGoBack}
+              title="Go back to home"
+              aria-label="Go back to home"
+            >
+              <ArrowLeft size={16} className="header-back-icon" />
+              Back
+            </button>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="agent-page-container">
+          {/* Dynamic Sources read list */}
+          {liveSources.length > 0 && (
+            <motion.div className="agent-page-sources-area" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}>
+              <div className="sources-header">
+                <Compass size={13} className="sources-compass" />
+                Sources searched and read ({liveSources.length})
+              </div>
+              <div className="sources-horizontal-scroll">
+                {liveSources.map((src, idx) => {
+                  let domain = 'google.com';
+                  try {
+                    if (src.url || src.link) {
+                      domain = new URL(src.url || src.link).hostname.replace('www.', '');
+                    }
+                  } catch (e) {
+                    domain = src.url || src.link || 'google.com';
+                  }
+                  return (
+                    <motion.a
+                      key={idx}
+                      href={src.url || src.link || '#'}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="source-card-item"
+                      initial={{ opacity: 0, y: 8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: idx * 0.04, duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    >
+                      <span className="source-card-badge">{idx + 1}</span>
+                      <div className="source-card-details">
+                        <span className="source-card-title">{src.title || src.name || 'Travel Source'}</span>
+                        <span className="source-card-domain">{domain}</span>
+                      </div>
+                    </motion.a>
+                  );
+                })}
+              </div>
+            </motion.div>
+          )}
+
+          {/* Messages Area */}
+          <div className="agent-page-messages">
+            {messages.length === 0 && (
+              <motion.div className="agent-page-empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5 }}>
+                <div className="agent-page-empty-icon">
+                  <Compass size={48} className="agent-page-empty-compass" />
+                </div>
+                <p>Start planning! Ask me anything about your trip.</p>
+              </motion.div>
+            )}
+
+            {messages.map((message, idx) => (
+              <motion.div
+                key={message.id}
+                className={`agent-page-message agent-page-message-${message.type}`}
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: idx * 0.03, duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              >
+                {message.type === 'user' && (
+                  <div className="agent-page-message-user-content">{message.text}</div>
+                )}
+
+                {message.type === 'agent' && (
+                  <div className="agent-page-message-agent-content">
+                    {message.isStreaming && !message.text ? (
+                      <div className="agent-page-thinking-indicator-wrapper">
+                        <div className="agent-page-thinking-comet" />
+                        <span className="agent-page-thinking-label">Thinking...</span>
+                      </div>
+                    ) : null}
+
+                    {message.text ? (
+                      <div className="agent-page-message-text markdown-content">
+                        <ReactMarkdown components={markdownComponents}>{message.text}</ReactMarkdown>
+                      </div>
+                    ) : null}
+
+                    {message.toolsUsed && message.toolsUsed.length > 0 && (
+                      <div className="agent-page-tools-used">
+                        <div className="agent-page-tools-header">Tools used:</div>
+                        <div className="agent-page-tools-list">
+                          {message.toolsUsed.map((tool, idx) => (
+                            <span key={idx} className="agent-page-tool-badge">{typeof tool === 'string' ? tool : tool.tool}</span>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {message.action && (
+                      <div className="agent-page-action-info">
+                        Action: <code>{message.action}</code>
+                        {message.confidence && <span className="agent-page-confidence">{message.confidence}% confidence</span>}
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {message.type === 'error' && (
+                  <div className="agent-page-message-error-content">{message.text}</div>
+                )}
+
+                <div className="agent-page-message-time">{message.timestamp?.toLocaleTimeString()}</div>
+              </motion.div>
+            ))}
+
+            {messages.length === 1 && (
+              <motion.div className="agent-page-welcome-prompts fade-in" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
+                <p className="prompts-kicker">SUGGESTED ACTIONS</p>
+                <div className="prompts-grid">
+                  <motion.button type="button" className="prompt-card-btn" onClick={() => handleQuickAction('analyze')} whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }}>
+                    <div className="prompt-card-icon"><IndianRupee size={16} /></div>
+                    <div className="prompt-card-info">
+                      <h4>Analyze cost split</h4>
+                      <p>Show me the complete breakdown including per-person splits</p>
+                    </div>
+                  </motion.button>
+                  <motion.button type="button" className="prompt-card-btn" onClick={() => handleQuickAction('alternatives')} whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }}>
+                    <div className="prompt-card-icon"><RefreshCw size={16} /></div>
+                    <div className="prompt-card-info">
+                      <h4>Suggest alternatives</h4>
+                      <p>Compare lodging and routes for better value or timing</p>
+                    </div>
+                  </motion.button>
+                  <motion.button type="button" className="prompt-card-btn" onClick={() => handleQuickAction('email')} whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }}>
+                    <div className="prompt-card-icon"><Mail size={16} /></div>
+                    <div className="prompt-card-info">
+                      <h4>Draft email summary</h4>
+                      <p>Generate a professional summary for my travel group</p>
+                    </div>
+                  </motion.button>
+                  <motion.button type="button" className="prompt-card-btn" onClick={() => handleQuickAction('summary')} whileHover={{ y: -3 }} whileTap={{ scale: 0.98 }}>
+                    <div className="prompt-card-icon"><ClipboardList size={16} /></div>
+                    <div className="prompt-card-info">
+                      <h4>Review plan highlights</h4>
+                      <p>Check route dates, best seasons, and key attractions</p>
+                    </div>
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+
+            {isLoading && liveThoughts.length > 0 && (
+              <motion.div className="agent-page-live-thoughts-box" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}>
+                <div className="live-thoughts-header">
+                  <Loader2 size={12} className="spinner live-thoughts-header-spinner" />
+                  Tool Activity
+                </div>
+                <div className="live-thoughts-list">
+                  {liveThoughts.map((thought, idx) => (
+                    <div key={idx} className={`live-thought-item ${thought.status}`}>
+                      <span className="live-thought-status-icon">
+                        {thought.status === 'complete' ? <span className="live-thought-status-check">✓</span> : <Loader2 size={12} className="spinner live-thought-status-spinner" />}
+                      </span>
+                      <span className="live-thought-text">
+                        {thought.text}
+                        {thought.elapsedMs ? ` (${thought.elapsedMs}ms)` : ''}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Input Area */}
+          <div className="agent-page-input-area">
+            {error && (
+              <motion.div className="agent-page-error-banner" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+                <span>
+                  <AlertCircle size={16} className="error-alert-icon" />
+                  {error}
+                </span>
+                <button type="button" onClick={() => setError(null)} aria-label="Dismiss error">×</button>
+                {lastMessageText && (
+                  <button type="button" onClick={() => setInput(lastMessageText)}>Retry</button>
+                )}
+              </motion.div>
+            )}
+
+            {/* Quick Actions */}
+            <div className="agent-page-quick-actions">
+              <button
+                type="button"
+                className="agent-page-quick-action-btn"
+                onClick={() => handleQuickAction('analyze')}
+                disabled={isLoading || agentLoading || isSending}
+                title="Analyze trip costs"
             >
               <IndianRupee size={14} className="quick-action-icon" />
               Analyze Costs

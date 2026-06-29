@@ -56,12 +56,8 @@ if (rateLimit) {
 }
 
 app.use(cors({
-  origin(origin, callback) {
-    if (!origin || process.env.NODE_ENV !== 'production' || allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    return callback(new Error('Origin not allowed by CORS'));
-  },
+  origin: '*',
+  credentials: true,
 }));
 app.use(express.json({ limit: '1mb' }));
 

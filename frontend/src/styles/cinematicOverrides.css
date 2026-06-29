@@ -1,6 +1,6 @@
 :root,
 [data-theme="dark"] {
-  /* Landing-page overrides: soft light-tinted glass instead of near-black hue. */
+  /* Landing-page overrides: soft cinematic glass. */
   --landing-card-bg: rgba(240, 242, 248, 0.70);
   --perplexity-log-bg: rgba(235, 239, 252, 0.72);
   --landing-overlay: linear-gradient(160deg, rgba(245, 198, 170, 0.08) 0%, rgba(100, 210, 185, 0.06) 58%, rgba(5, 6, 10, 0.38) 100%);
@@ -41,7 +41,7 @@
   --shadow-glow-coral: 0 0 22px rgba(255, 122, 89, 0.18);
   --shadow-glow-teal: 0 0 22px rgba(49, 213, 200, 0.16);
 
-  --glass-blur: blur(20px) saturate(160%);
+  --glass-blur: blur(22px) saturate(160%);
   --glass-bg: rgba(12, 16, 26, 0.7);
   --glass-border: rgba(255, 255, 255, 0.08);
 
@@ -56,7 +56,7 @@
   --landing-card-bg: rgba(250, 248, 244, 0.76);
   --perplexity-log-bg: rgba(248, 252, 248, 0.72);
   --landing-overlay: linear-gradient(165deg, rgba(252, 246, 238, 0.2) 0%, rgba(252, 246, 238, 0.6) 58%, rgba(252, 246, 238, 0.82) 100%);
-  --glass-blur: blur(14px) saturate(125%);
+  --glass-blur: blur(18px) saturate(145%);
 
   /* Keep the rest of the cinematic palette for non-landing surfaces. */
   --bg-luminous: #faf7f2;

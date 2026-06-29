@@ -2,10 +2,10 @@
   min-height: 100vh;
   padding: 2rem;
   background:
-    radial-gradient(circle at top left, rgba(69, 183, 160, 0.16), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(222, 107, 72, 0.16), transparent 30%),
-    linear-gradient(180deg, #f8fafc 0%, #eef4f9 100%);
-  color: #0f172a;
+    radial-gradient(circle at top left, rgba(45, 212, 191, 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(255, 107, 74, 0.14), transparent 30%),
+    linear-gradient(180deg, var(--bg-luminous) 0%, var(--bg-secondary) 100%);
+  color: var(--text-primary);
 }
 
 .internal-lab-shell {
@@ -38,7 +38,7 @@
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
   background: rgba(15, 118, 110, 0.08);
-  color: #0f766e;
+  color: var(--secondary-teal);
   font-size: 0.8rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -54,7 +54,7 @@
 .internal-lab-header p {
   margin: 0;
   max-width: 72ch;
-  color: #475569;
+  color: var(--text-secondary);
   line-height: 1.55;
 }
 
@@ -66,7 +66,7 @@
   padding: 0.45rem 0.85rem;
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.06);
-  color: #0f172a;
+  color: var(--text-primary);
   font-size: 0.85rem;
   font-weight: 700;
 }
@@ -96,9 +96,9 @@
 .internal-lab-secondary-btn,
 .internal-lab-ghost-btn,
 .internal-lab-icon-btn {
-  background: rgba(255, 255, 255, 0.85);
-  color: #0f172a;
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border: 1px solid var(--border-glass);
 }
 
 .internal-lab-secondary-btn,
@@ -107,9 +107,9 @@
 }
 
 .internal-lab-primary-btn {
-  background: linear-gradient(135deg, #0f766e 0%, #de6b48 100%);
-  color: white;
-  box-shadow: 0 14px 28px rgba(15, 118, 110, 0.18);
+  background: linear-gradient(135deg, var(--secondary-teal) 0%, var(--primary-coral) 100%);
+  color: var(--text-white);
+  box-shadow: var(--shadow-md);
 }
 
 .internal-lab-ghost-btn,
@@ -135,10 +135,10 @@
 .internal-lab-note-card,
 .internal-lab-session-card,
 .internal-lab-read-result {
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
   border-radius: 22px;
-  box-shadow: 0 18px 44px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-md);
 }
 
 .internal-lab-feature-card {
@@ -154,7 +154,7 @@
 
 .internal-lab-feature-name {
   font-weight: 800;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .internal-lab-feature-status {
@@ -215,7 +215,7 @@
   margin-bottom: 0.35rem;
   font-size: 0.82rem;
   font-weight: 800;
-  color: #334155;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -223,10 +223,10 @@
 .internal-lab-input,
 .internal-lab-textarea {
   width: 100%;
-  border: 1px solid rgba(203, 213, 225, 0.95);
+  border: 1px solid var(--border-glass);
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.92);
-  color: #0f172a;
+  background: var(--bg-card);
+  color: var(--text-primary);
   padding: 0.9rem 1rem;
   font: inherit;
 }
@@ -254,9 +254,9 @@
 }
 
 .internal-lab-tab {
-  border: 1px solid rgba(226, 232, 240, 0.95);
-  background: rgba(255, 255, 255, 0.88);
-  color: #334155;
+  border: 1px solid var(--border-glass);
+  background: var(--bg-card);
+  color: var(--text-secondary);
   padding: 0.75rem 1rem;
   border-radius: 999px;
   cursor: pointer;
@@ -264,7 +264,7 @@
 }
 
 .internal-lab-tab.active {
-  color: #0f172a;
+  color: var(--text-primary);
   background: linear-gradient(135deg, rgba(15, 118, 110, 0.12), rgba(222, 107, 72, 0.14));
   border-color: rgba(15, 118, 110, 0.2);
 }
@@ -316,13 +316,13 @@
 
 .internal-lab-insight-card p {
   margin: 0.65rem 0 0;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .internal-lab-insight-card ul {
   margin: 0.7rem 0 0;
   padding-left: 1.15rem;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .internal-lab-insight-card li + li {
@@ -334,8 +334,8 @@
   align-items: center;
   padding: 0.3rem 0.6rem;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.75);
-  color: #0f766e;
+  background: var(--bg-card);
+  color: var(--secondary-teal);
   font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -392,7 +392,7 @@
 .internal-lab-result-rank {
   font-size: 0.78rem;
   font-weight: 800;
-  color: #0f766e;
+  color: var(--secondary-teal);
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
@@ -408,7 +408,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: #0f766e;
+  color: var(--secondary-teal);
   text-decoration: none;
   font-weight: 700;
 }
@@ -416,7 +416,7 @@
 .internal-lab-result-url {
   margin: 0.45rem 0 0;
   font-size: 0.85rem;
-  color: #64748b;
+  color: var(--text-secondary);
   word-break: break-all;
 }
 
@@ -425,7 +425,7 @@
   margin: 0.75rem 0 0;
   white-space: pre-wrap;
   line-height: 1.6;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .internal-lab-prewrap {
@@ -454,7 +454,7 @@
   padding: 0.34rem 0.7rem;
   border-radius: 999px;
   background: rgba(15, 118, 110, 0.08);
-  color: #0f766e;
+  color: var(--secondary-teal);
   font-size: 0.8rem;
   font-weight: 700;
 }
@@ -463,8 +463,8 @@
 .internal-lab-error {
   padding: 0.9rem 1rem;
   border-radius: 16px;
-  background: rgba(248, 250, 252, 0.85);
-  border: 1px dashed rgba(203, 213, 225, 0.95);
+  background: var(--bg-secondary);
+  border: 1px dashed var(--border-glass);
 }
 
 .internal-lab-error {
@@ -478,7 +478,7 @@
   font-size: 0.95rem;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .internal-lab-helper {
@@ -514,7 +514,7 @@
 .internal-lab-insight-header h3 {
   margin: 0;
   font-size: 0.95rem;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .internal-lab-insight-badge {
@@ -523,7 +523,7 @@
   padding: 0.25rem 0.6rem;
   border-radius: 999px;
   background: rgba(15, 118, 110, 0.12);
-  color: #0f766e;
+  color: var(--secondary-teal);
   font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
@@ -537,7 +537,7 @@
 .internal-lab-insight-card ul {
   margin: 0.5rem 0 0;
   padding-left: 1.15rem;
-  color: #0f172a;
+  color: var(--text-primary);
 }
 
 .internal-lab-insight-card li + li {

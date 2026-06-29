@@ -5,6 +5,9 @@
  * Default implementation: no-op auth boundary.
  */
 
+const crypto = require('crypto');
+const db = require('../db/database');
+
 function resolveUserFromToken(token) {
   if (!token) {
     return null;
@@ -44,9 +47,22 @@ function isAuthenticated(req) {
   return Boolean(req.user?.isAuthenticated);
 }
 
+async function createAccount({ userId, email, password, name }) {
+  const id = userId || crypto.randomUUID();
+  const createdAt = new Date().toISOString();
+  await db.savePlan(id, `account-${id}`, {}, {
+    destination: '',
+    groupSize: 1,
+    budget: 0,
+    createdAt,
+  });
+  return { id, email, name, createdAt };
+}
+
 module.exports = {
   resolveUserFromToken,
   authMiddleware,
   requireAuth,
   isAuthenticated,
+  createAccount,
 };

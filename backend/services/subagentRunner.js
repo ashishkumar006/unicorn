@@ -231,17 +231,17 @@ Return your results in this exact JSON structure:
 // Subagent Runner Tasks
 // ==========================================
 
-async function scrapeHotelRate(hotelName, website, checkInDate, checkOutDate, travelers) {
+async function scrapeHotelRate(hotelName, website, checkInDate, checkOutDate, travelers, sessionId) {
    if (!website) return null;
    
    try {
-     global.updatePlanningStatus(null, 'Browser', `Visiting ${hotelName} website for live rates...`, 'searching');
+     global.updatePlanningStatus(sessionId, 'Browser', `Visiting ${hotelName} website for live rates...`, 'searching');
      
      const result = await runBrowserWorkflow({
        url: website,
        goal: `Find room rates for ${travelers} guests from ${checkInDate} to ${checkOutDate}. Extract price per night, availability status, and booking link.`,
        actions: [
-         { type: 'wait', ms: 2000 },
+         { type: 'wait', ms: 600 },
        ]
      });
      
@@ -274,7 +274,6 @@ async function scrapeHotelRate(hotelName, website, checkInDate, checkOutDate, tr
        'searching',
        ''
      );
-     await sleep(800);
 
      global.updatePlanningStatus(
        sessionId,
@@ -381,16 +380,16 @@ global.updatePlanningStatus(
   }
 }
 
-async function fetchLiveTransitFares(fromPlace, toPlace, travelDate) {
+async function fetchLiveTransitFares(fromPlace, toPlace, travelDate, sessionId) {
    const fares = [];
    
    try {
      // Check Indigo flights
-     global.updatePlanningStatus(null, 'Browser', `Checking Indigo fares ${fromPlace}→${toPlace}...`, 'searching');
+     global.updatePlanningStatus(sessionId, 'Browser', `Checking Indigo fares ${fromPlace}→${toPlace}...`, 'searching');
      const flightResult = await runBrowserWorkflow({
        url: 'https://www.goindigo.in',
        goal: `Find flight price from ${fromPlace} to ${toPlace}. Extract fare amount.`,
-       actions: [{ type: 'wait', ms: 3000 }]
+      actions: [{ type: 'wait', ms: 700 }]
      });
      if (flightResult.success && flightResult.content) {
        const priceMatch = flightResult.content.match(/₹\s*([\d,]+)/);
@@ -404,11 +403,11 @@ async function fetchLiveTransitFares(fromPlace, toPlace, travelDate) {
    
    try {
      // Check IRCTC trains
-     global.updatePlanningStatus(null, 'Browser', `Checking IRCTC trains ${fromPlace}→${toPlace}...`, 'searching');
+     global.updatePlanningStatus(sessionId, 'Browser', `Checking IRCTC trains ${fromPlace}→${toPlace}...`, 'searching');
      const trainResult = await runBrowserWorkflow({
        url: 'https://www.irctc.co.in',
        goal: `Find train fare from ${fromPlace} to ${toPlace}. Extract fare amount.`,
-       actions: [{ type: 'wait', ms: 3000 }]
+      actions: [{ type: 'wait', ms: 700 }]
      });
      if (trainResult.success && trainResult.content) {
        const priceMatch = trainResult.content.match(/₹\s*([\d,]+)/);
@@ -437,25 +436,26 @@ async function fetchLiveTransitFares(fromPlace, toPlace, travelDate) {
        'searching',
        ''
      );
-     await sleep(500);
 
      // Fetch live transit fares from booking sites
      let liveFares = [];
      try {
-       liveFares = await fetchLiveTransitFares(fromPlace, destination, travelDate);
+       liveFares = await fetchLiveTransitFares(fromPlace, destination, travelDate, sessionId);
      } catch (err) {
        console.warn('[TransitAgent] Live fare check failed:', err.message);
      }
 
      const prompt = generateTransitPrompt(trip);
+     let promptWithLiveFares = prompt;
      if (liveFares.length > 0) {
-       // Inject live fare data into prompt
-       prompt.actionsTaken = [`Verified live fares: ${liveFares.map(f => `${f.mode} ₹${f.price}`).join(', ')}`];
+       // Inject live fare data into prompt string
+       const liveFareText = liveFares.map(f => `${f.mode}: ₹${f.price}`).join(', ');
+       promptWithLiveFares = `${prompt}\n\nLIVE FARE DATA (verified): ${liveFareText}\nUse these verified fares in your options and mention them in actionsTaken.`;
      }
 
      const agentResult = await chatJson({
        system: 'You are the Transit Research Subagent. Return only JSON matching the requested structure.',
-       messages: [{ role: 'user', content: prompt }]
+       messages: [{ role: 'user', content: promptWithLiveFares }]
      });
 
     saveResearchArtifact(sessionId, 'Transit', agentResult.markdownArtifact);
@@ -490,16 +490,16 @@ global.updatePlanningStatus(
   }
 }
 
-async function fetchRestaurantMenuPrice(restaurantName, website) {
+async function fetchRestaurantMenuPrice(restaurantName, website, sessionId) {
    if (!website) return null;
    
    try {
-     global.updatePlanningStatus(null, 'Browser', `Checking menu on ${restaurantName}...`, 'searching');
+     global.updatePlanningStatus(sessionId, 'Browser', `Checking menu on ${restaurantName}...`, 'searching');
      
      const result = await runBrowserWorkflow({
        url: website,
        goal: `Find average meal price on the menu. Extract dish prices and calculate average cost per person.`,
-       actions: [{ type: 'wait', ms: 2000 }]
+       actions: [{ type: 'wait', ms: 600 }]
      });
      
      if (result.success && result.content) {
@@ -567,7 +567,7 @@ global.updatePlanningStatus(
         
         let scrapedPrice = null;
         if (website) {
-          scrapedPrice = await fetchRestaurantMenuPrice(candidate.name, website);
+          scrapedPrice = await fetchRestaurantMenuPrice(candidate.name, website, sessionId);
         }
         const avgCost = scrapedPrice?.avgCost || Math.max(300, Math.round(budget * 0.05)) + (i * 200);
         
@@ -585,8 +585,8 @@ global.updatePlanningStatus(
 
      if (enrichedRestaurants.length === 0) {
        enrichedRestaurants.push(
-         { name: `${destination} Coastal Table`, cuisine: 'Seafood & Indian', area: 'Beach Road', avgCost: 800, rating: 4.7, website: `https://www.${destination.toLowerCase()}coastaltable.com`, link: `https://www.${destination.toLowerCase()}coastaltable.com` },
-         { name: `Spice & Flavor Cafe`, cuisine: 'Vegetarian Specialties', area: 'Main Market', avgCost: 400, rating: 4.5, website: `https://www.${destination.toLowerCase()}spiceandflavor.com`, link: `https://www.${destination.toLowerCase()}spiceandflavor.com` }
+         { name: `${destination} Local Kitchen`, cuisine: 'Regional Specialties', area: 'Town Center', avgCost: 600, rating: 4.5, website: '', link: '' },
+         { name: `Market Street Cafe`, cuisine: 'Vegetarian', area: 'Main Market', avgCost: 400, rating: 4.3, website: '', link: '' }
        );
      }
 
@@ -635,16 +635,16 @@ saveResearchArtifact(sessionId, 'Gastronomy', agentResult.markdownArtifact);
   }
 }
 
-async function fetchAttractionTicketPrice(attractionName, website) {
+async function fetchAttractionTicketPrice(attractionName, website, sessionId) {
    if (!website) return null;
    
    try {
-     global.updatePlanningStatus(null, 'Browser', `Checking tickets for ${attractionName}...`, 'searching');
+     global.updatePlanningStatus(sessionId, 'Browser', `Checking tickets for ${attractionName}...`, 'searching');
      
      const result = await runBrowserWorkflow({
        url: website,
        goal: `Find entry ticket price and opening hours. Extract ticket cost, timings, and any special instructions.`,
-       actions: [{ type: 'wait', ms: 2000 }]
+       actions: [{ type: 'wait', ms: 600 }]
      });
      
      if (result.success && result.content) {
@@ -677,8 +677,6 @@ async function fetchAttractionTicketPrice(attractionName, website) {
        'searching',
        ''
      );
-    await sleep(700);
-
     // Call OSM to get destination Lat/Lon (internal only - do not expose URL)
     const osmData = await resolveOpenStreetMapLocation(destination, { zoom: 13 });
 
@@ -719,7 +717,7 @@ global.updatePlanningStatus(
         
         let scrapedInfo = null;
         if (website) {
-          scrapedInfo = await fetchAttractionTicketPrice(candidate.name, website);
+          scrapedInfo = await fetchAttractionTicketPrice(candidate.name, website, sessionId);
         }
         
         enrichedAttractions.push({
@@ -782,12 +780,17 @@ saveResearchArtifact(sessionId, 'Places', agentResult.markdownArtifact);
 async function runDeepResearchSubagents(trip, sessionId) {
   console.log(`[SubagentRunner] Triggering concurrent deep subagents for session: ${sessionId}`);
 
-  const [accommodationRes, transitRes, foodRes, placesRes] = await Promise.all([
+  const results = await Promise.allSettled([
     runAccommodationSubagent(trip, sessionId),
     runTransitSubagent(trip, sessionId),
     runFoodSubagent(trip, sessionId),
     runPlacesSubagent(trip, sessionId)
   ]);
+
+  const accommodationRes = results[0]?.status === 'fulfilled' ? results[0].value : { success: false, options: [], summary: 'Stay research failed.', sources: [], actionsTaken: [] };
+  const transitRes = results[1]?.status === 'fulfilled' ? results[1].value : { success: false, options: [], summary: 'Transit research failed.', sources: [], actionsTaken: [] };
+  const foodRes = results[2]?.status === 'fulfilled' ? results[2].value : { success: false, restaurants: [], summary: 'Food research failed.', sources: [], actionsTaken: [] };
+  const placesRes = results[3]?.status === 'fulfilled' ? results[3].value : { success: false, categories: [], summary: 'Places research failed.', sources: [], actionsTaken: [] };
 
   const compiledArtifacts = {
     accommodation: accommodationRes.markdown || 'Stays research details are saved in the logs.',

@@ -14,8 +14,26 @@ try {
 const emitStep = _mon?.emitEvent;
 
 const planningStatusStore = new Map();
+const PLANNING_STATUS_TTL_MS = 1000 * 60 * 30; // 30 minutes
+const MAX_PLANNING_STATUS_ENTRIES = 1000;
 const MAX_PLACE_LENGTH = 80;
 const MAX_PREFERENCES_LENGTH = 2000;
+
+function prunePlanningStatusStore() {
+  const now = Date.now();
+  for (const [sessionId, entry] of planningStatusStore.entries()) {
+    if (now - entry.createdAt > PLANNING_STATUS_TTL_MS) {
+      planningStatusStore.delete(sessionId);
+    }
+  }
+  if (planningStatusStore.size > MAX_PLANNING_STATUS_ENTRIES) {
+    const entries = [...planningStatusStore.entries()].sort((a, b) => a[1].createdAt - b[1].createdAt);
+    const toRemove = entries.slice(0, entries.length - MAX_PLANNING_STATUS_ENTRIES);
+    for (const [sessionId] of toRemove) {
+      planningStatusStore.delete(sessionId);
+    }
+  }
+}
 const routerDecision = createRouter({ enableBrowserEscalation: true });
 const orchestrator = createOrchestrator({
   tools: [
@@ -88,7 +106,7 @@ function parsePositiveNumber(value, field, errors, { integer = false, min = 1, m
   return integer ? Math.round(parsed) : parsed;
 }
 
-function validateTripPayload(body = {}, { requireTabType = false } = {}) {
+function validateTripPayload(body = {}, { requireTabType = false, requireTripFields = true } = {}) {
   const errors = [];
   const fromPlace = String(body.fromPlace || '').trim();
   const toPlace = String(body.toPlace || '').trim();
@@ -107,7 +125,7 @@ function validateTripPayload(body = {}, { requireTabType = false } = {}) {
     errors.push(`userPreferences must be ${MAX_PREFERENCES_LENGTH} characters or less.`);
   }
 
-  const budget = parsePositiveNumber(body.budget, 'budget', errors, { min: 1, max: 100000000 });
+  const budget = requireTripFields ? parsePositiveNumber(body.budget, 'budget', errors, { min: 1, max: 100000000 }) : parsePositiveNumber(body.budget, 'budget', errors, { min: 1, max: 100000000 });
   const days = body.days == null ? null : parsePositiveNumber(body.days, 'days', errors, { integer: true, min: 1, max: 365 });
   const travelers = body.travelers == null ? 1 : parsePositiveNumber(body.travelers, 'travelers', errors, { integer: true, min: 1, max: 50 });
 
@@ -117,6 +135,12 @@ function validateTripPayload(body = {}, { requireTabType = false } = {}) {
   if (body.endDate && Number.isNaN(endDate.getTime())) errors.push('endDate must be a valid date.');
   if (startDate && endDate && endDate < startDate) errors.push('endDate must be the same as or later than startDate.');
 
+  const computedDays = days != null && Number.isFinite(days) && days > 0
+    ? days
+    : (startDate && endDate)
+      ? Math.max(1, Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1)
+      : 3;
+
   return {
     errors,
     value: {
@@ -125,7 +149,7 @@ function validateTripPayload(body = {}, { requireTabType = false } = {}) {
       toPlace,
       tabType,
       budget,
-      days,
+      days: computedDays,
       travelers,
       userPreferences,
     },
@@ -134,10 +158,12 @@ function validateTripPayload(body = {}, { requireTabType = false } = {}) {
 
 global.updatePlanningStatus = (sessionId, agent, text, status, url = '') => {
   if (!sessionId) return;
+  prunePlanningStatusStore();
   if (!planningStatusStore.has(sessionId)) {
-    planningStatusStore.set(sessionId, []);
+    planningStatusStore.set(sessionId, { logs: [], createdAt: Date.now() });
   }
-  const logs = planningStatusStore.get(sessionId);
+  const entry = planningStatusStore.get(sessionId);
+  const logs = entry.logs;
   const existingLogIdx = logs.findIndex((log) => log.agent === agent);
   if (existingLogIdx !== -1) {
     logs[existingLogIdx].text = text;
@@ -147,19 +173,18 @@ global.updatePlanningStatus = (sessionId, agent, text, status, url = '') => {
   } else {
     logs.push({ agent, text, status, timestamp: new Date(), url });
   }
-  planningStatusStore.set(sessionId, logs);
+  planningStatusStore.set(sessionId, entry);
 };
 
 router.get('/status/:sessionId', (req, res) => {
   const requestId = createRequestId('status');
   const { sessionId } = req.params;
-  const logs = planningStatusStore.get(sessionId) || [
-    { agent: 'System Coordinator', text: 'Initializing multi-agent planning network...', status: 'searching', timestamp: new Date() },
-  ];
+  const logs = planningStatusStore.get(sessionId) || [];
 
   res.json({
     success: true,
     logs,
+    version: Date.now(),
     meta: { requestId, dataQuality: 'estimated', warnings: [] },
   });
 });
@@ -167,6 +192,7 @@ router.get('/status/:sessionId', (req, res) => {
 router.post('/plan', async (req, res) => {
   const requestId = createRequestId();
   const startedAt = Date.now();
+  let sessionId = null;
 
   try {
     const { errors, value } = validateTripPayload(req.body);
@@ -174,6 +200,8 @@ router.post('/plan', async (req, res) => {
     if (errors.length > 0) {
       return sendError(res, 400, 'VALIDATION_ERROR', 'Invalid travel planning request.', errors, requestId);
     }
+
+    sessionId = value.sessionId || `trip-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
 
     const {
       fromPlace,
@@ -185,7 +213,6 @@ router.post('/plan', async (req, res) => {
       endDate,
       travelers,
       provider = 'auto',
-      sessionId,
       userPreferences,
     } = value;
 
@@ -248,10 +275,20 @@ router.post('/plan', async (req, res) => {
       userId: `travel-${requestId}`,
     });
 
+    console.log('[TravelAPI] orchestrator.generate completed', {
+      requestId,
+      perception: orchestratorResult?.perception || null,
+      routerDecision: orchestratorResult?.routerDecision || null,
+      toolResults: orchestratorResult?.toolResults || [],
+      responseKeys: orchestratorResult?.response ? Object.keys(orchestratorResult.response) : [],
+    });
+
     // ── Emit orchestrator result summary to monitor ──────────────────
     if (emitStep) {
       emitStep('orchestrator', 'generate_completed', {
         requestId,
+        perception: orchestratorResult?.perception || null,
+        routerDecision: orchestratorResult?.routerDecision || null,
         toolResultsCount: Array.isArray(orchestratorResult?.toolResults)
           ? orchestratorResult.toolResults.length : 0,
         toolPlan: orchestratorResult?.toolPlan?.toolCalls
@@ -261,21 +298,38 @@ router.post('/plan', async (req, res) => {
       }, sessionId);
     }
 
-    const toolResult = Array.isArray(orchestratorResult?.toolResults)
-      ? orchestratorResult.toolResults.find((item) => item?.result?.success && item?.result?.data)
-      : null;
+    const toolResults = Array.isArray(orchestratorResult?.toolResults) ? orchestratorResult.toolResults : [];
+    const toolResult = toolResults.find((item) => item?.result?.success && item?.result?.data);
+    const hasGenerateTravelPackage = toolResults.some((item) => item?.toolName === 'generateTravelPackage');
 
     const fallbackPackageData = toolResult?.result?.data || null;
 
     if (global.updatePlanningStatus) {
-      const source = fallbackPackageData ? 'data_retrieved' : 'generating_fallback';
-      global.updatePlanningStatus(sessionId, 'Orchestrator', 'Retrieved travel data through pipeline', source);
+      global.updatePlanningStatus(sessionId, 'Orchestrator', 'Synthesizing travel data through pipeline', 'complete');
     }
 
-    const packageData = fallbackPackageData || await generateTravelPackage({
+    // Only call fallback generateTravelPackage if no tool was executed at all
+    const packageData = fallbackPackageData || (!toolResults.length ? await generateTravelPackage({
       ...value,
       routerDecision: decision,
       requestId,
+    }) : null);
+
+    if (!packageData) {
+      throw new Error('Travel plan generation failed: orchestrator did not return package data and no fallback was available.');
+    }
+
+    console.log('[TravelAPI] package ready', {
+      requestId,
+      elapsedMs: Date.now() - startedAt,
+      itineraryDays: packageData?.plan?.itinerary?.length
+        ?? (Array.isArray(packageData?.plan) ? packageData.plan.length : 0)
+        ?? 0,
+      hotels: packageData?.hotels?.options?.length || 0,
+      travel: packageData?.travel?.options?.length || 0,
+      food: packageData?.food?.restaurants?.length || 0,
+      places: packageData?.places?.categories?.length || 0,
+      success: true,
     });
 
     // ── Emit final package summary to monitor ────────────────────────
@@ -295,6 +349,10 @@ router.post('/plan', async (req, res) => {
       }, sessionId);
     }
 
+    if (global.updatePlanningStatus) {
+      global.updatePlanningStatus(sessionId, 'System Coordinator', 'Travel package ready', 'complete');
+    }
+
     res.json({
       success: true,
       data: packageData,
@@ -311,6 +369,9 @@ router.post('/plan', async (req, res) => {
       error: error.message,
       elapsedMs: Date.now() - startedAt,
     });
+    if (global.updatePlanningStatus) {
+      global.updatePlanningStatus(sessionId, 'System Coordinator', `Planning failed: ${error.message}`, 'error');
+    }
     sendError(res, 500, 'TRAVEL_PLAN_FAILED', 'Failed to generate travel plan.', error.message, requestId);
   }
 });
@@ -320,7 +381,7 @@ router.post('/details', async (req, res) => {
   const startedAt = Date.now();
 
   try {
-    const { errors, value } = validateTripPayload(req.body, { requireTabType: true });
+    const { errors, value } = validateTripPayload(req.body, { requireTabType: true, requireTripFields: false });
 
     if (errors.length > 0) {
       return sendError(res, 400, 'VALIDATION_ERROR', 'Invalid travel details request.', errors, requestId);

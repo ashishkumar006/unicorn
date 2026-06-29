@@ -90,6 +90,21 @@ class Database {
         )
       `);
 
+      this.db.run('DROP TABLE IF EXISTS guest_recovery_codes');
+      this.db.run(`
+        CREATE TABLE guest_recovery_codes (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          code TEXT UNIQUE NOT NULL,
+          userId TEXT NOT NULL,
+          sessionId TEXT NOT NULL,
+          planId TEXT,
+          planData TEXT,
+          expiresAt DATETIME NOT NULL,
+          createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY(userId) REFERENCES users(id)
+        )
+      `);
+
       console.log('✅ Database tables initialized');
     });
   }
@@ -286,6 +301,71 @@ class Database {
           } else {
             resolve(this.changes > 0);
           }
+        }
+      );
+    });
+  }
+
+  /**
+   * Save guest recovery code
+   */
+  saveGuestRecoveryCode(code, userId, sessionId, planId, planData, ttlMinutes = 10080) {
+    return new Promise((resolve, reject) => {
+      const expiresAt = new Date(Date.now() + ttlMinutes * 60 * 1000).toISOString();
+      this.db.run(
+        `INSERT OR REPLACE INTO guest_recovery_codes (code, userId, sessionId, planId, planData, expiresAt)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        [code, userId, sessionId, planId, planData ? JSON.stringify(planData) : null, expiresAt],
+        function(err) {
+          if (err) reject(err);
+          else resolve(this.lastID);
+        }
+      );
+    });
+  }
+
+  /**
+   * Get guest recovery code
+   */
+  getGuestRecoveryCode(code) {
+    return new Promise((resolve, reject) => {
+      this.db.all(
+        'SELECT * FROM guest_recovery_codes WHERE code = ? AND expiresAt > CURRENT_TIMESTAMP',
+        [code],
+        (err, rows) => {
+          if (err) reject(err);
+          else resolve(rows ? rows[0] : null);
+        }
+      );
+    });
+  }
+
+  /**
+   * Delete guest recovery code
+   */
+  deleteGuestRecoveryCode(code) {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'DELETE FROM guest_recovery_codes WHERE code = ?',
+        [code],
+        function(err) {
+          if (err) reject(err);
+          else resolve(this.changes > 0);
+        }
+      );
+    });
+  }
+
+  /**
+   * Cleanup expired guest recovery codes
+   */
+  cleanupExpiredGuestRecoveryCodes() {
+    return new Promise((resolve, reject) => {
+      this.db.run(
+        'DELETE FROM guest_recovery_codes WHERE expiresAt <= CURRENT_TIMESTAMP',
+        function(err) {
+          if (err) reject(err);
+          else resolve(this.changes);
         }
       );
     });

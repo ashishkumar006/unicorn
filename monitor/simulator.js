@@ -10,55 +10,64 @@ function emitEvt(layer, event, data, sid) {
       keepalive: true,
     }).catch(() => {});
   }
-  // Node runtime
   try { return require('./monitorBridge').emitEvent(layer, event, data, sid); } catch { return Promise.resolve(); }
 }
 
 function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-/**
- * Run a realistic multi-iteration ReAct trace so the monitor shows
- * what the LLM is "thinking" at each stage of the planning loop.
- */
 async function runSimulation(sessionId) {
   async function POST(layer, event, data = {}) {
     await emitEvt(layer, event, data, sessionId);
   }
 
-  // ── Stage 1: Query understanding (orchestrator) ─────────────────
-  await POST('orchestrator', 'generate_started', {
-    query: 'Plan a 5-day trip from Mumbai to Goa for 2 adults, budget ₹45,000',
-    provider: 'auto',
+  // ── Stage 1: Router Decision ─────────────────────────────────────
+  await POST('router', 'decision', {
+    domain: 'places',
     complexity: 'moderate',
+    executionMode: 'parallel',
+    providerPriority: ['ola', 'google', 'openstreetmap'],
+    browserEscalation: false,
+    fallbackChain: [
+      { source: 'api', provider: 'ola' },
+      { source: 'api', provider: 'google' },
+      { source: 'api', provider: 'openstreetmap' },
+      { source: 'web-search' },
+      { source: 'internal-knowledge' },
+    ],
+    dataRequirements: { restaurants: true, attractions: true },
+    actions: [
+      { tool: 'placesSearch', arguments: { destination: 'Goa', focus: 'all', constraints: [] } },
+      { tool: 'restaurantSearch', arguments: { destination: 'Goa', cuisine: null } },
+      { tool: 'hotelSearch', arguments: { destination: 'Goa', dates: '2026-06-20', nights: 5, groupSize: 2, constraints: [] } },
+      { tool: 'generateTravelPackage', arguments: { fromPlace: 'Mumbai', toPlace: 'Goa', dates: '2026-06-20', duration: 5, travelers: 2, budget: 50000, constraints: [] } },
+    ],
   });
-  await delay(350);
+  await delay(300);
 
-  // ── Stage 1b: Cache layer ───────────────────────────────────────
+  // ── Stage 2: Cache Lookup ────────────────────────────────────────
   await POST('cache', 'lookup_miss', {
-    key: 'pkg:mumbai:goa:2:5:45000:semi',
+    key: 'pkg:mumbai:goa:2:5:50000:semi',
     ttlRemaining: 0,
     reason: 'No cached package for this config',
   });
   await delay(200);
-  await delay(250);
-  await POST('api', 'reference_built', {
-    primary: 'google',
-    secondary: 'osm',
-    destination: 'Goa',
-    providers: [
-      { name: 'google_places', restaurants: 47, attractions: 32 },
-      { name: 'ola_maps', restaurants: 28, attractions: 15 },
-    ],
-  });
-  await delay(200);
-  await POST('api', 'places_fetched', {
-    provider: 'google',
-    candidates: 79,
-    used: 12,
-  });
-  await delay(300);
 
-  // ── Stage 3b: Browser subagents ──────────────────────────────────
+  // ── Stage 3: Orchestrator Perception ─────────────────────────────
+  await POST('orchestrator', 'perception_completed', {
+    intent: 'plan_trip',
+    entities: { origin: 'Mumbai', destination: 'Goa', dates: '2026-06-20', duration: 5, groupSize: 2, budget: 50000 },
+    constraints: [],
+    steps: [
+      'Find transport from Mumbai to Goa',
+      'Find hotels in Goa',
+      'Find restaurants and attractions in Goa',
+    ],
+    missingInfo: [],
+    nextQuestion: null,
+  });
+  await delay(250);
+
+  // ── Stage 3b: Browser Subagents ──────────────────────────────────
   await POST('browser', 'subagents_completed', {
     agents: ['AccommodationAgent', 'TransitAgent', 'FoodAgent', 'PlacesAgent'],
     mode: 'parallel',
@@ -69,7 +78,26 @@ async function runSimulation(sessionId) {
   });
   await delay(500);
 
-  // ── Stage 4: Data fusion ────────────────────────────────────────
+  // ── Stage 4: API Reference ───────────────────────────────────────
+  await POST('api', 'reference_built', {
+    primary: 'ola',
+    secondary: 'google',
+    destination: 'Goa',
+    providers: [
+      { name: 'ola_maps', restaurants: 28, attractions: 15 },
+      { name: 'google_places', restaurants: 47, attractions: 32 },
+    ],
+  });
+  await delay(200);
+
+  await POST('api', 'places_fetched', {
+    provider: 'ola',
+    candidates: 43,
+    used: 12,
+  });
+  await delay(300);
+
+  // ── Stage 5: Data Fusion ────────────────────────────────────────
   await POST('fusion', 'normalize_started', {
     sources: 5,
     rawCount: 62,
@@ -91,11 +119,11 @@ async function runSimulation(sessionId) {
   });
   await delay(250);
 
-  // ── Stage 5: LLM synthesis pass ────────────────────────────────
+  // ── Stage 6: LLM Synthesis ──────────────────────────────────────
   await POST('llm', 'synthesize_call', {
     model: 'gemma4:31b-cloud',
     promptSections: ['travel_prompt', 'budget_allocation', 'reference_data', 'fusion_normalized_data'],
-    referenceProvider: 'google',
+    referenceProvider: 'ola',
     fusionInputCounts: {
       hotels: 6,
       transit: 6,
@@ -105,43 +133,24 @@ async function runSimulation(sessionId) {
   });
   await delay(300);
 
-  // ReAct-style thought trace from the main LLM after receiving fusion data
-  await POST('llm', 'thought', {
-    iteration: 1,
-    thought: 'I now have a curated list of 6 hotels, 6 transit options, 8 restaurants, and 10 attractions — all scored, deduped, and with sanitized official links. The ₹45,000 budget needs to cover 5 days for 2 adults. I will now produce a day-wise itinerary frontloading the high-value experiences (Day 1: settle + beach sunset; Day 2: heritage walking; Day 3: excursion + local cuisine; Day 4: relax + markets; Day 5: checkout + departure). I should also surface the monsoon ferry caveat for Day 4.',
-  }, sessionId);
-  await delay(400);
-
-  await POST('llm', 'tool_call', {
-    iteration: 1,
-    thought: 'All required tool calls complete — fusion data is ready. Now synthesizing the final package.',
-    toolCalls: [
-      { name: 'synthesizeResponse', args: { includeCaveats: true, includeBudgetBreakdown: true } },
+  await POST('orchestrator', 'tools_executed', {
+    count: 4,
+    results: [
+      { tool: 'placesSearch', success: true },
+      { tool: 'restaurantSearch', success: true },
+      { tool: 'hotelSearch', success: true },
+      { tool: 'generateTravelPackage', success: true },
     ],
-  }, sessionId);
-  await delay(350);
+  });
+  await delay(200);
 
-  await POST('llm', 'tool_result', {
-    iteration: 1,
-    tool: 'synthesizeResponse',
-    success: true,
-    toolResult: { keys: ['summary', 'itinerary', 'travel', 'hotels', 'places', 'food', 'weather', 'budget', 'caveats', 'followUpQuestions'] },
-    observation: 'Final structured package assembled. Caveat for monsoon ferry added to Day 4.',
-  }, sessionId);
-  await delay(500);
-
-  // Final LLM synthesis pass
-  await POST('llm', 'final_synthesis', {
-    iteration: 3,
-    thought: 'Creative summary complete. The trip is balanced: heritage + beach, mid-range hotels with '
-      + 'one skybar upgrade, Veg + seafood mix for meals, flight+train combo. No regulation conflicts '
-      + 'detected. Recommend user recheck flight prices 72hrs before departure.',
-    confidence: 0.94,
-    model: 'gemma4:31b-cloud',
-  }, sessionId);
+  await POST('orchestrator', 'response_synthesized', {
+    keys: ['summary', 'itinerary', 'travel', 'hotels', 'places', 'food', 'weather', 'budget', 'caveats', 'followUpQuestions'],
+    summary: '5-day trip from Mumbai to Goa with curated hotels, transport, restaurants, and attractions.',
+  });
   await delay(400);
 
-  // ── Stage 6: Response delivery ────────────────────────────────
+  // ── Stage 7: Response Delivery ──────────────────────────────────
   await POST('response', 'package_ready', {
     requestId: 'req-' + Math.random().toString(36).slice(2, 9),
     elapsedMs: 14200,

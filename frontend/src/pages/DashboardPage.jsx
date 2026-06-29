@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   ArrowLeft,
   Calendar,
@@ -19,7 +19,8 @@ import {
   BookOpen,
   ExternalLink,
   X,
-  Bot
+  Bot,
+  KeyRound
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,25 +36,25 @@ const BUDGET_SPLITS = [
 ];
 
 const tabContentVariants = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { 
-    opacity: 1, 
+  hidden: { opacity: 0, y: 14 },
+  visible: {
+    opacity: 1,
     y: 0,
-    transition: { duration: 0.3, ease: 'easeOut' }
+    transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1] }
   },
-  exit: { 
-    opacity: 0, 
+  exit: {
+    opacity: 0,
     y: -10,
     transition: { duration: 0.2 }
   }
 };
 
 const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
+  hidden: { opacity: 0, y: 22 },
   visible: (i) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.05, duration: 0.4, ease: 'easeOut' }
+    transition: { delay: i * 0.06, duration: 0.45, ease: [0.16, 1, 0.3, 1] }
   })
 };
 
@@ -63,6 +64,13 @@ const buildBudgetData = (budgetAmount) => BUDGET_SPLITS.map((item) => ({
 }));
 
 const formatBudget = (value) => `₹${Number(value || 0).toLocaleString()}`;
+
+const formatElapsed = (ms) => {
+  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
+  return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+};
 
 const getBudgetSectionValue = (section, fallback = 0) => {
   if (section == null) {
@@ -155,6 +163,107 @@ export default function DashboardPage({
   const [selectedFoodIdx, setSelectedFoodIdx] = useState(0);
   const actionTimerRef = useRef(null);
   const tabs = ['Itinerary', 'Travel', 'Hotels', 'Places', 'Food'];
+  const [isReady, setIsReady] = useState(false);
+  const [loadError, setLoadError] = useState(null);
+  const detailTabs = ['Travel', 'Hotels', 'Places', 'Food'];
+  const initialLoadRef = useRef(false);
+  const loadedDetailTabsRef = useRef(new Set());
+  const detailErrorsRef = useRef(new Map());
+  const [showGuestPrompt, setShowGuestPrompt] = useState(false);
+  const [guestPromptDismissed, setGuestPromptDismissed] = useState(false);
+  const [recoveryCode, setRecoveryCode] = useState('');
+  const [isGeneratingRecovery, setIsGeneratingRecovery] = useState(false);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [accountEmail, setAccountEmail] = useState('');
+  const [accountPassword, setAccountPassword] = useState('');
+  const [accountName, setAccountName] = useState('');
+  const [isCreatingAccount, setIsCreatingAccount] = useState(false);
+  const planStartedAtRef = useRef(tripData?.planStartedAt || Date.now());
+  const [elapsed, setElapsed] = useState(0);
+
+  useEffect(() => {
+    planStartedAtRef.current = tripData?.planStartedAt || planStartedAtRef.current || Date.now();
+  }, [tripData?.planStartedAt]);
+
+  useEffect(() => {
+    if (isReady) {
+      return;
+    }
+    const tick = window.setInterval(() => {
+      setElapsed(Date.now() - planStartedAtRef.current);
+    }, 1000);
+    return () => window.clearInterval(tick);
+  }, [isReady]);
+
+  const markDetailTabLoaded = useCallback((tabType) => {
+    loadedDetailTabsRef.current = new Set(loadedDetailTabsRef.current);
+    loadedDetailTabsRef.current.add(tabType);
+  }, []);
+
+  const markDetailTabError = useCallback((tabType, error) => {
+    detailErrorsRef.current = new Map(detailErrorsRef.current);
+    detailErrorsRef.current.set(tabType, error);
+  }, []);
+
+  const areAllDetailTabsLoaded = useCallback(() => {
+    const loaded = loadedDetailTabsRef.current;
+    return detailTabs.every((tabType) => loaded.has(tabType));
+  }, [detailTabs]);
+
+  useEffect(() => {
+    if (initialLoadRef.current) {
+      return;
+    }
+    initialLoadRef.current = true;
+
+    let cancelled = false;
+    setIsReady(false);
+    setLoadError(null);
+    loadedDetailTabsRef.current = new Set();
+    detailErrorsRef.current = new Map();
+
+    const hasPlanData = Boolean(tripData?.plan);
+
+    (async () => {
+      try {
+        await Promise.all(
+          detailTabs.map((tabType) =>
+            fetchTabData(tabType, { silent: true }).then(() => tabType).catch((error) => {
+              markDetailTabError(tabType, error);
+              return null;
+            })
+          )
+        );
+      } catch (error) {
+        console.error('[DashboardPage] initial detail load failed', error);
+        setLoadError(error);
+      } finally {
+        if (!cancelled) {
+          const failedTabs = detailTabs.filter((tabType) => detailErrorsRef.current.has(tabType));
+          if (failedTabs.length > 0) {
+            setLoadError(new Error(`Failed to load: ${failedTabs.join(', ')}`));
+          }
+          setIsReady(true);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isReady || guestPromptDismissed) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setShowGuestPrompt(true);
+    }, 1500);
+
+    return () => window.clearTimeout(timer);
+  }, [isReady, guestPromptDismissed]);
 
   const plan = tripData?.plan || {};
   const planMeta = tripData?.planMeta || plan.meta || null;
@@ -194,6 +303,9 @@ export default function DashboardPage({
   const selectedFood = tripData.plan?.food?.restaurants?.[selectedFoodIdx] || tripData.food?.restaurants?.[selectedFoodIdx] || tabData.Food?.restaurants?.[selectedFoodIdx] || null;
 
   const getBudgetValue = (key, fallbackPct) => {
+    if (budgetAllocation && budgetAllocation[key]) {
+      return getBudgetSectionValue(budgetAllocation[key]);
+    }
     if (key === 'accommodation') {
       return selectedHotel ? (selectedHotel.pricePerNight || selectedHotel.price || 0) * Math.max(1, tripDays - 1) : Math.max(1, Math.round((budgetAmount * fallbackPct) / 100));
     }
@@ -202,9 +314,6 @@ export default function DashboardPage({
     }
     if (key === 'food') {
       return selectedFood ? (selectedFood.avgCost || 0) * Math.max(1, tripDays) : Math.max(1, Math.round((budgetAmount * fallbackPct) / 100));
-    }
-    if (budgetAllocation && budgetAllocation[key]) {
-      return getBudgetSectionValue(budgetAllocation[key]);
     }
     return Math.max(1, Math.round((budgetAmount * fallbackPct) / 100));
   };
@@ -231,8 +340,6 @@ export default function DashboardPage({
   }));
   const planningHighlights = plan.highlights || [];
   const agentUserId = tripData?.sessionId || `${fromPlace}-${toPlace}-${startDate}`;
-
-  const detailTabs = ['Travel', 'Hotels', 'Places', 'Food'];
 
   const flashNotice = (message) => {
     setNotice(message);
@@ -295,11 +402,15 @@ export default function DashboardPage({
   useEffect(() => {
     setTabData({});
 
-    detailTabs.forEach((tabType) => {
-      fetchTabData(tabType, { silent: true });
-    });
+    const timer = setTimeout(() => {
+      detailTabs.forEach((tabType) => {
+        fetchTabData(tabType, { silent: true });
+      });
+    }, 250);
     // Prefetching removes the first-click loading flash for detail tabs.
+    // Debounced to avoid hammering the API on rapid prop changes.
     // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => clearTimeout(timer);
   }, [fromPlace, toPlace, budget, startDate, endDate, travelersCount, tripDays]);
 
   const fetchTabData = async (tabType, options = {}) => {
@@ -328,18 +439,63 @@ export default function DashboardPage({
         })
       });
 
-      if (response.ok) {
-        const result = await response.json();
-        setTabData(prev => ({ ...prev, [tabType]: result.data }));
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(text || `Failed to load ${tabType}`);
       }
+
+      const result = await response.json();
+      setTabData(prev => ({ ...prev, [tabType]: result.data }));
+      markDetailTabLoaded(tabType);
     } catch (error) {
-      console.error('Error fetching tab data:', error);
+      console.error(`Error fetching ${tabType} data:`, error);
+      throw error;
     } finally {
       if (!silent) {
         setLoadingTab(null);
       }
     }
   };
+
+  if (!isReady) {
+    return (
+      <div className="page-wrapper dashboard page-shell">
+        <div className="dash-nav">
+          <div className="dash-nav-inner">
+            <button className="back-link" onClick={onBackToHome}>
+              <ArrowLeft size={16} />
+              Back to planner
+            </button>
+            <div className="brand-header nav-brand">
+              <Sparkles className="brand-icon" size={20} />
+              <span className="brand-name">Wanderlust</span>
+            </div>
+          </div>
+        </div>
+        <div className="dash-hero-container">
+          <div className="watercolor-bg"></div>
+          <div className="dash-hero">
+            <p className="dash-hero-label">
+              <MapPin size={12} /> YOUR ITINERARY
+            </p>
+            <h1 className="dash-hero-title">
+              {fromPlace} <span className="arrow">→</span> {toPlace}
+            </h1>
+            <div className="dash-hero-meta">
+              <span className="meta-item"><Calendar size={14} /> {startDate} to {endDate}</span>
+              <span className="meta-item"><Users size={14} /> {travelersText}</span>
+              <span className="meta-item"><IndianRupee size={14} /> Budget {formatBudget(budgetAmount)}</span>
+            </div>
+            <div className="hero-actions">
+              <Loader2 className="spin" size={18} />
+              <span>Preparing your full itinerary…</span>
+              <span className="loading-elapsed">{formatElapsed(elapsed)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-wrapper dashboard page-shell">
@@ -357,9 +513,8 @@ export default function DashboardPage({
         </div>
       </div>
 
-      {/* Hero Section with Watercolor Background */}
+      {/* Hero Section */}
       <div className="dash-hero-container">
-        <div className="watercolor-bg"></div>
         <div className="dash-hero">
           <p className="dash-hero-label">
             <MapPin size={12} /> YOUR ITINERARY
@@ -367,11 +522,12 @@ export default function DashboardPage({
           <h1 className="dash-hero-title">
             {fromPlace} <span className="arrow">→</span> {toPlace}
           </h1>
-          
+
           <div className="dash-hero-meta">
             <span className="meta-item"><Calendar size={14} /> {startDate} to {endDate}</span>
             <span className="meta-item"><Users size={14} /> {travelersText}</span>
             <span className="meta-item"><IndianRupee size={14} /> Budget {formatBudget(budgetAmount)}</span>
+            <span className="meta-item"><Clock size={14} /> Generated in {formatElapsed(elapsed)}</span>
           </div>
 
           <div className="hero-actions">
@@ -397,6 +553,177 @@ export default function DashboardPage({
         </div>
       </div>
 
+      {showGuestPrompt && (
+        <div className="guest-prompt-banner">
+          <div className="guest-prompt-content">
+            <div className="guest-prompt-icon">
+              <Sparkles size={20} />
+            </div>
+            <div className="guest-prompt-text">
+              <h3>Your plan is ready!</h3>
+              <p>Create a free account to save this plan, share it with friends, and continue refining it with your AI travel assistant.</p>
+              {recoveryCode && (
+                <div className="recovery-code-box">
+                  <strong>Recovery Code:</strong> <code>{recoveryCode}</code>
+                  <p className="recovery-hint">Save this code to recover your plan later without creating an account.</p>
+                </div>
+              )}
+            </div>
+            <div className="guest-prompt-actions">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setShowAccountModal(true);
+                }}
+              >
+                Create Account
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={async () => {
+                  setIsGeneratingRecovery(true);
+                  try {
+                    const response = await fetch('/api/internal/guest/recovery-code', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        userId: tripData?.userId || 'guest',
+                        sessionId: tripData?.sessionId,
+                        planId: tripData?.plan?.planId || tripData?.sessionId,
+                        planData: tripData?.plan || null
+                      })
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                      setRecoveryCode(data.code);
+                      toast.success('Recovery code generated!');
+                    }
+                  } catch (error) {
+                    console.error('Failed to generate recovery code:', error);
+                  } finally {
+                    setIsGeneratingRecovery(false);
+                  }
+                }}
+                disabled={isGeneratingRecovery}
+              >
+                {isGeneratingRecovery ? 'Generating...' : 'Save Recovery Code'}
+              </button>
+              <button
+                type="button"
+                className="btn btn-ghost"
+                onClick={() => {
+                  setShowGuestPrompt(false);
+                  setGuestPromptDismissed(true);
+                }}
+              >
+                Continue as Guest
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showAccountModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3>Create your account</h3>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={() => setShowAccountModal(false)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <div className="modal-body">
+              <p className="modal-subtitle">Save this plan and unlock your AI travel assistant.</p>
+              <div className="form-group">
+                <label htmlFor="account-name">Name</label>
+                <input
+                  id="account-name"
+                  type="text"
+                  value={accountName}
+                  onChange={(event) => setAccountName(event.target.value)}
+                  placeholder="Your name"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="account-email">Email</label>
+                <input
+                  id="account-email"
+                  type="email"
+                  value={accountEmail}
+                  onChange={(event) => setAccountEmail(event.target.value)}
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div className="form-group">
+                <label htmlFor="account-password">Password</label>
+                <input
+                  id="account-password"
+                  type="password"
+                  value={accountPassword}
+                  onChange={(event) => setAccountPassword(event.target.value)}
+                  placeholder="Create a password"
+                />
+              </div>
+            </div>
+            <div className="modal-footer">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setShowAccountModal(false)}
+                disabled={isCreatingAccount}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="btn btn-primary"
+                disabled={isCreatingAccount || !accountEmail || !accountPassword}
+                onClick={async () => {
+                  if (!accountEmail || !accountPassword) {
+                    return;
+                  }
+                  setIsCreatingAccount(true);
+                  try {
+                    const response = await fetch('/api/internal/account/create', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        email: accountEmail,
+                        password: accountPassword,
+                        name: accountName || accountEmail.split('@')[0],
+                        guestUserId: tripData?.userId || 'guest',
+                        sessionId: tripData?.sessionId,
+                      }),
+                    });
+                    const data = await response.json();
+                    if (data.success) {
+                      toast.success('Account created! Your plan has been saved.');
+                      setShowAccountModal(false);
+                      setShowGuestPrompt(false);
+                      setGuestPromptDismissed(true);
+                    } else {
+                      toast.error(data.error || 'Account creation failed');
+                    }
+                  } catch (error) {
+                    toast.error('Account creation failed');
+                  } finally {
+                    setIsCreatingAccount(false);
+                  }
+                }}
+              >
+                {isCreatingAccount ? 'Creating...' : 'Create Account'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="dashboard-layout">
         <div className="dashboard-main-column">
           {/* Budget Breakdown Chart */}
@@ -406,8 +733,8 @@ export default function DashboardPage({
         </h2>
         
         <div className="budget-flex">
-          <div className="chart-container">
-            <ResponsiveContainer>
+          <div className="chart-container" style={{ height: '260px' }}>
+            <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
                   data={budgetData}
@@ -618,52 +945,52 @@ export default function DashboardPage({
 
           {/* Trip Summary Block */}
           <div className="content-section summary-block">
-        <h2 className="section-title-large">Trip Summary</h2>
-        
-        <div className="summary-list">
-          <div className="summary-item">
-            <div className="summary-label">DURATION</div>
-            <div className="summary-value">{tripDays} Days</div>
-            <div className="summary-subtext">{startDate} to {endDate}</div>
-          </div>
-          
-          <div className="summary-item">
-            <div className="summary-label">
-              <TrainFront size={14} className="summary-icon"/> SELECTED TRAVEL
-            </div>
-            <div className="summary-value">{selectedTravel?.name || 'Select travel option'}</div>
-            <div className="summary-subtext">{selectedTravel ? `${formatBudget(selectedTravel.price)} · ${selectedTravel.duration}` : 'Waiting for options'}</div>
-          </div>
-          
-          <div className="summary-item">
-            <div className="summary-label">
-              <Hotel size={14} className="summary-icon"/> SELECTED HOTEL
-            </div>
-            <div className="summary-value">{selectedHotel?.name || 'Select accommodation'}</div>
-            <div className="summary-subtext">{selectedHotel ? `${formatBudget(selectedHotel.pricePerNight)}/night · ⭐ ${selectedHotel.rating}` : 'Waiting for options'}</div>
-          </div>
+            <h2 className="section-title-large">Trip Summary</h2>
 
-          <div className="summary-item">
-            <div className="summary-label">
-              <BookOpen size={14} className="summary-icon"/> BEST TIME
-            </div>
-            <div className="summary-value">{plan.bestTime || 'Year-round beach escape'}</div>
-            <div className="summary-subtext">{plan.estimatedBudget || formatBudget(budgetAmount)}</div>
-          </div>
-        </div>
+            <div className="summary-list">
+              <motion.div className="summary-item" whileHover={{ y: -2 }}>
+                <div className="summary-label">DURATION</div>
+                <div className="summary-value">{tripDays} Days</div>
+                <div className="summary-subtext">{startDate} to {endDate}</div>
+              </motion.div>
 
-        {/* Tabs Bar */}
-        <div className="tabs-bar">
-          {tabs.map(tab => (
-            <button
-              key={tab}
-              className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-              onClick={() => openTab(tab)}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
+              <motion.div className="summary-item" whileHover={{ y: -2 }}>
+                <div className="summary-label">
+                  <TrainFront size={14} className="summary-icon"/> SELECTED TRAVEL
+                </div>
+                <div className="summary-value">{selectedTravel?.name || 'Select travel option'}</div>
+                <div className="summary-subtext">{selectedTravel ? `${formatBudget(selectedTravel.price)} · ${selectedTravel.duration}` : 'Waiting for options'}</div>
+              </motion.div>
+
+              <motion.div className="summary-item" whileHover={{ y: -2 }}>
+                <div className="summary-label">
+                  <Hotel size={14} className="summary-icon"/> SELECTED HOTEL
+                </div>
+                <div className="summary-value">{selectedHotel?.name || 'Select accommodation'}</div>
+                <div className="summary-subtext">{selectedHotel ? `${formatBudget(selectedHotel.pricePerNight)}/night · ⭐ ${selectedHotel.rating}` : 'Waiting for options'}</div>
+              </motion.div>
+
+              <motion.div className="summary-item" whileHover={{ y: -2 }}>
+                <div className="summary-label">
+                  <BookOpen size={14} className="summary-icon"/> BEST TIME
+                </div>
+                <div className="summary-value">{plan.bestTime || 'Year-round beach escape'}</div>
+                <div className="summary-subtext">{plan.estimatedBudget || formatBudget(budgetAmount)}</div>
+              </motion.div>
+            </div>
+
+            {/* Tabs Bar */}
+            <div className="tabs-bar">
+              {tabs.map((tab) => (
+                <button
+                  key={tab}
+                  className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                  onClick={() => openTab(tab)}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
           </div>
 
 {/* Tab Content */}
@@ -690,57 +1017,57 @@ export default function DashboardPage({
                      }}
                    >
               {(itinerary.length > 0 ? itinerary : [{ day: 1, date: startDate, title: `${fromPlace} to ${toPlace} - Arrival`, activities: [] }]).map((day) => (
-<motion.article 
-                   key={day.day}
-                   className="day-card"
-                   variants={cardVariants}
-                   custom={day.day}
-                   whileHover={{ y: -2 }}
-                 >
-                   <div className="day-header">
-                     <div className="day-circle">{day.day}</div>
-                     <div className="day-title-group">
-                       <h3>Day {day.day}</h3>
-                       {day.date && <span className="day-date">{day.date}</span>}
-                     </div>
-                   </div>
+                <motion.article
+                  key={day.day}
+                  className="day-card"
+                  variants={cardVariants}
+                  custom={day.day}
+                  whileHover={{ y: -2 }}
+                >
+                  <div className="day-header">
+                    <div className="day-circle">{day.day}</div>
+                    <div className="day-title-group">
+                      <h3>Day {day.day}</h3>
+                      {day.date && <span className="day-date">{day.date}</span>}
+                    </div>
+                  </div>
 
-                   <h4 className="day-theme">{day.title}</h4>
+                  <h4 className="day-theme">{day.title}</h4>
 
-<div>
-                       {(day.activities || []).map((activity, index) => (
-                         <motion.div 
-                           key={`${day.day}-${index}`} 
-                           className="timeline-item"
-                           initial={{ opacity: 0, x: -10 }}
-                           animate={{ opacity: 1, x: 0 }}
-                           transition={{ delay: index * 0.05 }}
-                         >
-                           <div className="timeline-icon-wrapper">
-                             {getTimelineIcon(activity.activity)}
-                           </div>
-                           <div className="timeline-content">
-                             <span className="timeline-time">{activity.time}</span>
-                             <span className="timeline-desc">{activity.activity}</span>
-                            {activity.link && (
-                              <div style={{ marginTop: '6px' }}>
-                                <a
-                                  className="card-link-badge"
-                                  href={activity.link}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  Open <ExternalLink size={12} />
-                                </a>
-                              </div>
-                            )}
-                           </div>
-                         </motion.div>
-                       ))}
-                     </div>
-                   </motion.article>
-                                ))}
+                  <div>
+                    {(day.activities || []).map((activity, index) => (
+                      <motion.div
+                        key={`${day.day}-${index}`}
+                        className="timeline-item"
+                        initial={{ opacity: 0, x: -10 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                      >
+                        <div className="timeline-icon-wrapper">
+                          {getTimelineIcon(activity.activity)}
+                        </div>
+                        <div className="timeline-content">
+                          <span className="timeline-time">{activity.time}</span>
+                          <span className="timeline-desc">{activity.activity}</span>
+                          {activity.link && (
+                            <div style={{ marginTop: '6px' }}>
+                              <a
+                                className="card-link-badge"
+                                href={activity.link}
+                                target="_blank"
+                                rel="noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                Open <ExternalLink size={12} />
+                              </a>
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.article>
+              ))}
                           </motion.div>
                         </motion.div>
                       )}
@@ -762,9 +1089,13 @@ export default function DashboardPage({
                   </div>
                 ) : tabData['Travel']?.options ? (
                   <div className="options-grid">
-                    {tabData['Travel'].options.map((option, idx) => (
-                      <motion.div 
-                        key={idx} 
+                    {tabData['Travel'].options.map((option, idx) => {
+                      const displayName = /travel option \d+/i.test(option.name)
+                        ? `${option.type || 'Transport'} option ${idx + 1}`
+                        : option.name;
+                      return (
+                      <motion.div
+                        key={idx}
                         className={`option-card travel-card ${selectedTravelIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
                         onClick={() => setSelectedTravelIdx(idx)}
                         style={{ cursor: 'pointer' }}
@@ -773,21 +1104,21 @@ export default function DashboardPage({
                         whileHover={{ y: -3 }}
                       >
                     <div className="option-card-image-box">
-                      <img 
-                        src={option.image || option.photoUrl || getOptionImage(option.name, 'travel')} 
-                        alt={option.name} 
-                        className="option-card-image" 
-                        loading="lazy" 
+                      <img
+                        src={option.image || option.photoUrl || getOptionImage(option.name, 'travel')}
+                        alt={displayName}
+                        className="option-card-image"
+                        loading="lazy"
                       />
                     </div>
                     <div className="option-header">
                       <div className="card-title-group">
-                        <h3>{option.name}</h3>
+                        <h3>{displayName}</h3>
                         {option.link && (
-                          <a 
-                            className="card-link-badge" 
-                            href={option.link} 
-                            target="_blank" 
+                          <a
+                            className="card-link-badge"
+                            href={option.link}
+                            target="_blank"
                             rel="noreferrer"
                             onClick={(e) => e.stopPropagation()}
                           >
@@ -809,13 +1140,14 @@ export default function DashboardPage({
                         ))}
                       </div>
                     </motion.div>
-                  ))}
-                </div>
-              ) : (
-                <div className="no-data">No transport options available</div>
-              )}
-            </motion.div>
-          )}
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="no-data">No transport options available</div>
+                )}
+              </motion.div>
+            )}
 
           {/* Hotels Tab */}
           {activeTab === 'Hotels' && (
@@ -832,24 +1164,24 @@ export default function DashboardPage({
                    <Loader2 size={32} className="spinner" />
                    <p>Finding best hotels...</p>
                  </div>
-               ) : tabData['Hotels']?.options ? (
+               ) : (tabData['Hotels']?.options?.length ? tabData['Hotels'].options : tripData?.plan?.hotels?.options) ? (
                  <div className="options-grid">
-                   {tabData['Hotels'].options.map((hotel, idx) => (
-                     <motion.div 
-                       key={idx} 
+                   {(tabData['Hotels']?.options?.length ? tabData['Hotels'].options : tripData?.plan?.hotels?.options || []).map((hotel, idx) => (
+                     <motion.div
+                       key={idx}
                        className={`option-card hotel-card ${selectedHotelIdx === idx ? 'card-selected-coral' : idx === 0 ? 'card-preferred-gold' : ''}`}
                        onClick={() => setSelectedHotelIdx(idx)}
-                       style={{ cursor: 'pointer' }}
+                       style={{ cursor: 'pointer', flex: '1 1 320px', maxWidth: '100%' }}
                        variants={cardVariants}
                        custom={idx}
                        whileHover={{ y: -3 }}
                      >
                     <div className="option-card-image-box">
-                      <img 
-                        src={hotel.image || hotel.photoUrl || getOptionImage(hotel.name, 'hotel')} 
-                        alt={hotel.name} 
-                        className="option-card-image" 
-                        loading="lazy" 
+                      <img
+                        src={hotel.image || hotel.photoUrl || getOptionImage(hotel.name, 'hotel')}
+                        alt={hotel.name}
+                        className="option-card-image"
+                        loading="lazy"
                       />
                     </div>
                     <div className="option-header">
@@ -1088,134 +1420,78 @@ export default function DashboardPage({
 
       {/* Plan Another Confirmation Dialog */}
       {showPlanAnotherConfirm && (
-        <div className="plan-another-confirm-overlay" onClick={() => setShowPlanAnotherConfirm(false)}>
-          <div className="plan-another-confirm-dialog" onClick={(e) => e.stopPropagation()}>
-            <p className="delete-confirm-text">Start a new trip plan?</p>
-            <p className="delete-confirm-subtext">This will reset your current trip data.</p>
-            <div className="delete-confirm-actions">
-              <button type="button" className="delete-confirm-btn cancel" onClick={() => setShowPlanAnotherConfirm(false)}>Cancel</button>
-              <button type="button" className="delete-confirm-btn confirm" onClick={() => { setShowPlanAnotherConfirm(false); onPlanAnother(); }}>Plan New</button>
+        <motion.div
+          className="modal-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={() => setShowPlanAnotherConfirm(false)}
+        >
+          <motion.div
+            className="modal-content modal-content-glass"
+            initial={{ scale: 0.94, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.94, opacity: 0, y: 20 }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-header">
+              <h2>Start a new trip plan?</h2>
+              <p className="modal-subtitle">This will reset your current trip data.</p>
             </div>
-          </div>
-        </div>
+            <div className="modal-footer">
+              <button type="button" className="btn btn-secondary" onClick={() => setShowPlanAnotherConfirm(false)}>Cancel</button>
+              <button type="button" className="btn btn-primary" onClick={() => { setShowPlanAnotherConfirm(false); onPlanAnother(); }}>Plan New</button>
+            </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {/* Plan Another Action */}
-      <div className="plan-another-section">
+      <motion.div className="plan-another-section" initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}>
         <h3 className="section-title-large">Ready to Plan Another Trip?</h3>
         <p className="footer-subtext">Discover more destinations with optimized budget planning.</p>
-        <button className="button-plan-another" onClick={() => setShowPlanAnotherConfirm(true)}>
+        <motion.button className="button-plan-another" onClick={() => setShowPlanAnotherConfirm(true)} whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
           <Sparkles size={16} /> Plan Another Trip
-        </button>
-      </div>
+        </motion.button>
+      </motion.div>
 
       {/* Side-out research reports drawer */}
       {showResearchDrawer && planMeta?.researchArtifacts && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          width: 'min(90vw, 640px)',
-          height: '100vh',
-          background: 'var(--bg-card)',
-          backdropFilter: 'var(--glass-blur)',
-          borderLeft: '1px solid var(--border-glass)',
-          boxShadow: 'var(--shadow-2xl)',
-          zIndex: '1000',
-          display: 'flex',
-          flexDirection: 'column',
-          animation: 'slideInRight 0.35s cubic-bezier(0.16, 1, 0.3, 1) both'
-        }}>
-          <div style={{
-            padding: '20px 24px',
-            borderBottom: '1px solid var(--border-light)',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
+        <motion.div
+          className="research-drawer"
+          initial={{ x: '100%' }}
+          animate={{ x: 0 }}
+          exit={{ x: '100%' }}
+          transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        >
+          <div className="research-drawer-header">
             <div>
-              <h2 style={{ fontSize: '18px', fontWeight: 800, margin: 0, color: 'var(--text-primary)' }}>
-                Multi-Agent Deep Research Reports
-              </h2>
-              <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', margin: '4px 0 0 0' }}>
-                Unedited research summaries compiled concurrently by cloud subagents
-              </p>
+              <h2 className="research-drawer-title">Multi-Agent Deep Research Reports</h2>
+              <p className="research-drawer-subtitle">Unedited research summaries compiled concurrently by cloud subagents</p>
             </div>
-            <button 
-              onClick={() => setShowResearchDrawer(false)}
-              style={{
-                background: 'rgba(255, 255, 255, 0.05)',
-                border: 'none',
-                borderRadius: '50%',
-                width: '32px',
-                height: '32px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                color: 'var(--text-secondary)',
-                cursor: 'pointer'
-              }}
-            >
+            <button className="research-drawer-close" onClick={() => setShowResearchDrawer(false)}>
               <X size={18} />
             </button>
           </div>
 
-          {/* Subagent tabs inside drawer */}
-          <div style={{
-            display: 'flex',
-            background: 'rgba(0, 0, 0, 0.1)',
-            padding: '4px',
-            margin: '16px 24px',
-            borderRadius: '8px'
-          }}>
+          <div className="research-drawer-tabs">
             {['accommodation', 'transit', 'food', 'places'].map((tab) => (
               <button
                 key={tab}
+                className={`research-tab ${activeResearchTab === tab ? 'research-tab-active' : ''}`}
                 onClick={() => setActiveResearchTab(tab)}
-                style={{
-                  flex: 1,
-                  padding: '8px 0',
-                  border: 'none',
-                  background: activeResearchTab === tab ? 'var(--bg-elevated)' : 'transparent',
-                  color: activeResearchTab === tab ? 'var(--primary-coral)' : 'var(--text-secondary)',
-                  fontWeight: activeResearchTab === tab ? '600' : '400',
-                  borderRadius: '4px',
-                  fontSize: '12px',
-                  textTransform: 'capitalize',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}
               >
                 {tab === 'transit' ? 'Transit' : tab === 'accommodation' ? 'Stays' : tab === 'food' ? 'Gastronomy' : 'Sightseeing'}
               </button>
             ))}
           </div>
 
-          {/* Drawer content area */}
-          <div style={{
-            flex: 1,
-            overflowY: 'auto',
-            padding: '0 24px 24px 24px',
-            fontSize: '14px',
-            lineHeight: '1.6',
-            color: 'var(--text-secondary)'
-          }}>
-            <div style={{
-              background: 'rgba(255, 255, 255, 0.02)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: '8px',
-              padding: '20px',
-              whiteSpace: 'pre-wrap',
-              fontFamily: 'var(--font-mono), monospace',
-              fontSize: '12px',
-              color: 'var(--text-primary)',
-              maxHeight: 'calc(100vh - 240px)',
-              overflowY: 'auto'
-            }}>
+          <div className="research-drawer-body">
+            <div className="research-log-box">
               {planMeta.researchArtifacts[activeResearchTab] || 'No research log found for this subagent.'}
             </div>
           </div>
-        </div>
+        </motion.div>
       )}
 
     </div>

@@ -13,7 +13,7 @@ function buildOlaMapsUrl(place = {}) {
   params.set('api', '1');
   params.set('query', query);
 
-  return `https://www.google.com/maps/search/?${params.toString()}`;
+  return `https://www.olamaps.com/search/?${params.toString()}`;
 }
 
 const tokenState = {
@@ -89,6 +89,86 @@ function normalizeArray(value) {
   }
 
   return [];
+}
+
+const OLA_PLACE_CACHE_TTL_MS = 1000 * 60 * 5; // 5 minutes
+const OLA_PLACE_CACHE = new Map();
+
+function getOlaPlaceCacheKey(destination, focus, limit) {
+  return `${toText(destination, '').trim().toLowerCase()}::${toText(focus, 'all').trim().toLowerCase()}::${Number(limit) || 0}`;
+}
+
+async function withRetry(fn, options = {}) {
+  const retries = Number.isFinite(options.retries) ? Math.max(0, Math.floor(options.retries)) : 2;
+  const baseDelay = Number.isFinite(options.baseDelayMs) ? Math.max(0, options.baseDelayMs) : 400;
+  const maxDelay = Number.isFinite(options.maxDelayMs) ? Math.max(baseDelay, options.maxDelayMs) : 2000;
+  const shouldRetry = options.shouldRetry || (() => true);
+
+  let lastError;
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      return await fn();
+    } catch (error) {
+      lastError = error;
+
+      if (attempt === retries || !shouldRetry(error, attempt)) {
+        break;
+      }
+
+      const delay = Math.min(maxDelay, baseDelay * Math.pow(2, attempt));
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+  }
+
+  throw lastError;
+}
+
+function isRetryableOlaError(error) {
+  if (!error) {
+    return false;
+  }
+
+  if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+    return true;
+  }
+
+  const status = error.response?.status;
+  if (status === 429 || status === 502 || status === 503 || status === 504) {
+    return true;
+  }
+
+  const message = String(error.message || '').toLowerCase();
+  if (/timeout|timed out|aborted|temporarily unavailable|service unavailable|too many requests/.test(message)) {
+    return true;
+  }
+
+  return false;
+}
+
+function standardizeOlaError(error, fallbackMessage = 'Ola Maps request failed.') {
+  const status = error?.response?.status;
+  const message = error?.message || fallbackMessage;
+
+  if (status) {
+    return new Error(`Ola Maps error ${status}: ${message}`);
+  }
+
+  return new Error(`${fallbackMessage} ${message}`.trim());
+}
+
+function validateRequiredStrings(input = {}, fields = []) {
+  const missing = [];
+
+  for (const field of fields) {
+    const value = toText(input[field], '').trim();
+
+    if (!value) {
+      missing.push(field);
+    }
+  }
+
+  return missing;
 }
 
 function getOlaMapsConfig() {
@@ -260,23 +340,34 @@ async function requestOlaMaps(path, options = {}, config = getOlaMapsConfig()) {
   const params = options.params && typeof options.params === 'object' ? { ...options.params } : {};
   const data = options.data ?? null;
   const requestedAuthMode = toText(options.auth, 'auto');
-  const auth = await getOlaAuthHeaders(config, requestedAuthMode);
 
-  if (auth.authMode === 'api-key') {
-    params.api_key = config.apiKey;
-  }
+  const response = await withRetry(
+    async () => {
+      const auth = await getOlaAuthHeaders(config, requestedAuthMode);
 
-  const response = await axios.request({
-    method,
-    url: `${config.baseUrl}${path}`,
-    params,
-    data,
-    headers: {
-      ...auth.headers,
-      ...(options.headers && typeof options.headers === 'object' ? options.headers : {}),
+      if (auth.authMode === 'api-key') {
+        params.api_key = config.apiKey;
+      }
+
+      return axios.request({
+        method,
+        url: `${config.baseUrl}${path}`,
+        params,
+        data,
+        headers: {
+          ...auth.headers,
+          ...(options.headers && typeof options.headers === 'object' ? options.headers : {}),
+        },
+        timeout,
+      });
     },
-    timeout,
-  });
+    {
+      retries: 2,
+      baseDelayMs: 400,
+      maxDelayMs: 2000,
+      shouldRetry: isRetryableOlaError,
+    }
+  );
 
   return response;
 }
@@ -600,9 +691,17 @@ async function searchOlaPlaces(destination, limit = 6, focus = 'all', config = g
   const searchInput = normalizeOlaPlaceSearchInput(destination, focus);
   const destinationText = searchInput.destination;
   const normalizedFocus = searchInput.focus;
+  const resolvedLimit = Math.max(1, Math.min(Number(limit) || 6, 24));
 
   if (!destinationText || !isOlaMapsConfigured(config)) {
     return [];
+  }
+
+  const cacheKey = getOlaPlaceCacheKey(destinationText, normalizedFocus, resolvedLimit);
+  const cachedEntry = OLA_PLACE_CACHE.get(cacheKey);
+
+  if (cachedEntry && Date.now() < cachedEntry.expiresAt) {
+    return cachedEntry.value;
   }
 
   const queries = buildPlaceQueries(destinationText, normalizedFocus);
@@ -622,7 +721,7 @@ async function searchOlaPlaces(destination, limit = 6, focus = 'all', config = g
         }, config);
 
         const items = extractListFromPayload(response.data);
-        const candidateLimit = Math.max(limit * 2, 6);
+        const candidateLimit = Math.max(resolvedLimit * 2, 6);
         return items.slice(0, candidateLimit).map((entry, index) => mapAutocompleteItem(entry, query, index));
       } catch (error) {
         console.warn(`[OlaMaps] autocomplete failed for "${query}": ${error.message}`);
@@ -644,12 +743,12 @@ async function searchOlaPlaces(destination, limit = 6, focus = 'all', config = g
       seen.add(key);
       deduped.push(place);
 
-      if (deduped.length >= limit) {
+      if (deduped.length >= resolvedLimit) {
         break;
       }
     }
 
-    if (deduped.length >= limit) {
+    if (deduped.length >= resolvedLimit) {
       break;
     }
   }
@@ -672,24 +771,52 @@ async function searchOlaPlaces(destination, limit = 6, focus = 'all', config = g
     ? preferredMatches
     : (strongMatches.length > 0 ? strongMatches : scored);
   prioritized.sort((left, right) => right.relevanceScore - left.relevanceScore);
-  const finalResults = prioritized.slice(0, limit).map(({ relevanceScore, ...place }) => place);
+  const finalResults = prioritized.slice(0, resolvedLimit).map(({ relevanceScore, ...place }) => place);
 
   console.log(`[OlaMaps] place search complete: destination="${destinationText}" focus=${normalizedFocus} results=${finalResults.length} strongMatches=${strongMatches.length}`);
 
-  return finalResults;
+  const cacheValue = finalResults.slice();
+  OLA_PLACE_CACHE.set(cacheKey, {
+    value: cacheValue,
+    expiresAt: Date.now() + OLA_PLACE_CACHE_TTL_MS,
+  });
+
+  return cacheValue;
 }
 
+/**
+ * Get driving directions between two points via Ola Maps.
+ *
+ * @param {Object} input
+ * @param {string} input.origin - Start location or coordinates.
+ * @param {string} input.destination - End location or coordinates.
+ * @param {string} [input.waypoints] - Pipe-delimited waypoints.
+ * @param {string} [input.mode=driving] - Travel mode.
+ * @param {boolean} [input.alternatives=false] - Request alternative routes.
+ * @param {boolean} [input.steps=true] - Include turn-by-turn steps.
+ * @param {string} [input.overview=full] - Route overview detail level.
+ * @param {string} [input.language] - Preferred language.
+ * @param {boolean} [input.trafficMetadata=false] - Include traffic metadata.
+ * @param {string} [input.routePreference=fastest] - Route preference.
+ * @param {string} [input.auth=auto] - Auth mode override.
+ * @param {number} [input.timeout] - Request timeout in milliseconds.
+ * @param {Object} [config] - Ola Maps config override.
+ * @returns {Promise<Object|null>} Route result object or null when Ola Maps is not configured.
+ * @throws {Error} When required inputs are missing or the API request fails.
+ */
 async function getOlaDirections(input = {}, config = getOlaMapsConfig()) {
+  const missing = validateRequiredStrings(input, ['origin', 'destination']);
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required Ola Maps direction fields: ${missing.join(', ')}`);
+  }
+
   if (!isOlaMapsConfigured(config)) {
     return null;
   }
 
   const origin = toText(input.origin, '').trim();
   const destination = toText(input.destination, '').trim();
-
-  if (!origin || !destination) {
-    throw new Error('Origin and destination are required for Ola Maps directions.');
-  }
 
   const waypoints = Array.isArray(input.waypoints)
     ? input.waypoints.map((waypoint) => toText(waypoint, '')).filter(Boolean).join('|')
@@ -728,7 +855,27 @@ async function getOlaDirections(input = {}, config = getOlaMapsConfig()) {
   };
 }
 
+/**
+ * Get a distance matrix between origins and destinations via Ola Maps.
+ *
+ * @param {Object} input
+ * @param {string|string[]} input.origins - Single origin or pipe-delimited / array of origins.
+ * @param {string|string[]} input.destinations - Single destination or pipe-delimited / array of destinations.
+ * @param {string} [input.mode=driving] - Travel mode.
+ * @param {string} [input.routePreference=fastest] - Route preference.
+ * @param {string} [input.auth=auto] - Auth mode override.
+ * @param {number} [input.timeout] - Request timeout in milliseconds.
+ * @param {Object} [config] - Ola Maps config override.
+ * @returns {Promise<Object|null>} Distance matrix result object or null when Ola Maps is not configured.
+ * @throws {Error} When required inputs are missing or the API request fails.
+ */
 async function getOlaDistanceMatrix(input = {}, config = getOlaMapsConfig()) {
+  const missing = validateRequiredStrings(input, ['origins', 'destinations']);
+
+  if (missing.length > 0) {
+    throw new Error(`Missing required Ola Maps distance matrix fields: ${missing.join(', ')}`);
+  }
+
   if (!isOlaMapsConfigured(config)) {
     return null;
   }

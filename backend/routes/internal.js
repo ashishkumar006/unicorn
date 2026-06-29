@@ -2,6 +2,176 @@ const express = require('express');
 const router = express.Router();
 
 const db = require('../db/database');
+const crypto = require('crypto');
+const { createAccount } = require('../services/auth');
+
+function generateRecoveryCode() {
+  return crypto.randomBytes(4).toString('hex').toUpperCase();
+}
+
+router.post('/guest/recovery-code', async (req, res) => {
+  try {
+    const { userId, sessionId, planId, planData } = req.body;
+
+    if (!userId || !sessionId) {
+      return res.status(400).json({ error: 'userId and sessionId are required' });
+    }
+
+    const code = generateRecoveryCode();
+    await db.saveGuestRecoveryCode(code, userId, sessionId, planId, planData, 10080); // 7 days
+
+    res.json({
+      success: true,
+      code,
+      expiresIn: '7 days',
+      message: 'Save this code to recover your plan later'
+    });
+  } catch (error) {
+    console.error('[Guest] Recovery code error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/guest/recover', async (req, res) => {
+  try {
+    const { code } = req.body;
+
+    if (!code) {
+      return res.status(400).json({ error: 'Recovery code is required' });
+    }
+
+    const recovery = await db.getGuestRecoveryCode(code);
+
+    if (!recovery) {
+      return res.status(404).json({ error: 'Invalid or expired recovery code' });
+    }
+
+    let planData = null;
+
+    if (recovery.planData) {
+      try {
+        planData = JSON.parse(recovery.planData);
+      } catch (parseError) {
+        console.error('[Guest] Failed to parse stored planData:', parseError);
+      }
+    }
+
+    if (!planData) {
+      const plans = await db.getUserPlans(recovery.userId);
+      const plan = plans.find(p => p.planId === recovery.planId) || plans[0];
+      planData = plan?.planData || null;
+    }
+
+    if (!planData) {
+      return res.status(404).json({ error: 'No saved plan found for this recovery code' });
+    }
+
+    res.json({
+      success: true,
+      userId: recovery.userId,
+      sessionId: recovery.sessionId,
+      plan: planData,
+      message: 'Plan recovered successfully'
+    });
+  } catch (error) {
+    console.error('[Guest] Recover error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/guest/upgrade', async (req, res) => {
+  try {
+    const { guestUserId, newUserId, planId } = req.body;
+
+    if (!guestUserId || !newUserId) {
+      return res.status(400).json({ error: 'guestUserId and newUserId are required' });
+    }
+
+    // Get guest plans
+    const guestPlans = await db.getUserPlans(guestUserId);
+    
+    // Migrate plans to new user
+    for (const plan of guestPlans) {
+      await db.savePlan(newUserId, plan.planId, plan.planData, {
+        destination: plan.destination,
+        groupSize: plan.groupSize,
+        budget: plan.budget
+      });
+    }
+
+    // Get guest RAG documents
+    const guestDocs = await db.getUserRAGDocuments(guestUserId);
+    for (const doc of guestDocs) {
+      await db.saveRAGDocument(newUserId, doc.id, doc.data, doc.keywords);
+    }
+
+    // Get guest memory notes
+    const guestNotes = await db.getInternalMemoryNotes(guestUserId);
+    for (const note of guestNotes) {
+      await db.saveInternalMemoryNote(newUserId, note.title, note.content, note.tags);
+    }
+
+    res.json({
+      success: true,
+      migratedPlans: guestPlans.length,
+      migratedDocs: guestDocs.length,
+      migratedNotes: guestNotes.length,
+      message: 'Account upgraded successfully'
+    });
+  } catch (error) {
+    console.error('[Guest] Upgrade error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+router.post('/account/create', async (req, res) => {
+  try {
+    const { email, password, name, guestUserId, sessionId } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'email and password are required' });
+    }
+
+    const account = await createAccount({
+      userId: guestUserId,
+      email,
+      password,
+      name: name || email.split('@')[0],
+    });
+
+    // If guest session provided, migrate guest data to new account
+    if (guestUserId && sessionId) {
+      try {
+        const guestPlans = await db.getUserPlans(guestUserId);
+        for (const plan of guestPlans) {
+          await db.savePlan(account.id, plan.planId, plan.planData, {
+            destination: plan.destination,
+            groupSize: plan.groupSize,
+            budget: plan.budget,
+          });
+        }
+      } catch (migrationError) {
+        console.error('[Account] Guest migration error:', migrationError);
+      }
+    }
+
+    res.json({
+      success: true,
+      account: {
+        id: account.id,
+        email: account.email,
+        name: account.name,
+        createdAt: account.createdAt,
+      },
+      message: 'Account created successfully',
+    });
+  } catch (error) {
+    console.error('[Account] Create error:', error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+module.exports = router;
 const {
   getModelInfo,
   getSearchConfig,

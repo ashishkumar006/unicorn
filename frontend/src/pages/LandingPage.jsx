@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Target, MapPin, Calendar, IndianRupee, Users, Sparkles, ArrowRight, Bot, TrendingUp } from 'lucide-react';
+import { Target, MapPin, Calendar, IndianRupee, Users, Sparkles, ArrowRight, Bot, TrendingUp, KeyRound } from 'lucide-react';
 import { motion } from 'framer-motion';
 import toast from 'react-hot-toast';
 import '../styles/designSystem.css';
@@ -62,6 +62,81 @@ export default function LandingPage({ onPlanTrip }) {
   const formRef = useRef(null);
   const featuresRef = useRef(null);
 
+  const [showGuestRecoveryModal, setShowGuestRecoveryModal] = useState(false);
+  const [recoveryCodeInput, setRecoveryCodeInput] = useState('');
+  const [isRecovering, setIsRecovering] = useState(false);
+  const [recoveryError, setRecoveryError] = useState('');
+
+  const openGuestRecoveryModal = () => {
+    setRecoveryCodeInput('');
+    setRecoveryError('');
+    setShowGuestRecoveryModal(true);
+  };
+
+  const closeGuestRecoveryModal = () => {
+    if (!isRecovering) {
+      setShowGuestRecoveryModal(false);
+    }
+  };
+
+  const handleRecoverGuestPlan = async () => {
+    const code = recoveryCodeInput.trim();
+    if (!code) {
+      setRecoveryError('Please enter a recovery code.');
+      return;
+    }
+
+    setIsRecovering(true);
+    setRecoveryError('');
+
+    try {
+      const response = await fetch('/api/internal/guest/recover', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Unable to restore plan. Please check the code and try again.');
+      }
+
+      const plan = data.plan || {};
+      const restoredTrip = {
+        fromPlace: plan.fromPlace || DEFAULT_TRIP.fromPlace,
+        toPlace: plan.toPlace || DEFAULT_TRIP.toPlace,
+        startDate: plan.startDate || DEFAULT_TRIP.startDate,
+        endDate: plan.endDate || DEFAULT_TRIP.endDate,
+        budget: String(plan.budget ?? DEFAULT_TRIP.budget),
+        travelers: String(plan.travelers ?? DEFAULT_TRIP.travelers),
+        userPreferences: plan.userPreferences || '',
+      };
+
+      setFormData(restoredTrip);
+      setShowGuestRecoveryModal(false);
+
+      toast.success('Previous plan restored! Review and update it below.', {
+        position: 'top-center',
+        duration: 3000,
+        icon: '🗺️',
+        style: {
+          background: 'var(--bg-card)',
+          color: 'var(--primary-coral)',
+          border: '1px solid var(--primary-coral)',
+        },
+      });
+
+      setTimeout(() => {
+        formRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 150);
+    } catch (err) {
+      setRecoveryError(err.message || 'Something went wrong while restoring your plan.');
+    } finally {
+      setIsRecovering(false);
+    }
+  };
+
   const normalizedFromPlace = formData.fromPlace.trim();
   const normalizedToPlace = formData.toPlace.trim();
   const parsedBudget = Number(formData.budget);
@@ -121,6 +196,7 @@ export default function LandingPage({ onPlanTrip }) {
       fromPlace: normalizedFromPlace,
       toPlace: normalizedToPlace,
       budget: String(Math.max(1, Math.round(parsedBudget))),
+      planStartedAt: Date.now(),
     });
   };
 
@@ -181,6 +257,31 @@ export default function LandingPage({ onPlanTrip }) {
 
         {/* Landing Hero Text */}
         <motion.div className="landing-hero-text" variants={itemVariants}>
+          {!showGuestRecoveryModal && (
+            <motion.div
+              className="guest-recovery-banner"
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+            >
+              <div className="guest-recovery-banner-inner">
+                <div className="guest-recovery-icon">
+                  <KeyRound size={18} />
+                </div>
+                <div className="guest-recovery-text">
+                  <strong>Returning guest?</strong>
+                  <span>You can restore a previously saved plan using a recovery code.</span>
+                </div>
+                <button
+                  type="button"
+                  className="btn btn-secondary guest-recovery-cta"
+                  onClick={openGuestRecoveryModal}
+                >
+                  Restore plan
+                </button>
+              </div>
+            </motion.div>
+          )}
           <span className="eyebrow hero-eyebrow">AI Trip Planning, Perfected</span>
           <h1 className="landing-heading">
             Your Journey. <span>Intelligently Planned.</span>
@@ -431,6 +532,75 @@ export default function LandingPage({ onPlanTrip }) {
               <p>Refine the plan with live research, itinerary edits, and summary drafts.</p>
             </motion.div>
           </motion.div>
+
+          {/* Guest Recovery Modal */}
+          {showGuestRecoveryModal && (
+            <motion.div
+              className="modal-overlay"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeGuestRecoveryModal}
+            >
+              <motion.div
+                className="modal-content"
+                initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.9, opacity: 0, y: 20 }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="modal-header">
+                  <h2>Welcome back, traveller</h2>
+                  <p className="modal-subtitle">
+                    Looks like you had a plan saved from a previous visit. Enter your recovery code to restore it, or start fresh.
+                  </p>
+                </div>
+
+                <div className="modal-body">
+                  <div className="form-group">
+                    <label className="form-label">Recovery Code</label>
+                    <div className="input-wrapper">
+                      <input
+                        type="text"
+                        value={recoveryCodeInput}
+                        onChange={(e) => setRecoveryCodeInput(e.target.value.toUpperCase())}
+                        placeholder="e.g. WANDER-ABC123"
+                        className="input-field"
+                        style={{ fontFamily: 'monospace', letterSpacing: '0.08em', textTransform: 'uppercase' }}
+                        maxLength={20}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="modal-footer">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={closeGuestRecoveryModal}
+                    disabled={isRecovering}
+                  >
+                    Start fresh
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-primary"
+                    onClick={handleRecoverGuestPlan}
+                    disabled={isRecovering || !recoveryCodeInput.trim()}
+                  >
+                    {isRecovering ? 'Restoring...' : 'Restore plan'}
+                    {!isRecovering && <ArrowRight size={16} />}
+                  </button>
+                </div>
+
+                {recoveryError && (
+                  <p className="error-text" style={{ marginTop: '12px', textAlign: 'center' }}>
+                    {recoveryError}
+                  </p>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
 
           {/* Footer */}
           <footer className="landing-footer">

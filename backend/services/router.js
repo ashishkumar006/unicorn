@@ -207,7 +207,7 @@ class Router {
 
   decideModification(request = {}) {
     const modificationType = classifyModificationType(request.message || '');
-    const decision = this.decide(request);
+    const decision = this.mapStepsToActions(request, request);
 
     decision.modificationType = modificationType;
     decision.dataRequirements = {
@@ -220,6 +220,129 @@ class Router {
       decision.error = 'Could not infer modification target from the request.';
       decision.suggestedClarification = 'Please mention what to change: destination, dates, duration, group size, budget, or constraints.';
     }
+
+    return decision;
+  }
+
+  mapStepsToActions(perceptionOrRequest, originalRequest = {}) {
+    const request = perceptionOrRequest && typeof perceptionOrRequest === 'object' && Array.isArray(perceptionOrRequest.steps)
+      ? perceptionOrRequest
+      : originalRequest;
+
+    const message = normalizeText(request.message || request.query || '', '');
+    const entities = request.entities || {};
+    const steps = Array.isArray(request.steps) ? request.steps : [];
+    const constraints = Array.isArray(request.constraints) ? request.constraints : [];
+
+    const domain = request.domain || classifyDomain(request);
+    const complexity = estimateComplexity(request);
+    const providerPriority = buildProviderPriority(request);
+    const executionMode = complexity === 'simple' ? 'sequential' : 'parallel';
+    const dataRequirements = buildDataRequirements(domain, request);
+
+    const actions = [];
+
+    const hasTransit = steps.some((step) => /\b(transport|flight|train|bus|cab|taxi|auto|reach|get there)s?\b/i.test(step));
+    const hasAccommodation = steps.some((step) => /\b(stay|hotel|resort|lodging|accommodation|place to stay)s?\b/i.test(step));
+    const hasPlaces = steps.some((step) => /\b(restaurant|attraction|places?|sightseeing|do|see|visit)s?\b/i.test(step));
+    const hasFood = steps.some((step) => /\b(restaurant|food|eat|dining|cuisine)s?\b/i.test(step));
+    const hasWeather = steps.some((step) => /\b(weather|forecast|temperature|rain)s?\b/i.test(step));
+    const hasBudget = steps.some((step) => /\b(budget|cost|price|expense|afford)s?\b/i.test(step));
+
+    if (hasTransit) {
+      actions.push({
+        tool: 'transitApi',
+        arguments: {
+          from: entities.origin,
+          to: entities.destination,
+          date: entities.dates,
+          mode: dataRequirements.mode || 'driving',
+          groupSize: entities.groupSize,
+        },
+      });
+    }
+
+    if (hasAccommodation) {
+      actions.push({
+        tool: 'hotelSearch',
+        arguments: {
+          destination: entities.destination,
+          dates: entities.dates,
+          nights: entities.duration,
+          groupSize: entities.groupSize,
+          constraints,
+        },
+      });
+    }
+
+    if (hasPlaces) {
+      actions.push({
+        tool: 'placesSearch',
+        arguments: {
+          destination: entities.destination,
+          focus: dataRequirements.focus || 'all',
+          constraints,
+        },
+      });
+    }
+
+    if (hasFood) {
+      actions.push({
+        tool: 'restaurantSearch',
+        arguments: {
+          destination: entities.destination,
+          cuisine: constraints.includes('vegetarian') ? 'vegetarian' : null,
+        },
+      });
+    }
+
+    if (hasWeather) {
+      actions.push({
+        tool: 'weatherLookup',
+        arguments: {
+          destination: entities.destination,
+          days: dataRequirements.days || 7,
+        },
+      });
+    }
+
+    if (hasBudget || (!hasTransit && !hasAccommodation && !hasPlaces && !hasFood && !hasWeather)) {
+      actions.push({
+        tool: 'generateTravelPackage',
+        arguments: {
+          fromPlace: entities.origin,
+          toPlace: entities.destination,
+          dates: entities.dates,
+          duration: entities.duration,
+          travelers: entities.groupSize,
+          budget: entities.budget,
+          constraints,
+        },
+      });
+    }
+
+    const browserEscalation = Boolean(
+      this.options.enableBrowserEscalation && /availability|booking|live price|current status|schedule|exact rate/.test(message.toLowerCase())
+    );
+
+    const decision = {
+      domain,
+      complexity,
+      executionMode,
+      providerPriority,
+      dataRequirements,
+      constraints,
+      actions,
+      browserEscalation,
+      fallbackChain: [
+        ...providerPriority.map((provider) => ({ source: 'api', provider })),
+        ...(browserEscalation ? [{ source: 'browser' }] : []),
+        { source: 'web-search' },
+        { source: 'internal-knowledge' },
+      ],
+    };
+
+    try { emitRouter('decision', decision, originalRequest?.sessionId || 'default'); } catch {}
 
     return decision;
   }
